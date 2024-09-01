@@ -1,0 +1,47 @@
+# Archivos de configuración de entorno
+/.vscode/
+/.vscode/
+
+# Archivos y carpetas generados por ESP-IDF
+/build/
+/sdkconfig
+/sdkconfig.old
+
+# Archivos de logs
+*.log
+
+# Archivos de backup de editores comunes
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Archivos de salida de compilación
+*.o
+*.d
+*.map
+*.elf
+*.bin
+*.hex
+*.a
+*.pyc
+
+# Dependencias externas (si tienes alguna en la carpeta components/external)
+components/external/**
+
+# Archivos de configuración local de CMake
+CMakeCache.txt
+CMakeFiles/
+
+# Archivos generados por herramientas como Ninja o Make
+ninja.build
+build.ninja
+
+# Archivos temporales y de sesiones de editores como CLion
+.idea/
+*.iml
+
+# Ignorar archivos de configuración específicos del sistema operativo
+.DS_Store
+Thumbs.db
