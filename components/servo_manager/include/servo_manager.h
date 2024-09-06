@@ -2,10 +2,8 @@
   #define __ServoManager__
 
 #include <stdint.h>
-
 //#include "driver/i2c.h"
-#include "driver/i2c_master.h"
-#include "esp_log.h"
+//#include "driver/i2c_master.h"
 #include "pca9685.h"
 
 /**
@@ -29,15 +27,14 @@ namespace Servo
 
             ServoManager();
 
-            esp_err_t       set_angle       (uint8_t Channel, float Angle);
-            servo_mng_ret   init_pca        (void);
+            esp_err_t       set_angle     (uint8_t Channel, float Angle);
+            servo_mng_ret   Init          (void);
 
         private:
             i2c_dev_t pca9685_dev;
             const char *TAG = "PCA9685_SERVO";
 
             esp_err_t set_pwm_value   (i2c_dev_t *dev, uint8_t Channel, uint16_t pwm);
-            esp_err_t i2c_master_init (void);
     };
 };
 
