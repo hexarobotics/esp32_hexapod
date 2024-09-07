@@ -1,3 +1,5 @@
-idf_component_register(SRCS "hex.cpp"
-                    INCLUDE_DIRS "include")
+# Componente hex que depende de transformations
+idf_component_register(SRCS "hexa.cpp"
+                    INCLUDE_DIRS "include"
+                    REQUIRES transformations)
 
