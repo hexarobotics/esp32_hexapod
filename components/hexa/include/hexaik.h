@@ -1,7 +1,9 @@
-#ifndef __HEXA_H__
-  #define __HEXA_H__
+#ifndef __HEXAIK_H__
+  #define __HEXAIK_H__
 
-#include <stdint.h>
+#include <cstdint>
+#include <cmath>
+
 #include "vectors.h"
 
 //	###			KINEMATIC VARIABLES		###		//
@@ -26,17 +28,32 @@
  */
 namespace hexapod
 {
-    class Hexa : public transformations3D::Vectors
+    class Hexaik : public transformations3D::Vectors
     {
         public:
+            struct ik_sol_t
+            {
+                int coxa;
+                int femur;
+                int tibia;
+            };
+
             static const uint8_t num_legs = 6;
 
-            Hexa();
+            Hexaik();
 
         private:
             vector3d leg_endpoints[num_legs];
+
+            ik_sol_t legIK(int X, int Y, int Z, int leg);
+
+            // Función para convertir radianes a grados
+            inline float radians_to_degrees(float radians)
+            {
+                return radians * (180.0f / M_PI);
+            }
     };
 };
 
 
-#endif // __HEXA_H__
+#endif // __HEXAIK_H__
