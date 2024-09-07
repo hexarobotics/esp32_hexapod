@@ -10,7 +10,7 @@ namespace transformations3D
     Vectors::vector3d Tmatrix::apply(const Vectors::vector3d& vec) const
     {
         // Si los ángulos son 0, la rotación es la identidad
-        if (alpha == 0 && theta == 0 && phi == 0)
+        if (alpha_x == 0 && theta_y == 0 && phi_z == 0)
         {
             // Solo aplicar la traslación
             Vectors::vector3d result;
@@ -22,9 +22,9 @@ namespace transformations3D
         } 
 
         // Precalcular senos y cosenos
-        double Cthe = std::cos(theta), Sthe = std::sin(theta);
-        double Calf = std::cos(alpha), Salf = std::sin(alpha);
-        double Cphi = std::cos(phi), Sphi = std::sin(phi);
+        double Cthe = std::cos(theta_y), Sthe = std::sin(theta_y);
+        double Calf = std::cos(alpha_x), Salf = std::sin(alpha_x);
+        double Cphi = std::cos(phi_z), Sphi = std::sin(phi_z);
 
         // Matriz de rotación
         Vectors::vector3d rotated;

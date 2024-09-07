@@ -181,9 +181,10 @@ ik_sol_t  Real_angle(uint8_t leg, ik_sol_t angulo)
 					if((angulo.coxa>0)||(angulo.coxa==0)){
 						added_angle=angulo.coxa-(3*(Constante_PWM/2));
 						angulo.coxa=PATAS[leg].servo_coxa.Cero+added_angle;/*hecho*/
-					}else{ 		angulo.coxa=-angulo.coxa;//consideramos el �ngulo positivo para hacer c�lculos
-									 added_angle=2*Constante_PWM-angulo.coxa;//a 180 le restamos el �ngulo coxa calculado y obtenemos el �ngulo a a�adir
-									 angulo.coxa=PATAS[leg].servo_coxa.Cero+Constante_PWM/2+added_angle;
+					}else{
+					angulo.coxa=-angulo.coxa;//consideramos el �ngulo positivo para hacer c�lculos
+							added_angle=2*Constante_PWM-angulo.coxa;//a 180 le restamos el �ngulo coxa calculado y obtenemos el �ngulo a a�adir
+							angulo.coxa=PATAS[leg].servo_coxa.Cero+Constante_PWM/2+added_angle;
 					}
 
 	}else if(leg==RIGHT_MIDDLE){

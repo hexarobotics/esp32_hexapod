@@ -11,7 +11,7 @@ namespace transformations3D
     public:
           // Constructor por defecto
           Tmatrix() : translationX(0), translationY(0), translationZ(0),
-                      alpha(0), theta(0), phi(0) {}
+                      alpha_x(0), theta_y(0), phi_z(0) {}
 
           // Aplica la transformación al vector dado
           transformations3D::Vectors::vector3d apply(const transformations3D::Vectors::vector3d& vec) const;
@@ -22,9 +22,9 @@ namespace transformations3D
           void setTranslationZ(int16_t tz) { translationZ = tz; }
 
           // Setters para los ángulos de rotación
-          void setAlpha(double a) { alpha = a; }
-          void setTheta(double t) { theta = t; }
-          void setPhi(double p) { phi = p; }
+          void setAlpha(double a) { alpha_x = a; }
+          void setTheta(double t) { theta_y = t; }
+          void setPhi(double p) { phi_z = p; }
 
           // Getters para las traslaciones
           double getTranslationX() const { return translationX; }
@@ -32,9 +32,9 @@ namespace transformations3D
           double getTranslationZ() const { return translationZ; }
 
           // Getters para los ángulos de rotación
-          double getAlpha() const { return alpha; }
-          double getTheta() const { return theta; }
-          double getPhi() const { return phi; }
+          double getAlpha() const { return alpha_x; }
+          double getTheta() const { return theta_y; }
+          double getPhi() const { return phi_z; }
 
       private:
           // Traslaciones
@@ -43,9 +43,9 @@ namespace transformations3D
           int16_t translationZ;
 
           // Ángulos de rotación en radianes
-          double alpha; // Rotación alrededor del eje X - body roll  (rad)
-          double theta; // Rotación alrededor del eje Y - body pitch (rad)
-          double phi;   // Rotación alrededor del eje Z - body yaw   (rad)
+          double alpha_x; // Rotación alrededor del eje X - body roll  (rad)
+          double theta_y; // Rotación alrededor del eje Y - body pitch (rad)
+          double phi_z;   // Rotación alrededor del eje Z - body yaw   (rad)
   };
 };
 
