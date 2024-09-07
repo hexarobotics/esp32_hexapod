@@ -23,13 +23,12 @@ namespace Servo
                 s_ret_nok
             };
 
-            uint16_t pwm_freq;
-
             ServoManager();
 
             esp_err_t       set_angle     (uint8_t Channel, float Angle);
             servo_mng_ret   Init          (void);
 
+            uint16_t pwm_freq;
         private:
             i2c_dev_t pca9685_dev;
             const char *TAG = "PCA9685_SERVO";
