@@ -135,6 +135,20 @@ namespace hexapod
         //    if (step>stepsInCycle)step=1;
         }
     }
+
+    Hexaik::ik_angles Hexaik::do_1_leg_ik( Vectors::vector3d vec, leg_id leg  ) // hex.cpp -> hex_compute_step() (quitar de ik.cpp)
+    {
+        //    Gait_generator(n_pata); // gait.cpp file
+        //    //body_ik -> ahora llamado Tmatrix_apply o algo asi, la matriz de T homogenea. ik.cpp file
+
+        return legIK(vec.x,vec.y,vec.z,leg); //ik.cpp file
+//
+        //    check_angles_range_and_save_to_send_servos(); // servos_and_i2c.cpp file
+//
+        //    uint16_t gait_step++;
+//
+        //    if (step>stepsInCycle)step=1;
+    }
     
 } // namespace hexapod
 

@@ -38,12 +38,14 @@ namespace hexapod
 
             Hexaik();
 
+            ik_angles   do_1_leg_ik   ( Vectors::vector3d vec, leg_id leg  );
+
         private:
             vector3d leg_endpoints[num_legs];
 
-            ik_angles legIK         (int X, int Y, int Z, leg_id leg);
-            ik_angles real_angle    (leg_id leg, ik_angles angles );
-            void      do_ik         ( void );
+            ik_angles   legIK         (int X, int Y, int Z, leg_id leg);
+            ik_angles   real_angle    (leg_id leg, ik_angles angles );
+            void        do_ik         ( void );
 
             // Función para convertir radianes a grados
             inline float radians_to_degrees(float radians)

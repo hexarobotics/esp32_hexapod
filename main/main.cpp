@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <pca9685.h>
+//#include <pca9685.h>
 #include <string.h>
 #include <esp_log.h>
 #include <stdint.h>
 
 #include "servo_manager.h"
+#include "hexaik.h"
+#include "vectors.h"
+
+using namespace transformations3D;
+using namespace hexapod;
 
 #define ADDR PCA9685_ADDR_BASE
 #ifndef APP_CPU_NUM
@@ -21,8 +26,30 @@ void pca9685_test_task(void *pvParameters)
     Servo::ServoManager servo_mngr;
     servo_mngr.Init();
 
+    Vectors::vector3d leg_end_example[3];
+
+    leg_end_example[0] = {-155, 80, -100}; // x, y, z
+    leg_end_example[1] = {-100, 0, -50};
+    leg_end_example[2] = {-155, -80, -100};
+
+    Hexaik hexaik;
+
     while (1)
     {
+
+        for (int i = 0; i<3;i++)
+        {
+            Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], Hexaik::left_middle);
+
+            servo_mngr.set_angle(0,res.coxa);
+            servo_mngr.set_angle(1,res.femur);
+            servo_mngr.set_angle(2,res.tibia);
+
+            vTaskDelay(pdMS_TO_TICKS(2000));
+        }
+
+        /*
+
         for (uint16_t angle = 0; angle <= 180; angle+=10 )
         {
             vTaskDelay(pdMS_TO_TICKS(500));
@@ -40,6 +67,8 @@ void pca9685_test_task(void *pvParameters)
 
         servo_mngr.set_angle(0,180);
         vTaskDelay(pdMS_TO_TICKS(2000));
+
+        */
     }
 }
 
