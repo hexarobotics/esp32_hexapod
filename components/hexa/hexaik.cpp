@@ -1,9 +1,11 @@
 #include <Hexaik.h>
+#include "esp_log.h"
 
 uint8_t control_cuerpo;
 uint8_t control_robot;
 
-#define DEG_90  1.57F
+#define DEG_90  M_PI_2
+#define DEG_45  M_PI_4
 
 namespace hexapod
 {
@@ -18,29 +20,49 @@ namespace hexapod
 	    }
     }
 
-    // Implementación de legIK
-    Hexaik::ik_angles Hexaik::legIK(int X, int Y, int Z, leg_id leg)
+    // Implementación de legIK 3DOF
+    Hexaik::ik_angles Hexaik::legIK(int X, int Y, int Z, leg_id leg) 
     {
         ik_angles ans;
 
         // Resolver el ángulo de la coxa
+        ESP_LOGW("IK","COXA orig: %lf\n",atan2(Y, X));
         ans.coxa = radians_to_degrees(atan2(Y, X));
 
-        long trueX = sqrt((long)X * (long)X + (long)Y * (long)Y) - L_COXA;
-        long im = sqrt((long)trueX * (long)trueX + (long)Z * (long)Z);  // Longitud de la pierna imaginaria
-        float q1 = atan2(Z, trueX);
-        long n1 = (L_TIBIA * L_TIBIA) - (L_FEMUR * L_FEMUR) - (im * im);
-        long d2 = -2 * L_FEMUR * im;
-        float q2 = acos((float)n1 / (float)d2);
+        // Asegurarse de que los cálculos no generen valores inválidos
+        double trueX = sqrt((double)X * X + (double)Y * Y) - L_COXA;
+        double im = sqrt(trueX * trueX + Z * Z);  // Longitud de la pierna imaginaria
+        double q1 = atan2(Z, trueX);
 
+        double n1 = (L_TIBIA * L_TIBIA) - (L_FEMUR * L_FEMUR) - (im * im);
+        double d2 = -2 * L_FEMUR * im;
+
+        if (d2 == 0 || fabs(n1 / d2) > 1) {
+            ESP_LOGE(TAG, "Error: Valores invalidos para acos");
+            return ans;  // Devuelve un valor por defecto o un error
+        }
+
+        double q2 = acos(n1 / d2);
+        
+        ESP_LOGW("IK","FEMUR orig: %lf\n",(q2 + q1));
         ans.femur = radians_to_degrees(q2 + q1);
 
         n1 = (im * im) - (L_FEMUR * L_FEMUR) - (L_TIBIA * L_TIBIA);
         d2 = -2 * L_FEMUR * L_TIBIA;
-        ans.tibia = radians_to_degrees(acos((float)n1 / (float)d2) - DEG_90); // que cojones hacia el 1.57?
+
+        if (d2 == 0 || fabs(n1 / d2) > 1) {
+            ESP_LOGE(TAG, "Error: Valores invalidos para acos (tibia)");
+            return ans;
+        }
+
+        ESP_LOGW("IK","TIBIA orig: %lf\n",(acos(n1 / d2))); //
+        //ans.tibia = radians_to_degrees(acos(n1 / d2) - DEG_90); original
+        ans.tibia = radians_to_degrees(acos(n1 / d2));// - DEG_45);
 
         // Ajustar los ángulos reales
         ans = real_angle(leg, ans);
+
+        ESP_LOGI(TAG, "coxa: %d, femur: %d, tibia: %d\n", ans.coxa, ans.femur, ans.tibia);
 
         return ans;
     }
@@ -50,72 +72,67 @@ namespace hexapod
         ik_angles real;
 
         /*	####################   COXA	  #####################	*/
-        if ( leg == LEFT_FRONT ) // Para 1, por analizar
+        if (leg == LEFT_FRONT) // Para pata 1
         {
-            if( angles.coxa >= 0 )
+            if (angles.coxa >= 0)
             {
-                //angles.coxa =- (Constante_PWM/2)+angles.coxa;/*hecho*/
-
                 real.coxa = angles.coxa - 90;
             }
             else // 3*45 + beta, siendo beta = 180 - abs|coxa|
             {
-                //angles.coxa =- angles.coxa;
-                angles.coxa = std::abs(angles.coxa);
-
-                real.coxa = 315 - angles.coxa;
+                real.coxa = 315 - std::abs(angles.coxa); 
             }
         }
-        else if ( leg == LEFT_MIDDLE )
+        else if (leg == LEFT_MIDDLE)
         {
-            if( angles.coxa >= 0 )
+            if (angles.coxa >= 0)
             {
-                real.coxa = angles.coxa - 90;	/*hecho*/
+                real.coxa = angles.coxa - 90;
             }
             else
             {
-                //angles.coxa =- angles.coxa;
-                angles.coxa = std::abs(angles.coxa);
-
-                real.coxa = 270 - angles.coxa;
+                real.coxa = 270 - std::abs(angles.coxa);
             }
         }
-        else if( leg == LEFT_REAR )
+        else if (leg == LEFT_REAR)
         {
-            if( angles.coxa >= 0 )
+            if (angles.coxa >= 0)
             {
                 real.coxa = angles.coxa - 135;
             }
             else
-            { 		
+            {
                 real.coxa = 225 - std::abs(angles.coxa);
             }
         }
-        else if(leg==RIGHT_FRONT)
+        else if (leg == RIGHT_FRONT)
         {
             real.coxa = angles.coxa + 45;
         }
-        else if(leg==RIGHT_MIDDLE)
+        else if (leg == RIGHT_MIDDLE)
         {
             real.coxa = angles.coxa + 90;
         }
-        else if(leg==RIGHT_REAR)
+        else if (leg == RIGHT_REAR)
         {
             real.coxa = angles.coxa + 135;
         }
 
-        // 
+        /*	####################   FEMUR	  #####################	*/
+        real.femur = 90 - angles.femur;  // Ajuste universal para todas las patas
 
-            //		####################		   FEMUR	 	 #####################		//
-        // PARA todas las patas igual
-        real.femur = 90 - angles.femur; // GOOD
-        //angulo.femur=PATAS[leg].servo_femur.Cero+(Constante_PWM/2)+angulo.femur;
-        //angulo.femur=PATAS[leg].servo_femur.Cero+(3*(Constante_PWM/2))-angulo.femur;
+        /*	####################   TIBIA	  #####################	*/
+        // No se requiere ajuste adicional para tibia
 
+        //if ( angles.tibia < 90 )
+        //{
+        //    real.tibia = 0;
+        //}
+        //else
+        //{
+        //}
+        real.tibia = angles.tibia;// - 90;
 
-        //		####################		   TIBIA			  ######################		//
-        // PARA todas las patas igual
-        // PARA el angulo tibia se aplica el angulo calculado y ya
 
         return real;
     }
@@ -148,6 +165,25 @@ namespace hexapod
         //    uint16_t gait_step++;
 //
         //    if (step>stepsInCycle)step=1;
+    }
+
+    int Hexaik::radians_to_degrees(double radians)
+    {
+        // Convertir radianes a grados
+        double degrees = radians * (180.0 / M_PI);
+        
+        // Redondear al entero más cercano
+        int rounded_degrees = static_cast<int>(std::round(degrees));
+        // Verificar si el valor está fuera de los límites
+        //if (degrees < 0) {
+        //    ESP_LOGW("IK", "Angulo fuera de limites: %d grados. Ajustando a 0.", degrees);
+        //    degrees = 0;
+        //} else if (degrees > 180) {
+        //    ESP_LOGW("IK", "Angulo fuera de limites: %d grados. Ajustando a 180.", degrees);
+        //    degrees = 180;
+        //}
+
+        return rounded_degrees;
     }
     
 } // namespace hexapod

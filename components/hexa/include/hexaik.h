@@ -35,6 +35,7 @@ namespace hexapod
             };
 
             static const uint8_t num_legs = 6;
+            const char *TAG = "HEXA_IK";
 
             Hexaik();
 
@@ -48,10 +49,7 @@ namespace hexapod
             void        do_ik         ( void );
 
             // Función para convertir radianes a grados
-            inline float radians_to_degrees(float radians)
-            {
-                return (uint16_t)(radians * (180.0f / M_PI));
-            }
+            int radians_to_degrees(double radians);
     };
 };
 

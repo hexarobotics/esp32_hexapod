@@ -29,7 +29,7 @@ void pca9685_test_task(void *pvParameters)
     Vectors::vector3d leg_end_example[3];
 
     leg_end_example[0] = {-155, 80, -100}; // x, y, z
-    leg_end_example[1] = {-100, 0, -50};
+    leg_end_example[1] = {-155, 0, -70};
     leg_end_example[2] = {-155, -80, -100};
 
     Hexaik hexaik;
@@ -37,16 +37,24 @@ void pca9685_test_task(void *pvParameters)
     while (1)
     {
 
-        for (int i = 0; i<3;i++)
-        {
-            Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], Hexaik::left_middle);
+        //for (int i = 0; i<3;i++)
+        //{
+        //    Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], Hexaik::left_middle);
+//
+        //    servo_mngr.set_angle(0,res.coxa);
+        //    servo_mngr.set_angle(1,res.femur);
+        //    servo_mngr.set_angle(2,res.tibia);
+//
+        //    vTaskDelay(pdMS_TO_TICKS(2000));
+        //}
 
-            servo_mngr.set_angle(0,res.coxa);
-            servo_mngr.set_angle(1,res.femur);
-            servo_mngr.set_angle(2,res.tibia);
 
-            vTaskDelay(pdMS_TO_TICKS(2000));
-        }
+
+        servo_mngr.set_angle(2,120); 
+
+        vTaskDelay(pdMS_TO_TICKS(2000));
+
+
 
         /*
 
