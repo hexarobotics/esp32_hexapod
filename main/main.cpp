@@ -28,31 +28,33 @@ void pca9685_test_task(void *pvParameters)
 
     Vectors::vector3d leg_end_example[3];
 
-    leg_end_example[0] = {-155, 80, -100}; // x, y, z
-    leg_end_example[1] = {-155, 0, -70};
-    leg_end_example[2] = {-155, -80, -100};
+    leg_end_example[0] = {-155, 80, -120};
+    leg_end_example[1] = {-155, -80, -120}; // x, y, z
+    leg_end_example[2] = {-155, 0, -70};
 
     Hexaik hexaik;
 
     while (1)
     {
 
-        //for (int i = 0; i<3;i++)
-        //{
-        //    Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], Hexaik::left_middle);
-//
-        //    servo_mngr.set_angle(0,res.coxa);
-        //    servo_mngr.set_angle(1,res.femur);
-        //    servo_mngr.set_angle(2,res.tibia);
-//
-        //    vTaskDelay(pdMS_TO_TICKS(2000));
-        //}
+        for (int i = 0; i<3;i++)
+        {
+            Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], Hexaik::left_middle);
+
+            servo_mngr.set_angle(0,res.coxa);
+            servo_mngr.set_angle(1,res.femur);
+            servo_mngr.set_angle(2,res.tibia);
+
+            vTaskDelay(pdMS_TO_TICKS(2000));
+        }
 
 
 
-        servo_mngr.set_angle(2,120); 
+        //servo_mngr.set_angle(0,90); 
+        //servo_mngr.set_angle(1,0); 
+        //servo_mngr.set_angle(2,45); 
 
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        //vTaskDelay(pdMS_TO_TICKS(2000));
 
 
 

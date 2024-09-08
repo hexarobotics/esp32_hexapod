@@ -57,7 +57,7 @@ namespace hexapod
 
         ESP_LOGW("IK","TIBIA orig: %lf\n",(acos(n1 / d2))); //
         //ans.tibia = radians_to_degrees(acos(n1 / d2) - DEG_90); original
-        ans.tibia = radians_to_degrees(acos(n1 / d2));// - DEG_45);
+        ans.tibia = radians_to_degrees(acos(n1 / d2));// alfa // - DEG_45);
 
         // Ajustar los ángulos reales
         ans = real_angle(leg, ans);
@@ -124,14 +124,14 @@ namespace hexapod
         /*	####################   TIBIA	  #####################	*/
         // No se requiere ajuste adicional para tibia
 
-        //if ( angles.tibia < 90 )
-        //{
-        //    real.tibia = 0;
-        //}
-        //else
-        //{
-        //}
-        real.tibia = angles.tibia;// - 90;
+        if ( angles.tibia <= 45 )
+        {
+            real.tibia = 0;
+        }
+        else
+        {
+            real.tibia = angles.tibia - 45;
+        }
 
 
         return real;
