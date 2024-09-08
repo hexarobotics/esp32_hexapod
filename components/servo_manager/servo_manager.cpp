@@ -1,4 +1,6 @@
 #include "servo_manager.h"
+
+#include <string.h>
 #include "esp_log.h"
 
 #define I2C_MASTER_SDA_IO           gpio_num_t(21)          /*!< GPIO para SDA */
@@ -67,6 +69,11 @@ namespace Servo
     // PCA_9685 Driver Init
     ServoManager::servo_mng_ret ServoManager::Init( void )
     {
+        //pca9685_dev
+
+       // i2c_dev_t dev;
+        memset(&pca9685_dev, 0, sizeof(i2c_dev_t));
+
         // Init i2cdev library
         ESP_ERROR_CHECK(i2cdev_init());
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-//#include <pca9685.h>
+#include <pca9685.h>
 #include <string.h>
 #include <esp_log.h>
 #include <stdint.h>
