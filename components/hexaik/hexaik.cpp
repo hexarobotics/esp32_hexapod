@@ -13,10 +13,9 @@ namespace hexapod
     // Constructor Hexaik
     Hexaik::Hexaik()
     {
-	    // Inicializa todos los elementos del arreglo a {0.0, 0.0, 0.0}
 	    for (int i = 0; i < num_legs; ++i)
 	    {
-	        leg_endpoints[i] = Vectors::vector3d(); // Usa el constructor por defecto que inicializa a 0
+	        leg_endpoints[i] = Vectors::vector3d(); // inicializa a 0
 	    }
     }
 
@@ -26,10 +25,9 @@ namespace hexapod
         ik_angles ans;
 
         // Resolver el ángulo de la coxa
-        ESP_LOGW("IK","COXA orig: %lf\n",atan2(Y, X));
+        //ESP_LOGW("IK","COXA orig: %lf\n",atan2(Y, X));
         ans.coxa = radians_to_degrees(atan2(Y, X));
 
-        // Asegurarse de que los cálculos no generen valores inválidos
         double trueX = sqrt((double)X * X + (double)Y * Y) - L_COXA;
         double im = sqrt(trueX * trueX + Z * Z);  // Longitud de la pierna imaginaria
         double q1 = atan2(Z, trueX);
@@ -44,7 +42,7 @@ namespace hexapod
 
         double q2 = acos(n1 / d2);
         
-        ESP_LOGW("IK","FEMUR orig: %lf\n",(q2 + q1));
+        //ESP_LOGW("IK","FEMUR orig: %lf\n",(q2 + q1));
         ans.femur = radians_to_degrees(q2 + q1);
 
         n1 = (im * im) - (L_FEMUR * L_FEMUR) - (L_TIBIA * L_TIBIA);
@@ -55,7 +53,7 @@ namespace hexapod
             return ans;
         }
 
-        ESP_LOGW("IK","TIBIA orig: %lf\n",(acos(n1 / d2))); //
+        //ESP_LOGW("IK","TIBIA orig: %lf\n",(acos(n1 / d2))); //
         //ans.tibia = radians_to_degrees(acos(n1 / d2) - DEG_90); original
         ans.tibia = radians_to_degrees(acos(n1 / d2));// alfa // - DEG_45);
 
@@ -72,67 +70,42 @@ namespace hexapod
         ik_angles real;
 
         /*	####################   COXA	  #####################	*/
-        if (leg == LEFT_FRONT) // Para pata 1
+        switch (leg)
         {
-            if (angles.coxa >= 0)
-            {
-                real.coxa = angles.coxa - 90;
-            }
-            else // 3*45 + beta, siendo beta = 180 - abs|coxa|
-            {
-                real.coxa = 315 - std::abs(angles.coxa); 
-            }
-        }
-        else if (leg == LEFT_MIDDLE)
-        {
-            if (angles.coxa >= 0)
-            {
-                real.coxa = angles.coxa - 90;
-            }
-            else
-            {
-                real.coxa = 270 - std::abs(angles.coxa);
-            }
-        }
-        else if (leg == LEFT_REAR)
-        {
-            if (angles.coxa >= 0)
-            {
-                real.coxa = angles.coxa - 135;
-            }
-            else
-            {
-                real.coxa = 225 - std::abs(angles.coxa);
-            }
-        }
-        else if (leg == RIGHT_FRONT)
-        {
-            real.coxa = angles.coxa + 45;
-        }
-        else if (leg == RIGHT_MIDDLE)
-        {
-            real.coxa = angles.coxa + 90;
-        }
-        else if (leg == RIGHT_REAR)
-        {
-            real.coxa = angles.coxa + 135;
+            case LEFT_FRONT:
+                real.coxa = (angles.coxa >= 0) ? angles.coxa - 90 : 315 - std::abs(angles.coxa);
+                break;
+
+            case LEFT_MIDDLE:
+                real.coxa = (angles.coxa >= 0) ? angles.coxa - 90 : 270 - std::abs(angles.coxa);
+                break;
+
+            case LEFT_REAR:
+                real.coxa = (angles.coxa >= 0) ? angles.coxa - 135 : 225 - std::abs(angles.coxa);
+                break;
+
+            case RIGHT_FRONT:
+                real.coxa = angles.coxa + 45;
+                break;
+
+            case RIGHT_MIDDLE:
+                real.coxa = angles.coxa + 90;
+                break;
+
+            case RIGHT_REAR:
+                real.coxa = angles.coxa + 135;
+                break;
+
+            default:
+                break;
         }
 
+        /*      femur y tibia igual para todas las patas     */
         /*	####################   FEMUR	  #####################	*/
         real.femur = 90 - angles.femur;  // Ajuste universal para todas las patas
 
         /*	####################   TIBIA	  #####################	*/
-        // No se requiere ajuste adicional para tibia
-
-        if ( angles.tibia <= 45 )
-        {
-            real.tibia = 0;
-        }
-        else
-        {
-            real.tibia = angles.tibia - 45;
-        }
-
+        real.tibia = (angles.tibia <= 45) ? 0 : angles.tibia - 45;  // se ha ganado fisicamente un angulo de 45
 
         return real;
     }
@@ -169,19 +142,9 @@ namespace hexapod
 
     int Hexaik::radians_to_degrees(double radians)
     {
-        // Convertir radianes a grados
         double degrees = radians * (180.0 / M_PI);
         
-        // Redondear al entero más cercano
         int rounded_degrees = static_cast<int>(std::round(degrees));
-        // Verificar si el valor está fuera de los límites
-        //if (degrees < 0) {
-        //    ESP_LOGW("IK", "Angulo fuera de limites: %d grados. Ajustando a 0.", degrees);
-        //    degrees = 0;
-        //} else if (degrees > 180) {
-        //    ESP_LOGW("IK", "Angulo fuera de limites: %d grados. Ajustando a 180.", degrees);
-        //    degrees = 180;
-        //}
 
         return rounded_degrees;
     }
