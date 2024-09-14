@@ -1,3 +1,207 @@
+#include "gaits.h"
+#include <cmath>
+
+namespace hexapod
+{
+	// Constructor Gaits
+	Gaits::Gaits(GaitType gait) : 
+	Xspeed(0.0), Yspeed(0.0), Rspeed(0.0), stepsInCycle(0), 
+	tranTime(0.0), parado(true), step(1), pushSteps(0), 
+	liftHeight(45), Current_Gait(NUM_MAX_GAITS), cycleTime(0.0)
+	{
+		// Inicializamos el orden de las patas
+		gait_select(gait);
+	}
+
+	// Método principal para seleccionar el gait
+	void Gaits::gait_select(GaitType new_gait)
+	{
+		// Si el gait es el mismo que el actual, no hacemos nada
+		if (new_gait == Current_Gait) return;
+
+		// Actualizamos el gait actual
+		Current_Gait = new_gait;
+		liftHeight = 45;
+
+		// Configuramos el orden de las patas en base al gait seleccionado
+		setLegOrderByGait(Current_Gait);
+
+		// Actualizamos los parámetros en base al gait seleccionado
+		update_gait_params(Current_Gait);
+
+		// Recalculamos variables dependientes
+		cycleTime = (stepsInCycle * tranTime) / 1000.0;
+		// Reset step
+		step = 1;
+
+		// Actualizamos las velocidades
+		update_velocities();
+	}
+
+
+	// Nuevo método para configurar el orden de las patas según el gait
+	void Gaits::setLegOrderByGait(GaitType GaitType)
+	{
+		switch (GaitType)
+		{
+			case RIPPLE_6:
+			case RIPPLE_12:
+			case RIPPLE_24:
+					gaitleg_order[0] = 4;  // RIGHT_FRONT
+					gaitleg_order[1] = 2;  // RIGHT_REAR
+					gaitleg_order[2] = 1;  // LEFT_FRONT
+					gaitleg_order[3] = 5;  // LEFT_REAR
+					gaitleg_order[4] = 6;  // RIGHT_MIDDLE
+					gaitleg_order[5] = 3;  // LEFT_MIDDLE
+				break;
+			case TRIPOD_6:
+			case TRIPOD_12:
+			case TRIPOD_24:
+					gaitleg_order[0] = 2;  // RIGHT_FRONT
+					gaitleg_order[1] = 2;  // RIGHT_REAR
+					gaitleg_order[2] = 1;  // LEFT_FRONT
+					gaitleg_order[3] = 1;  // LEFT_REAR
+					gaitleg_order[4] = 2;  // LEFT_MIDDLE
+					gaitleg_order[5] = 1;  // RIGHT_MIDDLE
+				break;
+			case WAVE_12:
+			case WAVE_24:
+				gaitleg_order[0] = 4;  // RIGHT_FRONT
+				gaitleg_order[1] = 6;  // RIGHT_REAR
+				gaitleg_order[2] = 1;  // LEFT_FRONT
+				gaitleg_order[3] = 3;  // LEFT_REAR
+				gaitleg_order[4] = 5;  // RIGHT_MIDDLE
+				gaitleg_order[5] = 2;  // LEFT_MIDDLE
+				break;
+			default:
+				// Podríamos agregar un manejo de error aquí si fuera necesario
+				break;
+		}
+	}
+
+	// Método para actualizar los parámetros del gait (pushSteps, stepsInCycle, etc.)
+	void Gaits::update_gait_params(GaitType type)
+	{
+		switch (type)
+		{
+			case RIPPLE_6:
+				pushSteps = 4;
+				stepsInCycle = 6;
+				desfase = 1;
+				tranTime = 140;
+				break;
+
+			case RIPPLE_12:
+				pushSteps = 8;
+				stepsInCycle = 12;
+				desfase = 2;
+				tranTime = 120;
+				break;
+
+			case RIPPLE_24:
+				pushSteps = 12;
+				stepsInCycle = 18;
+				desfase = 3;
+				tranTime = 120;
+				break;
+
+			case TRIPOD_6:
+				pushSteps = 2;
+				stepsInCycle = 4;
+				desfase = 2;
+				tranTime = 140;
+				break;
+
+			case TRIPOD_12:
+				pushSteps = 4;
+				stepsInCycle = 8;
+				desfase = 4;
+				tranTime = 120;
+				break;
+
+			case TRIPOD_24:
+				pushSteps = 6;
+				stepsInCycle = 12;
+				desfase = 6;
+				tranTime = 120;
+				break;
+
+			case WAVE_12:
+				pushSteps = 10;
+				stepsInCycle = 12;
+				desfase = 2;
+				tranTime = 80;
+				break;
+
+			case WAVE_24:
+				pushSteps = 20;
+				stepsInCycle = 24;
+				desfase = 4;
+				tranTime = 80;
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	void Gaits::update_velocities() 
+	{
+		float Veloc_X_max = 70.0 / ((tranTime / 1000.0) * pushSteps);
+		float Veloc_Y_max = 70.0 / ((tranTime / 1000.0) * pushSteps);
+		float Veloc_Rot_max = (PI / 7) / ((tranTime / 1000.0) * pushSteps);
+	}
+
+	void Gaits::configureBody()
+	{
+		tranTime = 140;
+	}
+
+}
+
+
+// gaitSelect refactorizado
+// TODO: gait_generator, hexa_core, con todo incluido en una funcion apply ( do_ik, gaits, etc... )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  CODIGO ANTIGUO ************************************** abajo -->
+
+
+
+
+
+
+
+
+
+
+
+
 //	########################################			GAIT GENERATOR CODE			##############################################		\\
 //		*************************************************************************************************************	      \\
 
@@ -5,6 +209,8 @@
 // como gaits lo que va a hacer es transformar un vect_3d, con traslaciones y rotaciones
 // tendra que crear un objeto Tmatrix, con las traslaciones y rotaciones a aplicar
 // es decir gaits[leg].loquesea sera un objeto tmatrix
+
+
 
 
 void Gait_generator(uint8_t leg)
@@ -147,10 +353,6 @@ void Gait_generator(uint8_t leg)
 
 
 
-void Gait_body_config(){
-	tranTime = 140;
-}
-
 void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_24,	tripod_6,	tripod_12,	tripod_24
 {
 	if(GaitType == Current_Gait)
@@ -260,7 +462,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
 
 	cycleTime = (stepsInCycle*tranTime)/1000.0;
 	step = 1;	//	pero hay que poner la step por la que empezamos
-	calculo_recorrido ();
+	update_velocities ();
 
 	//	Serial.print("Step actual: ");
 	//	Serial.println(step);
@@ -273,7 +475,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
  *	 Veloc_max =   ----------------------------------------------
  *                      (trantime(ms) / conv_ms_to_s) * pushsteps
  */
-void calculo_recorrido ()
+void update_velocities ()
 {
 	Veloc_X_max=(70.0)/((tranTime/1000.0)*pushSteps);
 	Veloc_Y_max=(70.0)/((tranTime/1000.0)*pushSteps);
