@@ -6,7 +6,7 @@ namespace hexapod
 	// Constructor Gaits
 	Gaits::Gaits(GaitType gait) : 
 	Xspeed(0.0), Yspeed(0.0), Rspeed(0.0), stepsInCycle(0), 
-	tranTime(0.0), parado(true), step(1), pushSteps(0), 
+	tranTime(0.0), parado(true), step(1), leg_step(0),pushSteps(0), 
 	liftHeight(45), Current_Gait(NUM_MAX_GAITS), cycleTime(0.0)
 	{
 		// Inicializamos el orden de las patas
@@ -165,7 +165,9 @@ namespace hexapod
 
 
 
-
+// step -> seria gait_step: es el step actual del gait ( por ejemplo de un gait
+// 		   que tiene 12 steps, pues el step por el que vamos ) luego leg_step, es el step
+// 		   especifico de cada pata, para poder reproducir el gait o modo de andar
 
 
 
