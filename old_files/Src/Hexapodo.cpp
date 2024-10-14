@@ -335,8 +335,8 @@ void doIK(){
  					 Serial.print("Gait Z: ");
  					 Serial.println(gaits[n_pata].z );
 */
- 				sol_ik = legIK(req.x,req.y,req.z,n_pata);//hemos a�adido el siguiente parametro
  				req= bodyIK(n_pata);	  // Hay que generar un vector de puntos coxa asociados a cada pata como en el endpoint, que guarde los puntos pat solo tener
+ 				sol_ik = legIK(req.x,req.y,req.z,n_pata);//hemos a�adido el siguiente parametro
  				 for(uint8_t n_servo=1; n_servo<4;n_servo++){
 
 							servo_actual=n_pata*3+n_servo;// DESDE 1 hasta 18 PORQUE ES LA ID
