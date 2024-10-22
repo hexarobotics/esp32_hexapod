@@ -30,6 +30,7 @@ class Gaits
         uint8_t gaitleg_order[6];
         bool parado;
         uint8_t step;
+        int8_t leg_step;
 
         GaitType Current_Gait;
 
