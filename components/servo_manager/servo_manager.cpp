@@ -50,7 +50,7 @@ namespace Servo
 
         if (pwm == 4095)
         {
-            return pca9685_set_pwm_value(dev, Channel, 4096); // Full on.
+            return pca9685_set_pwm_value(dev, Channel, 4095); // Full on.
         }
         else if (pwm == 0)
         {
