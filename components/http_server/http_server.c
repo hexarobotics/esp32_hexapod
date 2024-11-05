@@ -197,7 +197,7 @@ static httpd_handle_t http_server_configure(void)
 	config.send_wait_timeout = 10;
 
 	ESP_LOGI(TAG,
-			"http_server_configure: Starting server on port: '%d' with task priority: '%d'",
+			"http_server_configure: Starting server task on port: '%d' with task priority: '%d'",
 			config.server_port,
 			config.task_priority);
 
