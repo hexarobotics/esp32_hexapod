@@ -8,10 +8,14 @@
 
 #include "nvs_flash.h"
 
-#include "wifi_app.h"
+
 #include "servo_manager.h"
 #include "hexaik.h"
 #include "vectors.h"
+
+extern "C" {
+	#include "wifi_app.h"
+}
 
 using namespace transformations3D;
 using namespace hexapod;
