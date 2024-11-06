@@ -30,12 +30,19 @@ h4 {
     color: #1d3557;
 }
 
+.gr {
+	color: green;
+}
+.rd {
+	color: red;
+}
+
 #latest_firmware, #latest_firmware_label {
 	display:inline;
 }
 #latest_firmware {
 	color: #1d3557;
-}	
+}
 
 .buttons {
     padding: 5px;
