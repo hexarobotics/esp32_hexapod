@@ -14,9 +14,9 @@ namespace transformations3D
         {
             // Solo aplicar la traslación
             Vectors::vector3d result;
-            result.x = translationX + vec.x;
-            result.y = translationY + vec.y;
-            result.z = translationZ + vec.z;
+            result.x = t_x + vec.x;
+            result.y = t_y + vec.y;
+            result.z = t_z + vec.z;
             
             return result;
         } 
@@ -34,9 +34,9 @@ namespace transformations3D
 
         // Traslación
         Vectors::vector3d result;
-        result.x = translationX + rotated.x;
-        result.y = translationY + rotated.y;
-        result.z = translationZ + rotated.z;
+        result.x = t_x + rotated.x;
+        result.y = t_y + rotated.y;
+        result.z = t_z + rotated.z;
 
         return result;
     }
