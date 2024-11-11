@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 set(EXTRA_COMPONENT_DIRS "esp-idf-lib/components")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(hexa_main_project_wifi)
+project(vscode_hexa_main_project_wifi)
 
 # Incluir archivos binarios
 target_add_binary_data(${PROJECT_NAME}.elf "webpage/favicon.ico" BINARY)

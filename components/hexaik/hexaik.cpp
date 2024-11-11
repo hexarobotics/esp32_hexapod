@@ -23,7 +23,7 @@ namespace hexapod
     }
 
     // Implementación de legIK 3DOF
-    Hexaik::ik_angles Hexaik::legIK(int X, int Y, int Z, leg_id leg) 
+    Hexaik::ik_angles Hexaik::legIK( int X, int Y, int Z, leg_id leg ) 
     {
         ik_angles ans;
 
