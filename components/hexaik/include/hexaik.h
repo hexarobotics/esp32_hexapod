@@ -5,7 +5,6 @@
 #include <cmath>
 
 #include "vectors.h"
-#include "hexa_params.h"
 
 /**
  * @brief Hexapod kinematics library
