@@ -1,5 +1,8 @@
-#include <Hexaik.h>
+#include "Hexaik.h"
 #include "esp_log.h"
+
+#include "hexa_params.h"
+
 
 uint8_t control_cuerpo;
 uint8_t control_robot;

@@ -3,15 +3,8 @@
 
 #include <stdint.h>
 
+#include "gait_types.h"
 #include "tmatrix.h"
-
-enum GaitType 
-{
-    RIPPLE_6, RIPPLE_12, RIPPLE_24,
-    TRIPOD_6, TRIPOD_12, TRIPOD_24,
-    WAVE_12, WAVE_24,    
-    NUM_MAX_GAITS
-};
 
 namespace hexapod
 {

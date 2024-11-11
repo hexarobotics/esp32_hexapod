@@ -1,7 +1,7 @@
 #include "gaits.h"
 #include <cmath>
 
-//#define MOVING   ((Xspeed > 15 || Xspeed < -15) || (Yspeed > 15 || Yspeed < -15) || (Rspeed > 0.05 || Rspeed < -0.05))
+#include "hexa_params.h"
 
 namespace hexapod
 {
@@ -42,7 +42,6 @@ namespace hexapod
 		update_velocities();
 	}
 
-
 	// Nuevo método para configurar el orden de las patas según el gait
 	void Gaits::setLegOrderByGait(GaitType GaitType)
 	{
@@ -51,31 +50,31 @@ namespace hexapod
 			case RIPPLE_6:
 			case RIPPLE_12:
 			case RIPPLE_24:
-					gaitleg_order[0] = 4;  // RIGHT_FRONT
-					gaitleg_order[1] = 2;  // RIGHT_REAR
-					gaitleg_order[2] = 1;  // LEFT_FRONT
-					gaitleg_order[3] = 5;  // LEFT_REAR
-					gaitleg_order[4] = 6;  // RIGHT_MIDDLE
-					gaitleg_order[5] = 3;  // LEFT_MIDDLE
+					gaitleg_order[LEFT_FRONT] 	= 4;  // RIGHT_FRONT
+					gaitleg_order[LEFT_MIDDLE]  = 2;  // RIGHT_REAR
+					gaitleg_order[LEFT_REAR] 	= 1;  // LEFT_FRONT
+					gaitleg_order[RIGHT_FRONT] 	= 5;  // LEFT_REAR
+					gaitleg_order[RIGHT_MIDDLE] = 6;  // RIGHT_MIDDLE
+					gaitleg_order[RIGHT_REAR] 	= 3;  // LEFT_MIDDLE
 				break;
 			case TRIPOD_6:
 			case TRIPOD_12:
 			case TRIPOD_24:
-					gaitleg_order[0] = 2;  // RIGHT_FRONT
-					gaitleg_order[1] = 2;  // RIGHT_REAR
-					gaitleg_order[2] = 1;  // LEFT_FRONT
-					gaitleg_order[3] = 1;  // LEFT_REAR
-					gaitleg_order[4] = 2;  // LEFT_MIDDLE
-					gaitleg_order[5] = 1;  // RIGHT_MIDDLE
+					gaitleg_order[LEFT_FRONT] 	= 2;  // RIGHT_FRONT
+					gaitleg_order[LEFT_MIDDLE]  = 2;  // RIGHT_REAR
+					gaitleg_order[LEFT_REAR] 	= 1;  // LEFT_FRONT
+					gaitleg_order[RIGHT_FRONT] 	= 1;  // LEFT_REAR
+					gaitleg_order[RIGHT_MIDDLE] = 2;  // LEFT_MIDDLE
+					gaitleg_order[RIGHT_REAR] 	= 1;  // RIGHT_MIDDLE
 				break;
 			case WAVE_12:
 			case WAVE_24:
-					gaitleg_order[0] = 4;  // RIGHT_FRONT
-					gaitleg_order[1] = 6;  // RIGHT_REAR
-					gaitleg_order[2] = 1;  // LEFT_FRONT
-					gaitleg_order[3] = 3;  // LEFT_REAR
-					gaitleg_order[4] = 5;  // RIGHT_MIDDLE
-					gaitleg_order[5] = 2;  // LEFT_MIDDLE
+					gaitleg_order[LEFT_FRONT] 	= 4;  // RIGHT_FRONT
+					gaitleg_order[LEFT_MIDDLE]  = 6;  // RIGHT_REAR
+					gaitleg_order[LEFT_REAR] 	= 1;  // LEFT_FRONT
+					gaitleg_order[RIGHT_FRONT] 	= 3;  // LEFT_REAR
+					gaitleg_order[RIGHT_MIDDLE] = 5;  // RIGHT_MIDDLE
+					gaitleg_order[RIGHT_REAR] 	= 2;  // LEFT_MIDDLE
 				break;
 			default:
 				// Podríamos agregar un manejo de error aquí si fuera necesario
