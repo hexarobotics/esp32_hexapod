@@ -39,6 +39,7 @@ void pca9685_test_task(void *pvParameters)
 		ESP_ERROR_CHECK(nvs_flash_erase());
 		ret = nvs_flash_init();
 	}
+    
 	ESP_ERROR_CHECK(ret);
 	
 	// Start Wifi

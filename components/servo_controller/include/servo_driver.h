@@ -32,8 +32,9 @@ namespace Servo
 
     private:
         i2c_dev_t pca9685_dev;
-        const char *TAG = "PCA9685_SERVO";
+        const char *TAG = "PCA9685";
         static bool i2c_initialized;
+        static uint8_t dev_counter;
 
         uint16_t pwm_freq;    // Freq pwm pca9685
         uint8_t  i2c_address; // Dirección I2C especificada

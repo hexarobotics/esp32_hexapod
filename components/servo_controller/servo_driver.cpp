@@ -50,6 +50,7 @@
 namespace Servo
 {
     bool ServoDriver::i2c_initialized = false;
+    uint8_t ServoDriver::dev_counter = 0;
 
     // Constructor por defecto
     ServoDriver::ServoDriver() : pwm_freq(SERVO_PWM_FREQ), i2c_address(PCA9685_I2C_ADDRESS)
@@ -125,7 +126,7 @@ namespace Servo
         ESP_ERROR_CHECK(pca9685_set_pwm_frequency(&pca9685_dev, pwm_freq));
         ESP_ERROR_CHECK(pca9685_get_pwm_frequency(&pca9685_dev, &freq));
 
-        ESP_LOGI(TAG, "Freq %dHz, real %d", 50, freq);
+        ESP_LOGI(TAG, "Driver: %d, Addr: %d, Freq %d Hz, real %d", dev_counter, i2c_address, 50, freq);
 
         return s_ret_ok;
     }
