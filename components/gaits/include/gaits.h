@@ -26,8 +26,8 @@ namespace hexapod
             uint8_t pushSteps;
             uint8_t desfase;
 
-            float tranTime;     // Time between steps in ms
-            float cycleTime;    // Total time. cycleTime =  (stepsInCycle * tranTime(ms)) / 1000.0 (to s) 
+            uint16_t tranTime;     // Time between steps in ms
+            uint32_t cycleTime;    // Total time. cycleTime =  (stepsInCycle * tranTime(ms)) / 1000.0 (to s) 
 
             uint8_t gaitleg_order[6];
             transformations3D::Tmatrix gaits[6];
@@ -58,6 +58,7 @@ namespace hexapod
             void gait_select(GaitType type);
             void generateGait(uint8_t leg);
             void configureBody();
+            uint16_t get_gait_transition_time(void);
             transformations3D::Tmatrix step(uint8_t leg);
             void next_step( void );
 

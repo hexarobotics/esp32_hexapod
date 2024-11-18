@@ -24,21 +24,21 @@ namespace hexapod
             };
 
             static const uint8_t num_legs = 6;
-            const char *TAG = "HEXA_IK";
+            static const char* TAG;
 
             Hexaik();
 
+            static ik_angles   legIK         ( leg_id leg, int X, int Y, int Z );
             ik_angles   do_1_leg_ik   ( Vectors::vector3d vec, leg_id leg  );
 
         private:
             vector3d leg_endpoints[num_legs];
 
-            ik_angles   legIK         ( leg_id leg, int X, int Y, int Z );
-            ik_angles   real_angle    ( leg_id leg, ik_angles angles );
             void        do_ik         ( void );
 
             // Función para convertir radianes a grados
-            int radians_to_degrees(double radians);
+            static int radians_to_degrees(double radians);
+            static ik_angles   real_angle    ( leg_id leg, ik_angles angles );
     };
 };
 

@@ -9,6 +9,8 @@ uint8_t control_robot;
 
 namespace hexapod
 {
+    const char* Hexaik::TAG = "HEXA_IK";
+
     // Class Hexaik
     // Constructor Hexaik
     Hexaik::Hexaik()

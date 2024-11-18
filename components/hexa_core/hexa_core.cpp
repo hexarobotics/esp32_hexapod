@@ -1,7 +1,9 @@
 
 
-#include "gaits.h"
 #include "hexa_params.h"
+#include "Hexaik.h"
+#include "gaits.h"
+#include "Servo_controller.h"
 
 // NEWW
 
@@ -50,9 +52,9 @@ transformations3D::Vectors::vector3d recalculate_leg_vector( uint8_t leg, transf
 
 void hexa_main_task()
 {
+	hexapod::Gaits gait(RIPPLE_6);
 
-	hexapod::Gaits Gait(RIPPLE_6);
-	
+	Servo::ServoController servo_ctr; 
 
 	// more tasks?
 
@@ -62,40 +64,47 @@ void hexa_main_task()
         // 2. is_moving()?
         // 3. calculate_gait_step
 
-        get_parameters()
+        //get_parameters()
 
-        if ( interpolate_running == NO && Gait.isMoving())
+        if ( servo_ctr.isInterpolating() && gait.isMoving())
         {
-            for(uint8_t leg = 0; leg < 6; leg++)
+            for( uint8_t leg = LEFT_FRONT; leg < NUM_MAX_LEGS; leg++ )
             {
-                transformations3D::Tmatrix tgait = Gait.step(n_pata);
+				// 1. Gait step calculation
+                transformations3D::Tmatrix tgait = gait.step(leg);
 
+				// 2. Total Vect
                 transformations3D::Vectors::vector3d leg_vect = calculate_total_vector( leg );
 
+				// 3. Apply Transformation matrix to leg_vector
                 leg_vect = tgait.apply(leg_vect); // vector modificado
 
+				// 4. Calculate leg vector
                 leg_vect = recalculate_leg_vector( leg, leg_vect );
 
-                Hexaik::ik_angles ik_angles = legIK( leg, leg_vect.x, leg_vect.y, leg_vect.z );
+				// 5. Solve IK
+                hexapod::Hexaik::ik_angles ik_angles = hexapod::Hexaik::legIK( (leg_id)leg, leg_vect.x, leg_vect.y, leg_vect.z );
 
-        		//    check_angles_range_and_save_to_send_servos(); // servos_and_i2c.cpp file
-				// save 3 servo per leg values.
+				// 6. Save nextpose
+				servo_ctr.save_nextpose(leg * 3, 	 ik_angles.coxa );
+				servo_ctr.save_nextpose(leg * 3 + 1, ik_angles.femur );
+				servo_ctr.save_nextpose(leg * 3 + 2, ik_angles.tibia );
 
-                Gait.next_step(); // Increment gait step
-
+				// 7. Set Next Gait step
+                gait.next_step(); // Increment gait step
             }
 
-			interpolate_setup(tranTime);
+			servo_ctr.interpolate_setup(gait.get_gait_transition_time());
         }
 
-
-
+		// update joints
+		servo_ctr.Interpolate_step();
     }
 
 
 }
 
-
+/*
 
 
 
@@ -113,14 +122,14 @@ void doIK(){
 	    ik_sol_t sol_ik;
 	    uint8_t servo_actual;
  				gait_step(n_pata);
-/*
+
  					 Serial.print("Gait X: ");
  					 Serial.print(gaits[n_pata].x );
  					 Serial.print("Gait Y: ");
  					 Serial.print(gaits[n_pata].y );
  					 Serial.print("Gait Z: ");
  					 Serial.println(gaits[n_pata].z );
-*/
+
  				req= bodyIK(n_pata);	  // Hay que generar un vector de puntos coxa asociados a cada pata como en el endpoint, que guarde los puntos pat solo tener
  				sol_ik = legIK(req.x,req.y,req.z,n_pata);//hemos a�adido el siguiente parametro
  				 for(uint8_t n_servo=1; n_servo<4;n_servo++){
@@ -197,7 +206,6 @@ void doIK(){
  					}
  			}
 
-	//###TEST###
 
 
 
@@ -220,4 +228,6 @@ if (step>stepsInCycle)step=1;
 
 
 
-}//doik()
+}
+
+*/

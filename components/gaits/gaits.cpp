@@ -9,7 +9,7 @@ namespace hexapod
 	Gaits::Gaits(GaitType gait) : 
 		Xspeed(0.0), Yspeed(0.0), Rspeed(0.0), liftHeight(45),
 		stepsInCycle(0), pushSteps(0), desfase(0),
-		tranTime(0.0), cycleTime(0.0),
+		tranTime(0), cycleTime(0.0),
 		gaitleg_order{0}, parado(true), gait_step(1), leg_step(0),
 		modo_control(0), current_gait(NUM_MAX_GAITS)
 	{
@@ -34,7 +34,7 @@ namespace hexapod
 		update_gait_params(current_gait);
 
 		// Recalculamos variables dependientes
-		cycleTime = (stepsInCycle * tranTime) / 1000.0;
+		cycleTime = (stepsInCycle * tranTime) / 1000;
 		// Reset step
 		gait_step = 1;
 
@@ -157,9 +157,9 @@ namespace hexapod
 	*/
 	void Gaits::update_velocities(void) 
 	{
-		Xspeed_max = 70.0 / ((tranTime / 1000.0) * pushSteps);
-		Yspeed_max = 70.0 / ((tranTime / 1000.0) * pushSteps);
-		Rspeed_max = (M_PI / 7) / ((tranTime / 1000.0) * pushSteps);
+		Xspeed_max = 70.0 / ((tranTime / 1000) * pushSteps);
+		Yspeed_max = 70.0 / ((tranTime / 1000) * pushSteps);
+		Rspeed_max = (M_PI / 7) / ((tranTime / 1000) * pushSteps);
 	}
 
 	void Gaits::configureBody()
@@ -170,6 +170,11 @@ namespace hexapod
 	bool Gaits::isMoving() const
 	{
 		return (Xspeed > 15 || Xspeed < -15) || (Yspeed > 15 || Yspeed < -15) || (Rspeed > 0.05 || Rspeed < -0.05);
+	}
+
+	uint16_t Gaits::get_gait_transition_time(void)
+	{
+		return tranTime;
 	}
 
 	// gait_step -> seria gait_step: es el step actual del gait ( por ejemplo de un gait
@@ -199,7 +204,7 @@ namespace hexapod
         {
             if(parado==true)
             {
-                parado = false; 
+                parado = false;
                 gait_step = 1;
             }
 
@@ -335,7 +340,7 @@ namespace hexapod
 
         if ( gait_step > stepsInCycle )
         {
-            gait_step=1;
+            gait_step = 1;
         }
     }
 

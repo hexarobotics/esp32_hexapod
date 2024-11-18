@@ -55,12 +55,16 @@ namespace Servo
     ServoDriver::ServoDriver() : pwm_freq(SERVO_PWM_FREQ), i2c_address(PCA9685_I2C_ADDRESS)
     {
         init_i2c_once();
+
+        Init();
     }
 
     // Constructor con dirección I2C específica
     ServoDriver::ServoDriver(uint8_t i2c_addr) : pwm_freq(SERVO_PWM_FREQ), i2c_address(i2c_addr)
     {
         init_i2c_once();
+
+        Init();
     }
 
     // Método estático para inicializar el I2C solo una vez
