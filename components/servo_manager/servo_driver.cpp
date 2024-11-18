@@ -1,5 +1,28 @@
-#include "servo_manager.h"
+/**
+ * @file servo_driver.cpp
+ * @brief Controlador de servomotores PCA9685 para ESP32.
+ * 
+ * Este módulo permite inicializar y controlar varios PCA9685 en el mismo bus I2C.
+ * Asegura que la función `i2cdev_init()` se llame **una sola vez** en el programa,
+ * independientemente del número de instancias de `ServoDriver` creadas.
+ * 
+ * ### Ejemplo de uso:
+ * ```cpp
+ * Servo::ServoDriver pca1(0x40);
+ * pca1.Init();
+ * Servo::ServoDriver pca2(0x41);
+ * pca2.Init();
+ * ```
+ * 
+ * @note La inicialización del I2C se maneja de manera interna en el constructor y solo ocurre una vez.
+ * No es necesario llamar manualmente a `i2cdev_init()`.
+ * 
+ * @date 2024
+ * @version 1.0
+ * @autor Miguel
+ */
 
+#include "servo_driver.h"
 #include <string.h>
 #include "esp_log.h"
 
@@ -17,8 +40,8 @@
 //PWM Value=(500 us / 20000 us)×4096≈102
 //2500 us (180 grados):
 //PWM Value=(2500 us20000 us)×4096≈512
-#define SERVO_MIN	        102 // 102 Default
-#define SERVO_MAX	        512 // 512 Default
+#define SERVO_MIN	        102 // 102 Default - set 0º
+#define SERVO_MAX	        540 // 512 Default - set 180º
 #define MIN_ANGLE	        0.0
 #define MAX_ANGLE	        180.0
 #define SERVO_PWM_FREQ      50
@@ -26,13 +49,31 @@
 
 namespace Servo
 {
-    // Class ServoManager
-    // Constructor ServoManager
-    ServoManager::ServoManager() : pwm_freq(SERVO_PWM_FREQ)
+    bool ServoDriver::i2c_initialized = false;
+
+    // Constructor por defecto
+    ServoDriver::ServoDriver() : pwm_freq(SERVO_PWM_FREQ), i2c_address(PCA9685_I2C_ADDRESS)
     {
+        init_i2c_once();
     }
 
-    esp_err_t ServoManager::set_angle(uint8_t Channel, float Angle)
+    // Constructor con dirección I2C específica
+    ServoDriver::ServoDriver(uint8_t i2c_addr) : pwm_freq(SERVO_PWM_FREQ), i2c_address(i2c_addr)
+    {
+        init_i2c_once();
+    }
+
+    // Método estático para inicializar el I2C solo una vez
+    void ServoDriver::init_i2c_once(void)
+    {
+        if (!i2c_initialized)
+        {
+            ESP_ERROR_CHECK(i2cdev_init());
+            i2c_initialized = true;
+        }
+    }
+
+    esp_err_t ServoDriver::set_angle(uint8_t Channel, float Angle)
     {
         float pwm_val;
 
@@ -41,10 +82,10 @@ namespace Servo
 
         pwm_val = (Angle - MIN_ANGLE) * ((float)SERVO_MAX - (float)SERVO_MIN) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
 
-        return set_pwm_value(&pca9685_dev,Channel, (uint16_t)(pwm_val+ROUND));
+        return set_pwm_value(&pca9685_dev, Channel, (uint16_t)(pwm_val + ROUND));
     }
 
-    esp_err_t ServoManager::set_pwm_value(i2c_dev_t *dev, uint8_t Channel, uint16_t pwm)
+    esp_err_t ServoDriver::set_pwm_value(i2c_dev_t *dev, uint8_t Channel, uint16_t pwm)
     {
         if (pwm > 4095) pwm = 4095; 
 
@@ -64,22 +105,13 @@ namespace Servo
         return ESP_OK;
     }
 
-    // ########## DRIVER CONFIG ##########
-
     // PCA_9685 Driver Init
-    ServoManager::servo_mng_ret ServoManager::Init( void )
+    ServoDriver::servo_driv_ret ServoDriver::Init(void)
     {
-        //pca9685_dev
-
-       // i2c_dev_t dev;
         memset(&pca9685_dev, 0, sizeof(i2c_dev_t));
 
-        // Init i2cdev library
-        ESP_ERROR_CHECK(i2cdev_init());
-
-        vTaskDelay(pdMS_TO_TICKS(20));
-
-        ESP_ERROR_CHECK(pca9685_init_desc(&pca9685_dev, PCA9685_I2C_ADDRESS, I2C_MASTER_NUM, I2C_MASTER_SDA_IO, I2C_MASTER_SCL_IO));
+        // Usa la dirección I2C especificada en el constructor
+        ESP_ERROR_CHECK(pca9685_init_desc(&pca9685_dev, i2c_address, I2C_MASTER_NUM, I2C_MASTER_SDA_IO, I2C_MASTER_SCL_IO));
         ESP_ERROR_CHECK(pca9685_init(&pca9685_dev));
 
         ESP_ERROR_CHECK(pca9685_restart(&pca9685_dev));
@@ -91,8 +123,7 @@ namespace Servo
 
         ESP_LOGI(TAG, "Freq %dHz, real %d", 50, freq);
 
-
         return s_ret_ok;
     }
 
-} // namespace servo
+} // namespace Servo

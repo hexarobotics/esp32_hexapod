@@ -9,9 +9,11 @@
 #include "nvs_flash.h"
 
 
-#include "servo_manager.h"
+#include "servo_driver.h"
 #include "hexaik.h"
 #include "vectors.h"
+#include "hexa_params.h"
+
 
 extern "C" {
 	#include "wifi_app.h"
@@ -42,7 +44,7 @@ void pca9685_test_task(void *pvParameters)
 	// Start Wifi
 	wifi_app_start();
 	
-    Servo::ServoManager servo_mngr;
+    Servo::ServoDriver servo_mngr;
     servo_mngr.Init();
 
     Vectors::vector3d leg_end_example[3];
@@ -58,7 +60,7 @@ void pca9685_test_task(void *pvParameters)
 
         for (int i = 0; i<3;i++)
         {
-            Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], Hexaik::left_middle);
+            Hexaik::ik_angles res = hexaik.do_1_leg_ik( leg_end_example[i], LEFT_MIDDLE);
 
             servo_mngr.set_angle(0,res.coxa);
             servo_mngr.set_angle(1,res.femur);

@@ -33,7 +33,7 @@ void Gait_generator(uint8_t leg)
         if (leg_step<0)	leg_step=stepsInCycle + leg_step;  // parece que funciona para ciclos de 6, 12 y 24 steps en RIPPLE
         if (leg_step==0) leg_step=stepsInCycle;
 
-		if((Current_Gait==ripple_6)||(Current_Gait==tripod_6)||(Current_Gait==wave_12)) 	// ### 3 ETAPAS ###
+		if((current_gait==ripple_6)||(current_gait==tripod_6)||(current_gait==wave_12)) 	// ### 3 ETAPAS ###
         {
 			if(leg_step == 1) 	  // UP
             {
@@ -58,7 +58,7 @@ void Gait_generator(uint8_t leg)
 			}
         }//6
 
-		if((Current_Gait==ripple_12)||(Current_Gait==wave_24)||(Current_Gait==tripod_12)){ //	### 5 ETAPAS ###
+		if((current_gait==ripple_12)||(current_gait==wave_24)||(current_gait==tripod_12)){ //	### 5 ETAPAS ###
 
 			if(leg_step == stepsInCycle){	// UP/2 :::: 12 (stepsInCycle)
 				gaits[leg].x = gaits[leg].x/2;
@@ -92,7 +92,7 @@ void Gait_generator(uint8_t leg)
 			}
 }//12
 
-		if((Current_Gait==ripple_24)||(Current_Gait==tripod_24)) //	### 7 ETAPAS ###
+		if((current_gait==ripple_24)||(current_gait==tripod_24)) //	### 7 ETAPAS ###
         {
 
 					if(leg_step == stepsInCycle-1){	// UP 1/3
@@ -151,15 +151,15 @@ void Gait_body_config(){
 
 void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_24,	tripod_6,	tripod_12,	tripod_24
 {
-	if(GaitType == Current_Gait)
+	if(GaitType == current_gait)
     {
 	    return;
     }
 
-	Current_Gait = GaitType;
+	current_gait = GaitType;
 	liftHeight=45;
 	// RIPPLE
-	if((Current_Gait == ripple_6)||(Current_Gait == ripple_12)||(Current_Gait == ripple_24))
+	if((current_gait == ripple_6)||(current_gait == ripple_12)||(current_gait == ripple_24))
     {
 		//ORDEN PATAS
         gaitLegNo[RIGHT_FRONT] = 4;//5;// actualizado
@@ -169,7 +169,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
         gaitLegNo[RIGHT_MIDDLE] =6;// 3;// actualizado
         gaitLegNo[LEFT_MIDDLE] =3; //6;// actualizado
 
-		switch(Current_Gait)
+		switch(current_gait)
         {
             case ripple_6 :
                 pushSteps=4;
@@ -193,7 +193,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
                 break;
         }
 	}
-    else if((Current_Gait == tripod_6)||(Current_Gait == tripod_12)||(Current_Gait == tripod_24))
+    else if((current_gait == tripod_6)||(current_gait == tripod_12)||(current_gait == tripod_24))
     {
 
 		gaitLegNo[RIGHT_FRONT] = 2;	// actualizado
@@ -203,7 +203,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
 		gaitLegNo[LEFT_REAR] = 1;	// actualizado
 		gaitLegNo[RIGHT_MIDDLE] = 1;	// actualizado
 
-		switch(Current_Gait) 
+		switch(current_gait) 
         {
             case tripod_6 : 	//	parece que hay que agregarle algun step entre elevaciones alternas de las 3 patas
                 pushSteps=2;	//6 	ya que justo cuando una toca el suelo, la otra se levanta y se tambalea un poco
@@ -227,7 +227,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
                 break;
 		}
 //		tranTime = 65;???????????????????????????
-		}else if((Current_Gait == wave_12)||(Current_Gait == wave_24)) //wave_12,	wave_24
+		}else if((current_gait == wave_12)||(current_gait == wave_24)) //wave_12,	wave_24
         {		
 			gaitLegNo[RIGHT_REAR] = 6;// actualizado
 			gaitLegNo[RIGHT_MIDDLE] = 5;// actualizado
@@ -236,7 +236,7 @@ void gaitSelect(gait GaitType)  //ripple_6, ripple_12,	ripple_24,	wave_12,	wave_
 			gaitLegNo[LEFT_MIDDLE] = 2;// actualizado
 			gaitLegNo[LEFT_FRONT] = 1;// actualizado
 
-		switch(Current_Gait)
+		switch(current_gait)
         {
             case wave_12 :
                 pushSteps=10;

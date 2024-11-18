@@ -17,6 +17,10 @@ namespace hexapod
             float Rspeed; // radians
             float liftHeight;
 
+            float Xspeed_max;
+            float Yspeed_max;
+            float Rspeed_max; // radians
+
             // Steps in gait
             uint8_t stepsInCycle;
             uint8_t pushSteps;
@@ -28,11 +32,22 @@ namespace hexapod
             uint8_t gaitleg_order[6];
             transformations3D::Tmatrix gaits[6];
             bool parado;
-            uint8_t step;
-            int8_t leg_step;
+            uint8_t gait_step;
+            int8_t leg_step; //int8_t ok, puede salir negativo -> refactorizar
             bool modo_control;	// 0 movimiento cuerpo; 1 movimiento robot
 
-            GaitType Current_Gait;
+            GaitType current_gait;
+
+            enum Leg_order
+            {
+                LEG_FIRST = 1,
+                LEG_SECOND,
+                LEG_THIRD,
+                LEG_FOURTH,
+                LEG_FIFTH,
+                LEG_SIXTH,
+                LEG_MAX_ORD    // Total de patas (6)
+            };
 
         public:
             // Constructor
@@ -43,15 +58,19 @@ namespace hexapod
             void gait_select(GaitType type);
             void generateGait(uint8_t leg);
             void configureBody();
-            void Gait_generator(uint8_t leg);
+            transformations3D::Tmatrix step(uint8_t leg);
+            void next_step( void );
 
             void setLegOrderByGait(GaitType GaitType); // Nuevo método
             void update_gait_params(GaitType type);
             void update_velocities(void);
 
             // Getters y Setters si es necesario
-            float getXspeed() const;
-            void setXspeed(float speed);
+            //float getXspeed() const;
+            float map(int16_t value, int16_t in_min, int16_t in_max, float out_min, float out_max);
+            void  set_xspeed( int16_t xspeed );
+            void  set_yspeed( int16_t yspeed );
+            void  set_rspeed( int16_t rspeed );
     };
 }
 

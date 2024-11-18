@@ -1,9 +1,6 @@
 #include "Hexaik.h"
 #include "esp_log.h"
 
-#include "hexa_params.h"
-
-
 uint8_t control_cuerpo;
 uint8_t control_robot;
 
@@ -23,7 +20,7 @@ namespace hexapod
     }
 
     // Implementación de legIK 3DOF
-    Hexaik::ik_angles Hexaik::legIK( int X, int Y, int Z, leg_id leg ) 
+    Hexaik::ik_angles Hexaik::legIK( leg_id leg, int X, int Y, int Z )
     {
         ik_angles ans;
 
@@ -115,9 +112,9 @@ namespace hexapod
 
     void Hexaik::do_ik( void ) // hex.cpp -> hex_compute_step() (quitar de ik.cpp)
     {
-        for(uint8_t leg=0; leg<=num_max_legs;leg++)
+        for( uint8_t leg = 0; leg <= NUM_MAX_LEGS; leg++ )
         {
-        //    Gait_generator(n_pata); // gait.cpp file
+        //    gait_step(n_pata); // gait.cpp file
         //    //body_ik -> ahora llamado Tmatrix_apply o algo asi, la matriz de T homogenea. ik.cpp file
             //legIK(); //ik.cpp file
 //
@@ -131,10 +128,10 @@ namespace hexapod
 
     Hexaik::ik_angles Hexaik::do_1_leg_ik( Vectors::vector3d vec, leg_id leg  ) // hex.cpp -> hex_compute_step() (quitar de ik.cpp)
     {
-        //    Gait_generator(n_pata); // gait.cpp file
+        //    gait_step(n_pata); // gait.cpp file
         //    //body_ik -> ahora llamado Tmatrix_apply o algo asi, la matriz de T homogenea. ik.cpp file
 
-        return legIK(vec.x,vec.y,vec.z,leg); //ik.cpp file
+        return legIK( leg, vec.x, vec.y, vec.z ); //ik.cpp file
 //
         //    check_angles_range_and_save_to_send_servos(); // servos_and_i2c.cpp file
 //

@@ -1,5 +1,7 @@
-//	###			KINEMATIC VARIABLES		###		//
-//	********************************		//
+#ifndef __HEXA_PARAMS_H__
+  #define __HEXA_PARAMS_H__
+
+#include "vectors.h"
 
 /* Body
 * We assume 4 legs are on the corners of a box defined by X_COXA x Y_COXA
@@ -15,14 +17,6 @@
 #define L_TIBIA     135 // MM distance from tibia servo to foot
 
 #define L_COXA      44  // MM distance from coxa servo to femur servo
-
-
-#define LEFT_FRONT     0
-#define LEFT_MIDDLE    1
-#define LEFT_REAR      2
-#define RIGHT_FRONT    3
-#define RIGHT_MIDDLE   4
-#define RIGHT_REAR     5
 
 /* Servo Legs*/
 #define RF_COXA 1
@@ -48,3 +42,20 @@
 #define LM_COXA 16
 #define LM_FEMUR 17
 #define LM_TIBIA 18
+
+enum leg_id
+{
+    LEFT_FRONT = 0,
+    LEFT_MIDDLE, 
+    LEFT_REAR,
+    RIGHT_FRONT, 
+    RIGHT_MIDDLE,
+    RIGHT_REAR,
+    NUM_MAX_LEGS  
+};
+
+
+static const transformations3D::Vectors::vector2d coxa_pos[NUM_MAX_LEGS];
+
+
+#endif // __HEXA_PARAMS_H__
