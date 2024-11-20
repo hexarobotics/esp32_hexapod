@@ -75,7 +75,7 @@ namespace hexapod
         switch (leg)
         {
             case LEFT_FRONT:
-                real.coxa = (angles.coxa >= 0) ? angles.coxa - 90 : 315 - std::abs(angles.coxa);
+                real.coxa = (angles.coxa >= 0) ? angles.coxa - 45 : 315 - std::abs(angles.coxa);
                 break;
 
             case LEFT_MIDDLE:
