@@ -47,64 +47,105 @@
 #define SERVO_PWM_FREQ      50
 #define ROUND               0.5F
 
+#define UNKOWN              0
+
 namespace Servo
 {
-    bool ServoDriver::i2c_initialized = false;
-    uint8_t ServoDriver::dev_counter = 0;
+    bool ServoDriver::i2c_initialized_ = false;
+    uint8_t ServoDriver::dev_counter_ = 0;
 
     // Constructor por defecto
-    ServoDriver::ServoDriver() : pwm_freq(SERVO_PWM_FREQ), i2c_address(PCA9685_I2C_ADDRESS)
+    ServoDriver::ServoDriver() :
+        pwm_freq(SERVO_PWM_FREQ),
+        i2c_address(PCA9685_I2C_ADDRESS),
+        servo_cal_(nullptr),
+        pose_size_(UNKOWN)
     {
         init_i2c_once();
 
         Init();
+
+        dev_counter_++;
     }
 
     // Constructor con dirección I2C específica
-    ServoDriver::ServoDriver(uint8_t i2c_addr) : pwm_freq(SERVO_PWM_FREQ), i2c_address(i2c_addr)
+    ServoDriver::ServoDriver(uint8_t i2c_addr) :
+        pwm_freq(SERVO_PWM_FREQ),
+        i2c_address(i2c_addr),
+        servo_cal_(nullptr),
+        pose_size_(UNKOWN)
     {
         init_i2c_once();
 
         Init();
+
+        dev_counter_++;
+    }
+
+    // Constructor Addr i2c y calibracion servos
+    ServoDriver::ServoDriver(uint8_t i2c_addr, const servo_cal_t* servo_calibration, uint16_t pose_size) :
+        pwm_freq(SERVO_PWM_FREQ),
+        i2c_address(i2c_addr),
+        servo_cal_(servo_calibration),
+        pose_size_(pose_size)
+    {
+        if (servo_calibration == nullptr || pose_size == 0)
+        {
+            ESP_LOGE(TAG, "Invalid servo calibration data or pose size");
+            abort();
+        }
+
+        init_i2c_once();
+        Init();
+
+        dev_counter_++;
     }
 
     // Método estático para inicializar el I2C solo una vez
     void ServoDriver::init_i2c_once(void)
     {
-        if (!i2c_initialized)
+        if (!i2c_initialized_)
         {
             ESP_ERROR_CHECK(i2cdev_init());
-            i2c_initialized = true;
+            i2c_initialized_ = true;
         }
     }
 
-    esp_err_t ServoDriver::set_angle(uint8_t Channel, float Angle)
+    esp_err_t ServoDriver::set_angle(uint8_t ch, float Angle)
     {
         float pwm_val;
 
         if(Angle < MIN_ANGLE) Angle = MIN_ANGLE;
         if(Angle > MAX_ANGLE) Angle = MAX_ANGLE;
 
-        pwm_val = (Angle - MIN_ANGLE) * ((float)SERVO_MAX - (float)SERVO_MIN) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
+        if ( servo_cal_ == nullptr ) // default -> no calibration
+        {
+            pwm_val = (Angle - MIN_ANGLE) * ((float)SERVO_MAX - (float)SERVO_MIN) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
+        }
+        else
+        {
+            pwm_val = (Angle - MIN_ANGLE) * ((float)servo_cal_[ch].pwm_max - (float)servo_cal_[ch].pwm_min) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
+        }
 
-        return set_pwm_value(&pca9685_dev, Channel, (uint16_t)(pwm_val + ROUND));
+
+        return set_pwm_value(&pca9685_dev, ch, (uint16_t)(pwm_val + ROUND));
     }
 
-    esp_err_t ServoDriver::set_pwm_value(i2c_dev_t *dev, uint8_t Channel, uint16_t pwm)
+    esp_err_t ServoDriver::set_pwm_value(i2c_dev_t *dev, uint8_t ch, uint16_t pwm)
     {
         if (pwm > 4095) pwm = 4095; 
 
         if (pwm == 4095)
         {
-            return pca9685_set_pwm_value(dev, Channel, 4095); // Full on.
+            return pca9685_set_pwm_value(dev, ch, 4095); // Full on.
         }
         else if (pwm == 0)
         {
-            return pca9685_set_pwm_value(dev, Channel, 0);    // Full off.
+            return pca9685_set_pwm_value(dev, ch, 0);    // Full off.
         }
         else
         {
-            return pca9685_set_pwm_value(dev, Channel, pwm);
+            return pca9685_set_pwm_value(dev, ch, pwm);
         }
 
         return ESP_OK;
@@ -126,7 +167,7 @@ namespace Servo
         ESP_ERROR_CHECK(pca9685_set_pwm_frequency(&pca9685_dev, pwm_freq));
         ESP_ERROR_CHECK(pca9685_get_pwm_frequency(&pca9685_dev, &freq));
 
-        ESP_LOGI(TAG, "Driver: %d, Addr: %d, Freq %d Hz, real %d", dev_counter, i2c_address, 50, freq);
+        ESP_LOGI(TAG, "Driver: %d, Addr: 0x%X, Freq %d Hz, real %d", dev_counter_, i2c_address, 50, freq);
 
         return s_ret_ok;
     }

@@ -28,7 +28,7 @@ namespace hexapod
 
             Hexaik();
 
-            static ik_angles   legIK         ( leg_id leg, int X, int Y, int Z );
+            static ik_angles   legIK         ( leg_id leg, double X, double Y, double Z );
             ik_angles          do_1_leg_ik   ( Vectors::vector3d vec, leg_id leg  );
 
         private:

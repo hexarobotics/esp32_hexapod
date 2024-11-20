@@ -1,11 +1,11 @@
 
 
 #include "gaits.h"
+#include <esp_log.h>
 
 
 namespace hexapod
 {
-
 
 
 // yo envio desde la app Xspeed int16
@@ -18,20 +18,41 @@ namespace hexapod
         return out_min + (static_cast<float>(value - in_min) * (out_max - out_min)) / (in_max - in_min);
     }
 
-    void Gaits::set_xspeed( int16_t xspeed )
+    void Gaits::set_xspeed(int16_t xspeed)
     {
-        Xspeed = map(xspeed,INT16_MIN,INT16_MAX,-Xspeed_max,Xspeed_max);
+        if ( xspeed == 0 )
+        {
+            Xspeed = 0.0f;
+            return;
+        }
+
+        Xspeed = map(xspeed, INT16_MIN, INT16_MAX, -Xspeed_max, Xspeed_max);
     }
 
-    void Gaits::set_yspeed( int16_t yspeed )
+    void Gaits::set_yspeed(int16_t yspeed)
     {
-        Yspeed = map(yspeed,INT16_MIN,INT16_MAX,-Yspeed_max,Yspeed_max);
+        if ( yspeed == 0 )
+        {
+            Yspeed = 0.0f;
+            return;
+        }
+
+        Yspeed = map(yspeed, INT16_MIN, INT16_MAX, -Yspeed_max, Yspeed_max);
     }
 
-    void Gaits::set_rspeed( int16_t rspeed )
+    void Gaits::set_rspeed(int16_t rspeed)
     {
-        Rspeed = map(rspeed,INT16_MIN,INT16_MAX,-Rspeed_max,Rspeed_max);
+        if ( rspeed == 0 )
+        {
+            Rspeed = 0.0f;
+            return;
+        }
+
+        Rspeed = map(rspeed, INT16_MIN, INT16_MAX, -Rspeed_max, Rspeed_max); // Rspeed sigue siendo float
     }
+
+
+
 
 /*
     int Gaits::Ajuste_velocidad(uint8_t joystick)

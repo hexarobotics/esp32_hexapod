@@ -10,8 +10,10 @@ namespace transformations3D
   {
     public:
           // Constructor por defecto
-          Tmatrix() : t_x(0), t_y(0), t_z(0),
-                      alpha_x(0), theta_y(0), phi_z(0) {}
+          Tmatrix() : t_x(0.0f), t_y(0.0f), t_z(0.0f),
+                      alpha_x(0.0f), theta_y(0.0f), phi_z(0.0f)
+          {
+          }
 
           // Aplica la transformación al vector dado
           transformations3D::Vectors::vector3d apply(const transformations3D::Vectors::vector3d& vec) const;
@@ -37,9 +39,9 @@ namespace transformations3D
           double getPhi() const { return phi_z; }
 
           // Traslaciones
-          int16_t t_x; // mm
-          int16_t t_y;
-          int16_t t_z;
+          float t_x; // mm
+          float t_y;
+          float t_z;
 
           // Ángulos de rotación en radianes
           double alpha_x; // Rotación alrededor del eje X - body roll  (rad)

@@ -22,7 +22,7 @@ namespace hexapod
     }
 
     // Implementación de legIK 3DOF
-    Hexaik::ik_angles Hexaik::legIK( leg_id leg, int X, int Y, int Z )
+    Hexaik::ik_angles Hexaik::legIK( leg_id leg, double X, double Y, double Z )
     {
         ik_angles ans;
 
@@ -62,7 +62,7 @@ namespace hexapod
         // Ajustar los ángulos reales
         ans = real_angle(leg, ans);
 
-        //ESP_LOGI(TAG, "coxa: %d, femur: %d, tibia: %d\n", ans.coxa, ans.femur, ans.tibia);
+        ESP_LOGI(TAG, "coxa: %d, femur: %d, tibia: %d\n", ans.coxa, ans.femur, ans.tibia);
 
         return ans;
     }

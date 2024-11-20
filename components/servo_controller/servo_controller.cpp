@@ -4,28 +4,31 @@
 
 namespace Servo
 {
+    
+
+
     ServoController::ServoController() :
-        frameTimeMs_(DEFAULT_FRAME_TIME_MS),
-        frameTimeUs_(DEFAULT_FRAME_TIME_MS * 1000),
+        frame_length_ms_(DEFAULT_FRAME_TIME_MS),
+        frame_length_us_(DEFAULT_FRAME_TIME_MS * 1000),
         interpolating_(0),
-        lastFrame_(0),
+        lastFrame_(esp_timer_get_time()),
         poseSize_(POSE_SIZE),
-        pca1(0x40),     // Dirección I2C del primer controlador
-        pca2(0x41)      // Dirección I2C del segundo controlador
+        pca1(0x40,servo_cal_,poseSize_),     // Dirección I2C del primer controlador
+        pca2(0x41,servo_cal_,poseSize_)      // Dirección I2C del segundo controlador
     {
         // Inicialización de las poses
         for (uint8_t i = 0; i < POSE_SIZE; i++)
         {
-            id_[i] = i + 1;
-            pose_[i] = 0;      // Inicializa a 0
-            nextPose_[i] = 0;  // Inicializa a 0
+            //id_[i] = i + 1;
+            pose_[i] = initial_pose_[i];      // Inicializa a 90
+            nextPose_[i] = initial_pose_[i];  // Inicializa a 90
         }
     }
 
     void ServoController::setFrameTimeMs(uint16_t newFrameTimeMs)
     {
-        frameTimeMs_ = newFrameTimeMs;
-        frameTimeUs_ = newFrameTimeMs * 1000;
+        frame_length_ms_ = newFrameTimeMs;
+        frame_length_us_ = newFrameTimeMs * 1000;
     }
 
     void ServoController::writePosition()
@@ -45,18 +48,20 @@ namespace Servo
 
     void ServoController::interpolate_setup(uint16_t time)
     {
-        uint8_t frames = (time / frameTimeMs_) + 1;
+        uint16_t frames = (time / frame_length_ms_) + 1;
         lastFrame_ = esp_timer_get_time();
 
         for (uint8_t i = 0; i < poseSize_; i++)
         {
             if (nextPose_[i] > pose_[i])
             {
-                speed_[i] = (nextPose_[i] - pose_[i]) / frames + 1;
+                int32_t delta = static_cast<int32_t>(nextPose_[i]) - static_cast<int32_t>(pose_[i]);
+                speed_[i] = (delta / frames) + 1;
             }
             else
             {
-                speed_[i] = (pose_[i] - nextPose_[i]) / frames + 1;
+                int32_t delta = static_cast<int32_t>(pose_[i]) - static_cast<int32_t>(nextPose_[i]);
+                speed_[i] = (delta / frames) + 1;
             }
         }
 
@@ -70,7 +75,7 @@ namespace Servo
             return;
         }
 
-        if (frameTimeUs_ > esp_timer_get_time() - lastFrame_)
+        if (frame_length_us_ > esp_timer_get_time() - lastFrame_)
         {
             return;
         }
@@ -122,15 +127,7 @@ namespace Servo
         writePosition();
     }
 
-    void ServoController::save_nextpose(int id, int pos)
-    {
-        if (id >= 1 && id <= poseSize_)
-        {
-            nextPose_[id - 1] = pos;  // Accede al índice correspondiente (id - 1)
-        }
-    }
-
-        void ServoController::setup_servo_init_pose(const uint16_t* initialPose)
+    void ServoController::setup_servo_init_pose( const uint16_t* initialPose ) // BORRAR, se hace en el constructor
     {
         for (uint8_t i = 0; i < poseSize_; i++)
         {
@@ -141,6 +138,14 @@ namespace Servo
 
         interpolating_ = 0;
         lastFrame_ = esp_timer_get_time();
+    }
+
+    void ServoController::save_nextpose( uint8_t index, uint8_t pos )
+    {
+        if ( index < poseSize_ )
+        {
+            nextPose_[index] = pos;  // Accede al índice correspondiente (id - 1)
+        }
     }
 
     void ServoController::initializeServos(const uint16_t* servosStart, const uint16_t* group1Up, const uint16_t* group2Up)
@@ -180,7 +185,6 @@ namespace Servo
             Interpolate_step();
         }
     }
-
 
     bool ServoController::isInterpolating() const
     {

@@ -6,6 +6,6 @@ idf_component_register(
     INCLUDE_DIRS          "."# optional, add here public include directories
     #EMBED_FILES			 webpage/app.css webpage/app.js webpage/favicon.ico webpage/index.html webpage/jquery-3.3.1.min.js
     PRIV_INCLUDE_DIRS     # optional, add here private include directories
-    REQUIRES              wifi_app nvs_flash servo_controller  hexaik #transformations hexa servo_controller              # optional, list the public requirements (component names)
+    REQUIRES              wifi_app nvs_flash servo_controller  hexaik hexa_core#transformations hexa servo_controller              # optional, list the public requirements (component names)
     PRIV_REQUIRES         # optional, list the private requirements
 )
