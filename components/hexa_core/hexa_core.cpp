@@ -23,7 +23,7 @@ const transformations3D::Vectors::vector2d coxa_endpoints[6] =
 
 const transformations3D::Vectors::vector3d leg_endpoints[6] =
 {
-    {-155, 100, -100},     // PATA 1: LEFT_FRONT
+    {-115, 100, -100},     // PATA 1: LEFT_FRONT
     {-155, 0, -100},       // PATA 2: LEFT_MIDDLE
     {-115, -100,-100},     // PATA 3: LEFT_REAR
     {115, 100, -100},      // PATA 4: RIGHT_FRONT
@@ -58,6 +58,7 @@ void hexa_main_task(void *pvParameters)
 	hexapod::Gaits gait(RIPPLE_6);
 
 	Servo::ServoController servo_ctr; 
+    servo_ctr.writePosition();
 
 	uint16_t delay_ms = servo_ctr.get_frame_length_ms();
 
@@ -67,7 +68,7 @@ void hexa_main_task(void *pvParameters)
 	gait.set_xspeed(0);
 	gait.set_yspeed(30000);
 
-	vTaskDelay(pdMS_TO_TICKS(500));
+	vTaskDelay(pdMS_TO_TICKS(1000));
 
 
     while(1)
@@ -149,16 +150,19 @@ void hexa_main_task(void *pvParameters)
 
 	while(0) // TESTING 2 Poses with interpolation process
 	{
-        for( int8_t leg = RIGHT_REAR; leg < NUM_MAX_LEGS; leg++ )
+        for( int8_t leg = LEFT_FRONT; leg < NUM_MAX_LEGS; leg++ )
         {
             ESP_LOGI(HEXA_TASK_TAG," Writing pose 1" );
 
 
-            servo_ctr.save_nextpose(leg * 3, 	 95 );  // 1. Pose all 0
-            servo_ctr.save_nextpose(leg * 3 + 1, 50 );   // 2. Set next_pose_ values
-            servo_ctr.save_nextpose(leg * 3 + 2, 15 );
+            servo_ctr.save_nextpose(leg * 3, 	 90 ); // coxa  // 1. Pose all 0
+            servo_ctr.save_nextpose(leg * 3 + 1, 90 ); // femur  // 2. Set next_pose_ values
+            servo_ctr.save_nextpose(leg * 3 + 2, 45 ); // tibia
 
         }
+
+        //servo_ctr.save_nextpose(3 * 3 + 1, 	 0 ); // coxa  // 1. Pose all 0
+
 
         //servo_ctr.writePosition(); 
 
@@ -172,27 +176,27 @@ void hexa_main_task(void *pvParameters)
         vTaskDelay(pdMS_TO_TICKS(2000));
 
 
-        for( int8_t leg = RIGHT_REAR; leg < NUM_MAX_LEGS; leg++ )
-        {
-            ESP_LOGI(HEXA_TASK_TAG," Writing pose 2" );
-
-
-            servo_ctr.save_nextpose(leg * 3, 	 95 );
-            servo_ctr.save_nextpose(leg * 3 + 1, 90 );
-            servo_ctr.save_nextpose(leg * 3 + 2, 50 );
-
-        }
-
-        //servo_ctr.writePosition();
-
-        servo_ctr.interpolate_setup(1000);
-
-        while (servo_ctr.isInterpolating())
-        {
-            servo_ctr.Interpolate_step();
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        //for( int8_t leg = RIGHT_REAR; leg < NUM_MAX_LEGS; leg++ )
+        //{
+        //    ESP_LOGI(HEXA_TASK_TAG," Writing pose 2" );
+//
+//
+        //    servo_ctr.save_nextpose(leg * 3, 	 95 );
+        //    servo_ctr.save_nextpose(leg * 3 + 1, 90 );
+        //    servo_ctr.save_nextpose(leg * 3 + 2, 50 );
+//
+        //}
+//
+        ////servo_ctr.writePosition();
+//
+        //servo_ctr.interpolate_setup(1000);
+//
+        //while (servo_ctr.isInterpolating())
+        //{
+        //    servo_ctr.Interpolate_step();
+        //}
+//
+        //vTaskDelay(pdMS_TO_TICKS(2000));
 
 	}
 

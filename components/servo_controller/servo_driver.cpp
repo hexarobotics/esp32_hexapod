@@ -46,7 +46,7 @@
 #define MAX_ANGLE	        180.0
 #define SERVO_PWM_FREQ      50
 #define ROUND               0.5F
-
+#define NUM_MAX_CHANNELS    16
 #define UNKOWN              0
 
 namespace Servo
@@ -113,7 +113,7 @@ namespace Servo
 
     esp_err_t ServoDriver::set_angle(uint8_t ch, float Angle)
     {
-        float pwm_val;
+        float pwm_val = 0;
 
         if(Angle < MIN_ANGLE) Angle = MIN_ANGLE;
         if(Angle > MAX_ANGLE) Angle = MAX_ANGLE;
@@ -121,10 +121,15 @@ namespace Servo
         if ( servo_cal_ == nullptr ) // default -> no calibration
         {
             pwm_val = (Angle - MIN_ANGLE) * ((float)SERVO_MAX - (float)SERVO_MIN) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
+            ESP_LOGE(TAG, "NO ESTARAS ENTRANDO CABRON?");
+        }
+        else if ( ( ch < pose_size_ ) && ch < NUM_MAX_CHANNELS )
+        {
+            pwm_val = (Angle - MIN_ANGLE) * ((float)servo_cal_[ch].pwm_max - (float)servo_cal_[ch].pwm_min) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
         }
         else
         {
-            pwm_val = (Angle - MIN_ANGLE) * ((float)servo_cal_[ch].pwm_max - (float)servo_cal_[ch].pwm_min) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
+            ESP_LOGE(TAG, "Channel higher than pose size: check configuration");
         }
 
 

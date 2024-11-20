@@ -13,8 +13,8 @@ namespace Servo
         interpolating_(0),
         lastFrame_(esp_timer_get_time()),
         poseSize_(POSE_SIZE),
-        pca1(0x40,servo_cal_,poseSize_),     // Dirección I2C del primer controlador
-        pca2(0x41,servo_cal_,poseSize_)      // Dirección I2C del segundo controlador
+        pca1(0x40, pca1_servo_cal_,poseSize_ / 2 ),     // Dirección I2C del primer controlador
+        pca2(0x41, pca2_servo_cal_,poseSize_ / 2 )      // Dirección I2C del segundo controlador
     {
         // Inicialización de las poses
         for (uint8_t i = 0; i < POSE_SIZE; i++)

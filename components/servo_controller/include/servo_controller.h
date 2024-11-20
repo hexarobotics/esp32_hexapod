@@ -40,13 +40,15 @@ namespace Servo
             int16_t  speed_[POSE_SIZE];        // Velocidades de interpolación
             uint8_t  id_[POSE_SIZE];           // Identificadores de los servos  ****** BORRAR ******
             uint8_t  poseSize_;                // Número de servos a controlar
-            servo_cal_t servo_cal_[POSE_SIZE] = {
-                {102,540},{102,540},{102,540},
-                {102,540},{102,540},{102,540},
-                {102,540},{102,540},{102,540},
-                {102,540},{102,540},{102,540},
-                {102,540},{102,540},{102,540},
-                {102,540},{102,540},{102,540}
+            servo_cal_t pca1_servo_cal_[POSE_SIZE/2] = {
+                {100,540},{102,510},{100,540}, // LF: coxa, femur, tibia
+                {98,540},{102,540},{102,540}, // LM: coxa, femur, tibia
+                {98,540},{90,520},{102,540}, // LR: coxa, femur, tibia
+            };
+            servo_cal_t pca2_servo_cal_[POSE_SIZE/2] = {
+                {102,545},{90,540},{102,540}, // RF: coxa, femur, tibia
+                {102,540},{90,540},{102,540}, // RM: coxa, femur, tibia
+                {102,545},{90,540},{102,540}  // RR: coxa, femur, tibia
             };
             // Controladores de servos (estáticos, 2 en este caso)
             Servo::ServoDriver pca1;      // Primer controlador de servo (pca)
