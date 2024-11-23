@@ -72,12 +72,12 @@ namespace hexapod
 			case TRIPOD_6:
 			case TRIPOD_12:
 			case TRIPOD_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;  // RIGHT_FRONT
+					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
 					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
 					gaitleg_order[LEFT_REAR] 	= LEG_FIRST;   // LEFT_FRONT
-					gaitleg_order[RIGHT_FRONT] 	= LEG_SECOND;   // LEFT_REAR
-					gaitleg_order[RIGHT_MIDDLE] = LEG_FIRST;  // LEFT_MIDDLE
-					gaitleg_order[RIGHT_REAR] 	= LEG_SECOND;   // RIGHT_MIDDLE
+					gaitleg_order[RIGHT_FRONT] 	= LEG_SECOND;  // LEFT_REAR
+					gaitleg_order[RIGHT_MIDDLE] = LEG_FIRST;   // LEFT_MIDDLE
+					gaitleg_order[RIGHT_REAR] 	= LEG_SECOND;  // RIGHT_MIDDLE
 				break;
 			case WAVE_12:
 			case WAVE_24:
@@ -239,7 +239,7 @@ namespace hexapod
                 gaits[leg].t_x 	 = 0;
                 gaits[leg].t_y 	 = 0;
                 gaits[leg].t_z 	 = 0;
-                gaits[leg].phi_z = 0;
+                gaits[leg].rot_z = 0;
             }
         }
         else //  MOVING***
@@ -277,114 +277,114 @@ namespace hexapod
 			{
 				if( leg_step == 1 ) 	  // UP
 				{
-					gaits[leg].t_x = 0;
-					gaits[leg].t_y = 0;
+					gaits[leg].t_x = 0.0f;
+					gaits[leg].t_y = 0.0f;
 					gaits[leg].t_z = liftHeight;
-					gaits[leg].phi_z = 0;
+					gaits[leg].rot_z = 0.0f;
 				}
 				else if( leg_step == 2 ) 	// DOWN
 				{
 					gaits[leg].t_x = (Xspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
 					gaits[leg].t_y = (Yspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
-					gaits[leg].t_z = 0;
-					gaits[leg].phi_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
+					gaits[leg].t_z = 0.0f;
+					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
 				}
 				else 	  // MOVE BODY FORWARD
 				{
 					gaits[leg].t_x = gaits[leg].t_x - (Xspeed * cycleTime) / stepsInCycle;
 					gaits[leg].t_y = gaits[leg].t_y - (Yspeed * cycleTime) / stepsInCycle;
-					gaits[leg].t_z = 0;
-					gaits[leg].phi_z = gaits[leg].phi_z - (Rspeed*cycleTime) / stepsInCycle;
+					gaits[leg].t_z = 0.0f;
+					gaits[leg].rot_z = gaits[leg].rot_z - (Rspeed*cycleTime) / stepsInCycle;
 				}
 			}//6
-			else if ( ( current_gait == RIPPLE_12 ) || ( current_gait == WAVE_24 )|| ( current_gait == TRIPOD_12 ) )	//	### 5 ETAPAS ###
+			else if ( ( current_gait == RIPPLE_12 ) || ( current_gait == WAVE_24 ) || ( current_gait == TRIPOD_12 ) )	//	### 5 ETAPAS ###
 			{
 				if(leg_step == stepsInCycle)	// UP/2 :::: 12 (stepsInCycle)
 				{	
 					gaits[leg].t_x = gaits[leg].t_x / 2.0f;
 					gaits[leg].t_y = gaits[leg].t_y / 2.0f;
 					gaits[leg].t_z = liftHeight / 2.0f;
-					gaits[leg].phi_z = gaits[leg].phi_z / 2.0f;
+					gaits[leg].rot_z = gaits[leg].rot_z / 2.0f;
 				}
 				else if(leg_step == 1)		// UP
 				{
-					gaits[leg].t_x = 0;
-					gaits[leg].t_y = 0;
+					gaits[leg].t_x = 0.0f;
+					gaits[leg].t_y = 0.0f;
 					gaits[leg].t_z = liftHeight;
-					gaits[leg].phi_z = 0;
+					gaits[leg].rot_z = 0.0f;
 				}
 				else if(leg_step == 2)	// DOWN/2
 				{
 					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(4*stepsInCycle);
 					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(4*stepsInCycle);
 					gaits[leg].t_z = int(liftHeight/2.0f);
-					gaits[leg].phi_z = (Rspeed*cycleTime*pushSteps)/(4*stepsInCycle);
+					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(4*stepsInCycle);
 				}
 				else if(leg_step == 3)		// DOWN
 				{
 					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
 					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
-					gaits[leg].t_z = 0;
-					gaits[leg].phi_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
+					gaits[leg].t_z = 0.0f;
+					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
 				}
 				else	// MOVE BODY FORWARD
 				{
 					gaits[leg].t_x = gaits[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;
 					gaits[leg].t_y = gaits[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;
-					gaits[leg].t_z = 0;
-					gaits[leg].phi_z = gaits[leg].phi_z - (Rspeed*cycleTime)/stepsInCycle;
+					gaits[leg].t_z = 0.0f;
+					gaits[leg].rot_z = gaits[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;
 				}
 			}//12
 			else if ( ( current_gait == RIPPLE_24 ) || ( current_gait == TRIPOD_24 ) ) //	### 7 ETAPAS ###
 			{
 				if(leg_step == stepsInCycle-1)		// UP 1/3
 				{
-					gaits[leg].t_x = gaits[leg].t_x/3;
-					gaits[leg].t_y = gaits[leg].t_y/3;
-					gaits[leg].t_z = liftHeight/3;
-					gaits[leg].phi_z = gaits[leg].phi_z/3;
+					gaits[leg].t_x = gaits[leg].t_x/3.0f;
+					gaits[leg].t_y = gaits[leg].t_y/3.0f;
+					gaits[leg].t_z = liftHeight/3.0f;
+					gaits[leg].rot_z = gaits[leg].rot_z/3.0f;
 				}
 				else if(leg_step == stepsInCycle)	// UP 2/3
 				{
-					gaits[leg].t_x = gaits[leg].t_x*2.0f/3;
-					gaits[leg].t_y = gaits[leg].t_y*2.0f/3;
-					gaits[leg].t_z = liftHeight*2.0f/3;
-					gaits[leg].phi_z = gaits[leg].phi_z*2.0f/3;
+					gaits[leg].t_x = gaits[leg].t_x*2.0f/3.0f;
+					gaits[leg].t_y = gaits[leg].t_y*2.0f/3.0f;
+					gaits[leg].t_z = liftHeight*2.0f/3.0f;
+					gaits[leg].rot_z = gaits[leg].rot_z*2.0f/3.0f;
 				}
 				else if(leg_step == 1)	// UP
 				{
-					gaits[leg].t_x = 0;
-					gaits[leg].t_y = 0;
+					gaits[leg].t_x = 0.0f;
+					gaits[leg].t_y = 0.0f;
 					gaits[leg].t_z = liftHeight;
-					gaits[leg].phi_z = 0;
+					gaits[leg].rot_z = 0.0f;
 				}
 				else if(leg_step == 2)	// DOWN 1/3
 				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(3*stepsInCycle);
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(3*stepsInCycle);
+					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
+					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
 					gaits[leg].t_z = liftHeight*2.0f/3;
-					gaits[leg].phi_z = (Rspeed*cycleTime*pushSteps)/(3*stepsInCycle);
+					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
 				}
 				else if(leg_step == 3)	// DOWN 2/3
 				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)*2.0f/(3*stepsInCycle);
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)*2.0f/(3*stepsInCycle);
+					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
+					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
 					gaits[leg].t_z = liftHeight/3;
-					gaits[leg].phi_z = (Rspeed*cycleTime*pushSteps)*2.0f/(3*stepsInCycle);
+					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
 				}
 				else if(leg_step == 4)	// DOWN
 				{
 					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Xspeed*trantime*pushsteps/2
 					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Yspeed*trantime*pushsteps/2
 					gaits[leg].t_z = 0;
-					gaits[leg].phi_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Rspeed*trantime*pushsteps/2
+					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Rspeed*trantime*pushsteps/2
 				}
 				else	// MOVE BODY FORWARD
 				{
 					gaits[leg].t_x = gaits[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;// same as Xspeed*trantime
 					gaits[leg].t_y = gaits[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;// same as Yspeed*trantime
-					gaits[leg].t_z = 0;
-					gaits[leg].phi_z = gaits[leg].phi_z - (Rspeed*cycleTime)/stepsInCycle;// same as Rspeed*trantime
+					gaits[leg].t_z = 0.0f;
+					gaits[leg].rot_z = gaits[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;// same as Rspeed*trantime
 				}
 			}//24
 		} // moving

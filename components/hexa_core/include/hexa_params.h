@@ -43,19 +43,23 @@
 #define LM_FEMUR 17
 #define LM_TIBIA 18
 
-enum leg_id
+
+namespace hexapod
 {
-    LEFT_FRONT = 0,
-    LEFT_MIDDLE, 
-    LEFT_REAR,
-    RIGHT_FRONT, 
-    RIGHT_MIDDLE,
-    RIGHT_REAR,
-    NUM_MAX_LEGS  
-};
+  enum leg_id
+  {
+      LEFT_FRONT = 0,
+      LEFT_MIDDLE, 
+      LEFT_REAR,
+      RIGHT_FRONT, 
+      RIGHT_MIDDLE,
+      RIGHT_REAR,
+      NUM_MAX_LEGS  
+  };
 
 
-static const transformations3D::Vectors::vector2d coxa_pos[NUM_MAX_LEGS];
+  static const transformations3D::Vectors::vector2d coxa_pos[NUM_MAX_LEGS];
 
+}
 
 #endif // __HEXA_PARAMS_H__

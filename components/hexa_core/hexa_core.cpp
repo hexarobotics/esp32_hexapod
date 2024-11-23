@@ -7,6 +7,8 @@
 #include <esp_log.h>
 #include "esp_timer.h"
 
+namespace hexapod
+{
 
 // NEWW
 
@@ -69,7 +71,7 @@ void hexa_main_task(void *pvParameters)
 {
 	ESP_LOGI(HEXA_TASK_TAG, "hexa_main_task initialization");
 
-	hexapod::Gaits gait(TRIPOD_6);
+	hexapod::Gaits gait(TRIPOD_24);
 
 	Servo::ServoController servo_ctr;
     servo_ctr.writePositions();
@@ -80,7 +82,8 @@ void hexa_main_task(void *pvParameters)
 
 
 	gait.set_xspeed(0);
-	gait.set_yspeed(30000);
+	gait.set_yspeed(0);
+	gait.set_rspeed(30000);
 
 	vTaskDelay(pdMS_TO_TICKS(1000));
 
@@ -112,7 +115,7 @@ void hexa_main_task(void *pvParameters)
 				//ESP_LOGI(HEXA_TASK_TAG,"T gait x: %f", tgait.t_x);
 				//ESP_LOGI(HEXA_TASK_TAG,"T gait y: %f", tgait.t_y);
 				//ESP_LOGI(HEXA_TASK_TAG,"T gait z: %f", tgait.t_z);
-				//ESP_LOGI(HEXA_TASK_TAG,"T gait r: %f", tgait.phi_z);
+				//ESP_LOGI(HEXA_TASK_TAG,"T gait r: %f", tgait.rot_z);
 
 				// 2. Total Vect
                 transformations3D::Vectors::vector3d leg_vect = calculate_total_vector( leg );
@@ -120,7 +123,7 @@ void hexa_main_task(void *pvParameters)
 				//ESP_LOGI(HEXA_TASK_TAG,"endpoint x: %f", leg_endpoints[leg].x);
 				//ESP_LOGI(HEXA_TASK_TAG,"endpoint y: %f", leg_endpoints[leg].y);
 				//ESP_LOGI(HEXA_TASK_TAG,"endpoint z: %f", leg_endpoints[leg].z);
-				//ESP_LOGI(HEXA_TASK_TAG,"endpoint r: %f", tgait.phi_z);
+				//ESP_LOGI(HEXA_TASK_TAG,"endpoint r: %f", tgait.rot_z);
 				//ESP_LOGI(HEXA_TASK_TAG,"coxa x: %f", coxa_endpoints[leg].x);
 				//ESP_LOGI(HEXA_TASK_TAG,"coxa y: %f", coxa_endpoints[leg].y);
 
@@ -219,6 +222,10 @@ void hexa_main_task(void *pvParameters)
         //vTaskDelay(pdMS_TO_TICKS(2000));
 
 	}
+
+
+}
+
 
 
 }
