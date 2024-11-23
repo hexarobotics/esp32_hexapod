@@ -62,7 +62,7 @@ namespace hexapod
         // Ajustar los ángulos reales
         ans = real_angle(leg, ans);
 
-        ESP_LOGI(TAG, "coxa: %d, femur: %d, tibia: %d\n", ans.coxa, ans.femur, ans.tibia);
+        //ESP_LOGI(TAG, "coxa: %d, femur: %d, tibia: %d\n", ans.coxa, ans.femur, ans.tibia);
 
         return ans;
     }

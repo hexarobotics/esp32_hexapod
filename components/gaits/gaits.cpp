@@ -263,14 +263,14 @@ namespace hexapod
 			if (leg_step<0)	leg_step=stepsInCycle + leg_step;
 			if (leg_step==0) leg_step=stepsInCycle;
 
-			ESP_LOGI(TAG_GAIT, "gait_step: %d", gait_step);
-			ESP_LOGI(TAG_GAIT, "leg_step: %d", leg_step);
+			//ESP_LOGI(TAG_GAIT, "gait_step: %d", gait_step);
+			//ESP_LOGI(TAG_GAIT, "leg_step: %d", leg_step);
 
-			ESP_LOGI(TAG_GAIT, "Xspeed: %f", Xspeed);
-			ESP_LOGI(TAG_GAIT, "Yspeed: %f", Yspeed);
-			ESP_LOGI(TAG_GAIT, "cycleTime: %f", cycleTime);
-			ESP_LOGI(TAG_GAIT, "pushSteps: %f", pushSteps);
-			ESP_LOGI(TAG_GAIT, "stepsInCycle: %f", stepsInCycle);
+			//ESP_LOGI(TAG_GAIT, "Xspeed: %f", Xspeed);
+			//ESP_LOGI(TAG_GAIT, "Yspeed: %f", Yspeed);
+			//ESP_LOGI(TAG_GAIT, "cycleTime: %f", cycleTime);
+			//ESP_LOGI(TAG_GAIT, "pushSteps: %f", pushSteps);
+			//ESP_LOGI(TAG_GAIT, "stepsInCycle: %f", stepsInCycle);
 
 
 			if ( ( current_gait == RIPPLE_6) || ( current_gait == TRIPOD_6 ) || ( current_gait == WAVE_12 ) ) 	// ### 3 ETAPAS ###

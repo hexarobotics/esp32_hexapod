@@ -6,6 +6,9 @@
 #include <esp_log.h>
 #include <stdint.h>
 
+//#include "esp_system.h"
+//#include "esp_private/esp_clk.h"
+//#include "esp_cpu.h"
 #include "nvs_flash.h"
 
 #include "hexa_params.h"
@@ -77,6 +80,9 @@ void pca9685_test_task(void *pvParameters)
 
 extern "C"  void app_main()
 {
+    //ESP_LOGI(HEXA_TASK_TAG, "CPU Frequency: %d MHz", esp_clk_cpu_freq());
+    //ESP_LOGI("CPU_INFO", "Máxima frecuencia soportada: %d MHz", rtc_clk_cpu_freq_get_max() / 1000000);
+
     xTaskCreatePinnedToCore(pca9685_test_task, TAG, configMINIMAL_STACK_SIZE * 3, NULL, 5, NULL, APP_CPU_NUM);
 
     if (xTaskCreatePinnedToCore(

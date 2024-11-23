@@ -4,7 +4,6 @@
 
 # Archivos y carpetas generados por ESP-IDF
 /build/
-/sdkconfig
 /sdkconfig.old
 
 # Archivos de logs

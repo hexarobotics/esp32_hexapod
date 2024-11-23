@@ -31,7 +31,7 @@ namespace Servo
         frame_length_us_ = newFrameTimeMs * 1000;
     }
 
-    void ServoController::writePosition()
+    void ServoController::writePositions()
     {
         for (uint8_t i = 0; i < poseSize_; i++)
         {
@@ -124,7 +124,7 @@ namespace Servo
             interpolating_ = 0;
         }
 
-        writePosition();
+        writePositions();
     }
 
     void ServoController::setup_servo_init_pose( const uint16_t* initialPose ) // BORRAR, se hace en el constructor
@@ -150,7 +150,7 @@ namespace Servo
 
     void ServoController::initializeServos(const uint16_t* servosStart, const uint16_t* group1Up, const uint16_t* group2Up)
     {
-        writePosition();
+        writePositions();
         vTaskDelay(pdMS_TO_TICKS(1000));
 
         for (int i = 1; i < poseSize_ + 1; i++) save_nextpose(i, servosStart[i - 1]);
