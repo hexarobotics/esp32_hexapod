@@ -47,8 +47,8 @@ namespace hexapod
             float Rspeed_max; // radians
 
             // Steps in gait
-            float stepsInCycle;
-            float pushSteps;
+            uint16_t stepsInCycle;
+            uint16_t pushSteps;
             uint8_t desfase;
 
             uint16_t tranTime;     // Time between steps in ms

@@ -100,57 +100,57 @@ namespace hexapod
 		switch (type)
 		{
 			case RIPPLE_6: 
-				pushSteps = 4.0f;
-				stepsInCycle = 6.0f;
+				pushSteps = 4;
+				stepsInCycle = 6;
 				desfase = 1;
 				tranTime = 140;
 				break;
 
 			case RIPPLE_12:
-				pushSteps = 8.0f;
-				stepsInCycle = 12.0f;
+				pushSteps = 8;
+				stepsInCycle = 12;
 				desfase = 2;
 				tranTime = 120;
 				break;
 
 			case RIPPLE_24:
-				pushSteps = 12.0f;
-				stepsInCycle = 18.0f;
+				pushSteps = 12;
+				stepsInCycle = 18;
 				desfase = 3;
 				tranTime = 120;
 				break;
 
 			case TRIPOD_6:
-				pushSteps = 2.0f;
-				stepsInCycle = 4.0f;
+				pushSteps = 2;
+				stepsInCycle = 4;
 				desfase = 2;
 				tranTime = 140;
 				break;
 
 			case TRIPOD_12:
-				pushSteps = 4.0f;
-				stepsInCycle = 8.0f;
+				pushSteps = 4;
+				stepsInCycle = 8;
 				desfase = 4;
 				tranTime = 120;
 				break;
 
 			case TRIPOD_24:
-				pushSteps = 6.0f;
-				stepsInCycle = 12.0f;
+				pushSteps = 6;
+				stepsInCycle = 12;
 				desfase = 6;
 				tranTime = 120;
 				break;
 
 			case WAVE_12:
-				pushSteps = 10.0f;
-				stepsInCycle = 12.0f;
+				pushSteps = 10;
+				stepsInCycle = 12;
 				desfase = 2;
 				tranTime = 80;
 				break;
 
 			case WAVE_24:
-				pushSteps = 20.0f;
-				stepsInCycle = 24.0f;
+				pushSteps = 20;
+				stepsInCycle = 24;
 				desfase = 4;
 				tranTime = 80;
 				break;
@@ -175,7 +175,7 @@ namespace hexapod
 
 		//ESP_LOGI(TAG_GAIT,"tranTime: %d", tranTime);
 		//ESP_LOGI(TAG_GAIT,"pushSteps: %d", pushSteps);
-//
+
 		//ESP_LOGI(TAG_GAIT,"Xspeed max: %f", Xspeed_max);
 		//ESP_LOGI(TAG_GAIT,"Yspeed_max max: %f", Yspeed_max);
 		//ESP_LOGI(TAG_GAIT,"Rspeed_max max: %f", Rspeed_max);
