@@ -71,39 +71,82 @@ namespace hexapod
 	// Nuevo método para configurar el orden de las patas según el gait
 	void Gaits::setLegOrderByGait(GaitType GaitType)
 	{
+		if (robot_type_ == HEXAPOD)
+		{
+			setHexapodLegOrder(GaitType);
+		}
+		else if (robot_type_ == QUADRUPED)
+		{
+			setQuadrupedLegOrder(GaitType);
+		}
+		else
+		{
+			ESP_LOGE(TAG_GAIT, "Unsupported RobotType: %d", robot_type_);
+		}
+	}
+
+	void Gaits::setHexapodLegOrder(GaitType GaitType)
+	{
 		switch (GaitType)
 		{
 			case RIPPLE_6:
 			case RIPPLE_12:
 			case RIPPLE_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;
-					gaitleg_order[LEFT_MIDDLE]  = LEG_FIFTH;
-					gaitleg_order[LEFT_REAR] 	= LEG_THIRD;
-					gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;
-					gaitleg_order[RIGHT_MIDDLE] = LEG_SECOND;
-					gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;
+				gaitleg_order[LEFT_FRONT]  = LEG_FIRST;
+				gaitleg_order[LEFT_MIDDLE] = LEG_FIFTH;
+				gaitleg_order[LEFT_REAR]   = LEG_THIRD;
+				gaitleg_order[RIGHT_FRONT] = LEG_FOURTH;
+				gaitleg_order[RIGHT_MIDDLE]= LEG_SECOND;
+				gaitleg_order[RIGHT_REAR]  = LEG_SIXTH;
 				break;
+
 			case TRIPOD_6:
 			case TRIPOD_12:
 			case TRIPOD_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
-					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
-					gaitleg_order[LEFT_REAR] 	= LEG_FIRST;   // LEFT_FRONT
-					gaitleg_order[RIGHT_FRONT] 	= LEG_SECOND;  // LEFT_REAR
-					gaitleg_order[RIGHT_MIDDLE] = LEG_FIRST;   // LEFT_MIDDLE
-					gaitleg_order[RIGHT_REAR] 	= LEG_SECOND;  // RIGHT_MIDDLE
+				gaitleg_order[LEFT_FRONT]  = LEG_FIRST;   // RIGHT_FRONT
+				gaitleg_order[LEFT_MIDDLE] = LEG_SECOND;  // RIGHT_REAR
+				gaitleg_order[LEFT_REAR]   = LEG_FIRST;   // LEFT_FRONT
+				gaitleg_order[RIGHT_FRONT] = LEG_SECOND;  // LEFT_REAR
+				gaitleg_order[RIGHT_MIDDLE]= LEG_FIRST;   // LEFT_MIDDLE
+				gaitleg_order[RIGHT_REAR]  = LEG_SECOND;  // RIGHT_MIDDLE
 				break;
+
 			case WAVE_12:
 			case WAVE_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
-					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
-					gaitleg_order[LEFT_REAR] 	= LEG_THIRD;   // LEFT_FRONT
-					gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;  // LEFT_REAR
-					gaitleg_order[RIGHT_MIDDLE] = LEG_FIFTH;   // RIGHT_MIDDLE
-					gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;   // LEFT_MIDDLE
+				gaitleg_order[LEFT_FRONT]  = LEG_FIRST;   // RIGHT_FRONT
+				gaitleg_order[LEFT_MIDDLE] = LEG_SECOND;  // RIGHT_REAR
+				gaitleg_order[LEFT_REAR]   = LEG_THIRD;   // LEFT_FRONT
+				gaitleg_order[RIGHT_FRONT] = LEG_FOURTH;  // LEFT_REAR
+				gaitleg_order[RIGHT_MIDDLE]= LEG_FIFTH;   // RIGHT_MIDDLE
+				gaitleg_order[RIGHT_REAR]  = LEG_SIXTH;   // LEFT_MIDDLE
 				break;
+
 			default:
-				// Podríamos agregar un manejo de error aquí si fuera necesario
+				ESP_LOGW(TAG_GAIT, "Unsupported GaitType for Hexapod: %d", GaitType);
+				break;
+		}
+	}
+
+	void Gaits::setQuadrupedLegOrder(GaitType GaitType)
+	{
+		switch (GaitType)
+		{
+			//case WALK:
+			//	gaitleg_order[LEFT_FRONT]  = LEG_FIRST;
+			//	gaitleg_order[LEFT_REAR]   = LEG_THIRD;
+			//	gaitleg_order[RIGHT_FRONT] = LEG_SECOND;
+			//	gaitleg_order[RIGHT_REAR]  = LEG_FOURTH;
+			//	break;
+//
+			//case TROT:
+			//	gaitleg_order[LEFT_FRONT]  = LEG_FIRST;
+			//	gaitleg_order[LEFT_REAR]   = LEG_FIRST;
+			//	gaitleg_order[RIGHT_FRONT] = LEG_SECOND;
+			//	gaitleg_order[RIGHT_REAR]  = LEG_SECOND;
+			//	break;
+
+			default:
+				ESP_LOGW(TAG_GAIT, "Unsupported GaitType for Quadruped: %d", GaitType);
 				break;
 		}
 	}

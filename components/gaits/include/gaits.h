@@ -85,6 +85,10 @@ namespace hexapod
         void handle_step_5_stages(uint8_t leg, int8_t leg_step);
         void handle_step_7_stages(uint8_t leg, int8_t leg_step);
 
+        // Specialized methods for hexapod and quadruped leg orders
+        void setHexapodLegOrder(GaitType GaitType);
+        void setQuadrupedLegOrder(GaitType GaitType);
+
         float map(int16_t value, int16_t in_min, int16_t in_max, float out_min, float out_max);
     };
 }
