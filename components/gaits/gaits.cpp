@@ -45,28 +45,68 @@ namespace hexapod
         update_velocities();
     }
 
-    void Gaits::setLegOrderByGait(GaitType GaitType)
-    {
-        static const uint8_t hexapod_orders[][6] = {
-            {LEG_FIRST, LEG_FIFTH, LEG_THIRD, LEG_FOURTH, LEG_SECOND, LEG_SIXTH},  // RIPPLE
-            {LEG_FIRST, LEG_SECOND, LEG_FIRST, LEG_SECOND, LEG_FIRST, LEG_SECOND}, // TRIPOD
-            {LEG_FIRST, LEG_SECOND, LEG_THIRD, LEG_FOURTH, LEG_FIFTH, LEG_SIXTH}   // WAVE
-        };
+    //void Gaits::setLegOrderByGait(GaitType GaitType)
+    //{
+    //    static const uint8_t hexapod_orders[][6] = {
+    //        {LEG_FIRST, LEG_FIFTH, LEG_THIRD, LEG_FOURTH, LEG_SECOND, LEG_SIXTH},  // RIPPLE
+    //        {LEG_FIRST, LEG_SECOND, LEG_FIRST, LEG_SECOND, LEG_FIRST, LEG_SECOND}, // TRIPOD
+    //        {LEG_FIRST, LEG_SECOND, LEG_THIRD, LEG_FOURTH, LEG_FIFTH, LEG_SIXTH}   // WAVE
+    //    };
+//
+    //    static const uint8_t quadruped_orders[][4] = {
+    //        {LEG_FIRST, LEG_SECOND, LEG_THIRD, LEG_FOURTH},  // WALK
+    //        {LEG_FIRST, LEG_FIRST, LEG_SECOND, LEG_SECOND}   // TROT
+    //    };
+//
+    //    const uint8_t *order = (robot_type_ == HEXAPOD) 
+    //        ? hexapod_orders[GaitType]
+    //        : quadruped_orders[GaitType];
+//
+    //    for (uint8_t i = 0; i < num_legs_; ++i)
+    //    {
+    //        gaitleg_order[i] = order[i];
+    //    }
+    //}
 
-        static const uint8_t quadruped_orders[][4] = {
-            {LEG_FIRST, LEG_SECOND, LEG_THIRD, LEG_FOURTH},  // WALK
-            {LEG_FIRST, LEG_FIRST, LEG_SECOND, LEG_SECOND}   // TROT
-        };
-
-        const uint8_t *order = (robot_type_ == HEXAPOD) 
-            ? hexapod_orders[GaitType]
-            : quadruped_orders[GaitType];
-
-        for (uint8_t i = 0; i < num_legs_; ++i)
-        {
-            gaitleg_order[i] = order[i];
-        }
-    }
+	// Nuevo método para configurar el orden de las patas según el gait
+	void Gaits::setLegOrderByGait(GaitType GaitType)
+	{
+		switch (GaitType)
+		{
+			case RIPPLE_6:
+			case RIPPLE_12:
+			case RIPPLE_24:
+					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;
+					gaitleg_order[LEFT_MIDDLE]  = LEG_FIFTH;
+					gaitleg_order[LEFT_REAR] 	= LEG_THIRD;
+					gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;
+					gaitleg_order[RIGHT_MIDDLE] = LEG_SECOND;
+					gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;
+				break;
+			case TRIPOD_6:
+			case TRIPOD_12:
+			case TRIPOD_24:
+					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
+					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
+					gaitleg_order[LEFT_REAR] 	= LEG_FIRST;   // LEFT_FRONT
+					gaitleg_order[RIGHT_FRONT] 	= LEG_SECOND;  // LEFT_REAR
+					gaitleg_order[RIGHT_MIDDLE] = LEG_FIRST;   // LEFT_MIDDLE
+					gaitleg_order[RIGHT_REAR] 	= LEG_SECOND;  // RIGHT_MIDDLE
+				break;
+			case WAVE_12:
+			case WAVE_24:
+					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
+					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
+					gaitleg_order[LEFT_REAR] 	= LEG_THIRD;   // LEFT_FRONT
+					gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;  // LEFT_REAR
+					gaitleg_order[RIGHT_MIDDLE] = LEG_FIFTH;   // RIGHT_MIDDLE
+					gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;   // LEFT_MIDDLE
+				break;
+			default:
+				// Podríamos agregar un manejo de error aquí si fuera necesario
+				break;
+		}
+	}
 
     void Gaits::update_gait_params(GaitType type)
 	{
