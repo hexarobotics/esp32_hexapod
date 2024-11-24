@@ -173,9 +173,9 @@ namespace hexapod
         if (leg_step < 0) leg_step += stepsInCycle;
         if (leg_step == 0) leg_step = stepsInCycle;
 
-        float x_move = (Xspeed * cycleTime * pushSteps) / stepsInCycle;
-        float y_move = (Yspeed * cycleTime * pushSteps) / stepsInCycle;
-        float r_move = (Rspeed * cycleTime * pushSteps) / stepsInCycle;
+        float x_move = (Xspeed * cycleTime * pushSteps) / static_cast<float>(stepsInCycle);
+        float y_move = (Yspeed * cycleTime * pushSteps) / static_cast<float>(stepsInCycle);
+        float r_move = (Rspeed * cycleTime * pushSteps) / static_cast<float>(stepsInCycle);
 
         handle_step_phase(leg, leg_step, x_move, y_move, r_move);
 
@@ -324,5 +324,5 @@ namespace hexapod
             gait_step = 1;
         }
     }
-	
+
 }
