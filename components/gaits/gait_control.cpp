@@ -51,7 +51,12 @@ namespace hexapod
         Rspeed = map(rspeed, INT16_MIN, INT16_MAX, -Rspeed_max, Rspeed_max); // Rspeed sigue siendo float
     }
 
-
+	bool Gaits::isMoving() // refactorizar, lo veo obsoleto, hay otras maneras mejores de hacerlo
+	{
+		return  ( Xspeed > 1.50f || Xspeed < -1.50f ) || 
+				( Yspeed > 1.50f || Yspeed < -1.50f ) || 
+				( Rspeed > 0.05f || Rspeed < -0.05f );
+	}
 
 
 /*
