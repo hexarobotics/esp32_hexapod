@@ -16,16 +16,17 @@ namespace Servo
 
             ServoController();
             // Métodos públicos
-            void    setFrameTimeMs     (uint16_t newFrameTimeMs);
-            void    setup_servo_init_pose         (const uint16_t* initialPose);
-            void    writePositions      ();
-            void    interpolate_setup   (uint16_t time);
-            void    Interpolate_step    ();
-            bool    isInterpolating() const;
-            void    save_nextpose       (uint8_t id, uint8_t pos);
-            void    initializeServos   (const uint16_t* servosStart, const uint16_t* group1Up, const uint16_t* group2Up);
+            void    setFrameTimeMs              (uint16_t newFrameTimeMs);
+            void    setup_servo_init_pose       (const uint16_t* initialPose);
+            void    writePositions              (void);
+            void    interpolate_setup           (uint16_t time);
+            void    Interpolate_step            (void);
+            bool    isInterpolating             (void) const;
+            void    save_nextpose               (uint8_t id, uint8_t pos);
+            void    back_to_init_position       (void);
+            void    initializeServos            (const uint16_t* servosStart, const uint16_t* group1Up, const uint16_t* group2Up);
             // Getter para frame_length_us_
-            uint16_t get_frame_length_ms() const { return frame_length_ms_; }
+            uint16_t get_frame_length_ms        (void) const { return frame_length_ms_; }
         private:
             // Variables de estado
             int32_t frame_length_ms_;

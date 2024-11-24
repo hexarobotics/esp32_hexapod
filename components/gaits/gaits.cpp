@@ -6,27 +6,30 @@
 namespace hexapod
 {
 	// Constructor Gaits
-	Gaits::Gaits(GaitType gait) : 
+	Gaits::Gaits(GaitType gait, uint16_t num_legs) : 
 		Xspeed(0.0), Yspeed(0.0), Rspeed(0.0), liftHeight(45),
-		stepsInCycle(0), pushSteps(0), desfase(0),
+		num_legs_(num_legs), stepsInCycle(0), pushSteps(0), desfase(0),
 		tranTime(0), cycleTime(0.0),
-		gaitleg_order{0}, parado(true), gait_step(1), leg_step(0),
+		gaitleg_order{0}, parado(true), moving(false),
+		gait_step(1), leg_step(0),
 		modo_control(0), current_gait(NUM_MAX_GAITS)
 	{
 		// Inicializamos el orden de las patas
 		gait_select(gait);
 
-		for (int i = 0; i < 6; ++i)
-        {
-            gaits[i].setTranslationX(0);
-            gaits[i].setTranslationY(0);
-            gaits[i].setTranslationZ(0);
-            gaits[i].setAlpha(0.0);
-            gaits[i].setTheta(0.0);
-            gaits[i].setPhi(0.0);
-        }
+		init_tgaits();
 
 		ESP_LOGI(TAG_GAIT,"Gait object created");
+	}
+
+	void Gaits::init_tgaits(void)
+	{
+		for ( int leg = 0; leg < num_legs_-1 ; leg++ ) 
+		{
+			tgait[leg].reset();
+		}
+
+		gait_step = 1;
 	}
 
 	// Método principal para seleccionar el gait
@@ -186,11 +189,14 @@ namespace hexapod
 		tranTime = 140;
 	}
 
-	bool Gaits::isMoving() const // refactorizar, lo veo obsoleto, hay otras maneras mejores de hacerlo
+	bool Gaits::isMoving() // refactorizar, lo veo obsoleto, hay otras maneras mejores de hacerlo
 	{
 		//ESP_LOGI(TAG_GAIT,"Xspeed: %f", Xspeed);
+		moving = ( Xspeed > 1.50f || Xspeed < -1.50f ) || 
+				 ( Yspeed > 1.50f || Yspeed < -1.50f ) || 
+				 ( Rspeed > 0.05f || Rspeed < -0.05f );
 
-		return (Xspeed > 1.50f || Xspeed < -1.50f ) || (Yspeed > 1.50f || Yspeed < -1.50f ) || (Rspeed > 0.05f || Rspeed < -0.05f );
+		return moving;
 	}
 
 	uint16_t Gaits::get_gait_transition_time(void)
@@ -207,189 +213,141 @@ namespace hexapod
 	//	########################################			GAIT GENERATOR CODE			##############################################
 	//		*************************************************************************************************************
 
-	static uint16_t cont = 0;
-
-	void Gaits::log_info(const char* msg)
-	{
-		cont++;
-
-		if (cont == 50)
-		{
-			ESP_LOGI(TAG_GAIT,"%s", msg);
-
-			cont = 0;
-		}
-	}
-
 	transformations3D::Tmatrix Gaits::step( uint8_t leg )
 	{
-		//log_info("entro en step");
+		//gait_step = (gait_step+1)%stepsInCycle;
+		// cambiar (stepsInCycle-pushSteps) por DESFASE: 1, 2, 3, 4, o 6 seg�n: (6, 12, 24 steps), wave 24 steps o tripod 24 steps
+		leg_step = gait_step - (gaitleg_order[leg]-1) * (desfase);
+		
+		if (leg_step<0)	leg_step=stepsInCycle + leg_step;
+		if (leg_step==0) leg_step=stepsInCycle;
+
+		//ESP_LOGI(TAG_GAIT, "gait_step: %d", gait_step);
+		//ESP_LOGI(TAG_GAIT, "leg_step: %d", leg_step);
+
+		//ESP_LOGI(TAG_GAIT, "Xspeed: %f", Xspeed);
+		//ESP_LOGI(TAG_GAIT, "Yspeed: %f", Yspeed);
+		//ESP_LOGI(TAG_GAIT, "cycleTime: %f", cycleTime);
+		//ESP_LOGI(TAG_GAIT, "pushSteps: %f", pushSteps);
+		//ESP_LOGI(TAG_GAIT, "stepsInCycle: %f", stepsInCycle);
 
 
-        if( !isMoving() )//|| modo_control == 0 )      // NOT MOVING***
-        {
-			log_info("if not moving");
-
-            if( parado == false )
-            {
-				log_info("parado - false");
-
-                parado = true;
-
-                gaits[leg].t_x 	 = 0;
-                gaits[leg].t_y 	 = 0;
-                gaits[leg].t_z 	 = 0;
-                gaits[leg].rot_z = 0;
-            }
-        }
-        else //  MOVING***
-        {
-			//log_info("else - moving");
-
-            if(parado==true)
-            {
-				ESP_LOGI(TAG_GAIT, "Parado == true");
-
-                parado = false;
-                gait_step = 1;
-            }
-
-			//ESP_LOGI(TAG_GAIT, "HEXA executing gait step");
-
-			//gait_step = (gait_step+1)%stepsInCycle;
-			// cambiar (stepsInCycle-pushSteps) por DESFASE: 1, 2, 3, 4, o 6 seg�n: (6, 12, 24 steps), wave 24 steps o tripod 24 steps
-			leg_step = gait_step - (gaitleg_order[leg]-1) * (desfase);
-			
-			if (leg_step<0)	leg_step=stepsInCycle + leg_step;
-			if (leg_step==0) leg_step=stepsInCycle;
-
-			//ESP_LOGI(TAG_GAIT, "gait_step: %d", gait_step);
-			//ESP_LOGI(TAG_GAIT, "leg_step: %d", leg_step);
-
-			//ESP_LOGI(TAG_GAIT, "Xspeed: %f", Xspeed);
-			//ESP_LOGI(TAG_GAIT, "Yspeed: %f", Yspeed);
-			//ESP_LOGI(TAG_GAIT, "cycleTime: %f", cycleTime);
-			//ESP_LOGI(TAG_GAIT, "pushSteps: %f", pushSteps);
-			//ESP_LOGI(TAG_GAIT, "stepsInCycle: %f", stepsInCycle);
-
-
-			if ( ( current_gait == RIPPLE_6) || ( current_gait == TRIPOD_6 ) || ( current_gait == WAVE_12 ) ) 	// ### 3 ETAPAS ###
+		if ( ( current_gait == RIPPLE_6) || ( current_gait == TRIPOD_6 ) || ( current_gait == WAVE_12 ) ) 	// ### 3 ETAPAS ###
+		{
+			if( leg_step == 1 ) 	  // UP
 			{
-				if( leg_step == 1 ) 	  // UP
-				{
-					gaits[leg].t_x = 0.0f;
-					gaits[leg].t_y = 0.0f;
-					gaits[leg].t_z = liftHeight;
-					gaits[leg].rot_z = 0.0f;
-				}
-				else if( leg_step == 2 ) 	// DOWN
-				{
-					gaits[leg].t_x = (Xspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
-					gaits[leg].t_y = (Yspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
-					gaits[leg].t_z = 0.0f;
-					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
-				}
-				else 	  // MOVE BODY FORWARD
-				{
-					gaits[leg].t_x = gaits[leg].t_x - (Xspeed * cycleTime) / stepsInCycle;
-					gaits[leg].t_y = gaits[leg].t_y - (Yspeed * cycleTime) / stepsInCycle;
-					gaits[leg].t_z = 0.0f;
-					gaits[leg].rot_z = gaits[leg].rot_z - (Rspeed*cycleTime) / stepsInCycle;
-				}
-			}//6
-			else if ( ( current_gait == RIPPLE_12 ) || ( current_gait == WAVE_24 ) || ( current_gait == TRIPOD_12 ) )	//	### 5 ETAPAS ###
+				tgait[leg].t_x = 0.0f;
+				tgait[leg].t_y = 0.0f;
+				tgait[leg].t_z = liftHeight;
+				tgait[leg].rot_z = 0.0f;
+			}
+			else if( leg_step == 2 ) 	// DOWN
 			{
-				if(leg_step == stepsInCycle)	// UP/2 :::: 12 (stepsInCycle)
-				{	
-					gaits[leg].t_x = gaits[leg].t_x / 2.0f;
-					gaits[leg].t_y = gaits[leg].t_y / 2.0f;
-					gaits[leg].t_z = liftHeight / 2.0f;
-					gaits[leg].rot_z = gaits[leg].rot_z / 2.0f;
-				}
-				else if(leg_step == 1)		// UP
-				{
-					gaits[leg].t_x = 0.0f;
-					gaits[leg].t_y = 0.0f;
-					gaits[leg].t_z = liftHeight;
-					gaits[leg].rot_z = 0.0f;
-				}
-				else if(leg_step == 2)	// DOWN/2
-				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(4*stepsInCycle);
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(4*stepsInCycle);
-					gaits[leg].t_z = int(liftHeight/2.0f);
-					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(4*stepsInCycle);
-				}
-				else if(leg_step == 3)		// DOWN
-				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
-					gaits[leg].t_z = 0.0f;
-					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
-				}
-				else	// MOVE BODY FORWARD
-				{
-					gaits[leg].t_x = gaits[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;
-					gaits[leg].t_y = gaits[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;
-					gaits[leg].t_z = 0.0f;
-					gaits[leg].rot_z = gaits[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;
-				}
-			}//12
-			else if ( ( current_gait == RIPPLE_24 ) || ( current_gait == TRIPOD_24 ) ) //	### 7 ETAPAS ###
+				tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+				tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+				tgait[leg].t_z = 0.0f;
+				tgait[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
+			}
+			else 	  // MOVE BODY FORWARD
 			{
-				if(leg_step == stepsInCycle-1)		// UP 1/3
-				{
-					gaits[leg].t_x = gaits[leg].t_x/3.0f;
-					gaits[leg].t_y = gaits[leg].t_y/3.0f;
-					gaits[leg].t_z = liftHeight/3.0f;
-					gaits[leg].rot_z = gaits[leg].rot_z/3.0f;
-				}
-				else if(leg_step == stepsInCycle)	// UP 2/3
-				{
-					gaits[leg].t_x = gaits[leg].t_x*2.0f/3.0f;
-					gaits[leg].t_y = gaits[leg].t_y*2.0f/3.0f;
-					gaits[leg].t_z = liftHeight*2.0f/3.0f;
-					gaits[leg].rot_z = gaits[leg].rot_z*2.0f/3.0f;
-				}
-				else if(leg_step == 1)	// UP
-				{
-					gaits[leg].t_x = 0.0f;
-					gaits[leg].t_y = 0.0f;
-					gaits[leg].t_z = liftHeight;
-					gaits[leg].rot_z = 0.0f;
-				}
-				else if(leg_step == 2)	// DOWN 1/3
-				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
-					gaits[leg].t_z = liftHeight*2.0f/3;
-					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
-				}
-				else if(leg_step == 3)	// DOWN 2/3
-				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
-					gaits[leg].t_z = liftHeight/3;
-					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
-				}
-				else if(leg_step == 4)	// DOWN
-				{
-					gaits[leg].t_x = (Xspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Xspeed*trantime*pushsteps/2
-					gaits[leg].t_y = (Yspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Yspeed*trantime*pushsteps/2
-					gaits[leg].t_z = 0;
-					gaits[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Rspeed*trantime*pushsteps/2
-				}
-				else	// MOVE BODY FORWARD
-				{
-					gaits[leg].t_x = gaits[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;// same as Xspeed*trantime
-					gaits[leg].t_y = gaits[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;// same as Yspeed*trantime
-					gaits[leg].t_z = 0.0f;
-					gaits[leg].rot_z = gaits[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;// same as Rspeed*trantime
-				}
-			}//24
-		} // moving
+				tgait[leg].t_x = tgait[leg].t_x - (Xspeed * cycleTime) / stepsInCycle;
+				tgait[leg].t_y = tgait[leg].t_y - (Yspeed * cycleTime) / stepsInCycle;
+				tgait[leg].t_z = 0.0f;
+				tgait[leg].rot_z = tgait[leg].rot_z - (Rspeed*cycleTime) / stepsInCycle;
+			}
+		}//6
+		else if ( ( current_gait == RIPPLE_12 ) || ( current_gait == WAVE_24 ) || ( current_gait == TRIPOD_12 ) )	//	### 5 ETAPAS ###
+		{
+			if(leg_step == stepsInCycle)	// UP/2 :::: 12 (stepsInCycle)
+			{	
+				tgait[leg].t_x = tgait[leg].t_x / 2.0f;
+				tgait[leg].t_y = tgait[leg].t_y / 2.0f;
+				tgait[leg].t_z = liftHeight / 2.0f;
+				tgait[leg].rot_z = tgait[leg].rot_z / 2.0f;
+			}
+			else if(leg_step == 1)		// UP
+			{
+				tgait[leg].t_x = 0.0f;
+				tgait[leg].t_y = 0.0f;
+				tgait[leg].t_z = liftHeight;
+				tgait[leg].rot_z = 0.0f;
+			}
+			else if(leg_step == 2)	// DOWN/2
+			{
+				tgait[leg].t_x = (Xspeed*cycleTime*pushSteps)/(4*stepsInCycle);
+				tgait[leg].t_y = (Yspeed*cycleTime*pushSteps)/(4*stepsInCycle);
+				tgait[leg].t_z = int(liftHeight/2.0f);
+				tgait[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(4*stepsInCycle);
+			}
+			else if(leg_step == 3)		// DOWN
+			{
+				tgait[leg].t_x = (Xspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
+				tgait[leg].t_y = (Yspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
+				tgait[leg].t_z = 0.0f;
+				tgait[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);
+			}
+			else	// MOVE BODY FORWARD
+			{
+				tgait[leg].t_x = tgait[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;
+				tgait[leg].t_y = tgait[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;
+				tgait[leg].t_z = 0.0f;
+				tgait[leg].rot_z = tgait[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;
+			}
+		}//12
+		else if ( ( current_gait == RIPPLE_24 ) || ( current_gait == TRIPOD_24 ) ) //	### 7 ETAPAS ###
+		{
+			if(leg_step == stepsInCycle-1)		// UP 1/3
+			{
+				tgait[leg].t_x = tgait[leg].t_x/3.0f;
+				tgait[leg].t_y = tgait[leg].t_y/3.0f;
+				tgait[leg].t_z = liftHeight/3.0f;
+				tgait[leg].rot_z = tgait[leg].rot_z/3.0f;
+			}
+			else if(leg_step == stepsInCycle)	// UP 2/3
+			{
+				tgait[leg].t_x = tgait[leg].t_x*2.0f/3.0f;
+				tgait[leg].t_y = tgait[leg].t_y*2.0f/3.0f;
+				tgait[leg].t_z = liftHeight*2.0f/3.0f;
+				tgait[leg].rot_z = tgait[leg].rot_z*2.0f/3.0f;
+			}
+			else if(leg_step == 1)	// UP
+			{
+				tgait[leg].t_x = 0.0f;
+				tgait[leg].t_y = 0.0f;
+				tgait[leg].t_z = liftHeight;
+				tgait[leg].rot_z = 0.0f;
+			}
+			else if(leg_step == 2)	// DOWN 1/3
+			{
+				tgait[leg].t_x = (Xspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
+				tgait[leg].t_y = (Yspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
+				tgait[leg].t_z = liftHeight*2.0f/3;
+				tgait[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(3.0f*stepsInCycle);
+			}
+			else if(leg_step == 3)	// DOWN 2/3
+			{
+				tgait[leg].t_x = (Xspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
+				tgait[leg].t_y = (Yspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
+				tgait[leg].t_z = liftHeight/3;
+				tgait[leg].rot_z = (Rspeed*cycleTime*pushSteps)*2.0f/(3.0f*stepsInCycle);
+			}
+			else if(leg_step == 4)	// DOWN
+			{
+				tgait[leg].t_x = (Xspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Xspeed*trantime*pushsteps/2
+				tgait[leg].t_y = (Yspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Yspeed*trantime*pushsteps/2
+				tgait[leg].t_z = 0;
+				tgait[leg].rot_z = (Rspeed*cycleTime*pushSteps)/(2.0f*stepsInCycle);// same as Rspeed*trantime*pushsteps/2
+			}
+			else	// MOVE BODY FORWARD
+			{
+				tgait[leg].t_x = tgait[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;// same as Xspeed*trantime
+				tgait[leg].t_y = tgait[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;// same as Yspeed*trantime
+				tgait[leg].t_z = 0.0f;
+				tgait[leg].rot_z = tgait[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;// same as Rspeed*trantime
+			}
+		}//24
 
-        return gaits[leg];
+		return tgait[leg];
 	}
 
     void Gaits::next_step( void )

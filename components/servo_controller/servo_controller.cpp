@@ -17,7 +17,7 @@ namespace Servo
         pca2(0x41, pca2_servo_cal_,poseSize_ / 2 )      // Dirección I2C del segundo controlador
     {
         // Inicialización de las poses
-        for (uint8_t i = 0; i < POSE_SIZE; i++)
+        for (uint8_t i = 0; i < poseSize_; i++)
         {
             //id_[i] = i + 1;
             pose_[i] = initial_pose_[i];      // Inicializa a 90
@@ -147,6 +147,26 @@ namespace Servo
             nextPose_[index] = pos;  // Accede al índice correspondiente (id - 1)
         }
     }
+
+    // TODO
+    // Crear funcion para volver a la posicion de inicio
+    void ServoController::back_to_init_position(void)
+    {
+        for (uint8_t i = 0; i < poseSize_; i++)
+        {
+            pose_[i] = initial_pose_[i];      // Inicializa a 90
+        }
+
+        interpolate_setup(500);
+
+        while (interpolating_ > 0)
+        {
+            Interpolate_step();
+
+            vTaskDelay(pdMS_TO_TICKS(50));
+        }
+    }
+
 
     void ServoController::initializeServos(const uint16_t* servosStart, const uint16_t* group1Up, const uint16_t* group2Up)
     {

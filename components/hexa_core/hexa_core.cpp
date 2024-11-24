@@ -45,6 +45,8 @@ const transformations3D::Vectors::vector3d leg_offsets[6] =
     {0, 0, -8}      // PATA 6: RIGHT_REAR
 };
 
+bool init_position;
+
 transformations3D::Vectors::vector3d calculate_total_vector( uint8_t leg )
 {
     transformations3D::Vectors::vector3d v_out;
@@ -67,107 +69,89 @@ transformations3D::Vectors::vector3d recalculate_leg_vector( uint8_t leg, transf
     return v_out;
 }
 
+void hexa_core_init(void)
+{
+	init_position = true;
+}
+
+// Restablecer la posición inicial
+void resetToInitPosition(Servo::ServoController &servo_ctr)
+{
+    servo_ctr.back_to_init_position();
+    init_position = true;
+}
+
+// Realizar un paso de marcha (gait step)
+void performGaitStep(hexapod::Gaits &gait, Servo::ServoController &servo_ctr)
+{
+    for (uint8_t leg = LEFT_FRONT; leg < NUM_MAX_LEGS; leg++)
+	{
+        // 1. Cálculo del paso de marcha
+        transformations3D::Tmatrix tgait = gait.step(leg);
+
+        // 2. Vector total y transformaciones
+        transformations3D::Vectors::vector3d leg_vect = calculate_total_vector(leg);
+        leg_vect = tgait.apply(leg_vect);
+        leg_vect = recalculate_leg_vector(leg, leg_vect);
+
+        // 3. Resolver cinemática inversa y guardar posiciones
+        hexapod::Hexaik::ik_angles ik_angles = hexapod::Hexaik::legIK(
+            static_cast<leg_id>(leg), leg_vect.x, leg_vect.y, leg_vect.z);
+
+        servo_ctr.save_nextpose(leg * 3, ik_angles.coxa);
+        servo_ctr.save_nextpose(leg * 3 + 1, ik_angles.femur);
+        servo_ctr.save_nextpose(leg * 3 + 2, ik_angles.tibia);
+    }
+
+    // Incrementar paso y configurar interpolación
+    gait.next_step();
+
+    servo_ctr.interpolate_setup(gait.get_gait_transition_time());
+}
+
 void hexa_main_task(void *pvParameters)
 {
-	ESP_LOGI(HEXA_TASK_TAG, "hexa_main_task initialization");
+    ESP_LOGI(HEXA_TASK_TAG, "hexa_main_task initialization");
+    hexa_core_init();
 
-	hexapod::Gaits gait(TRIPOD_24);
-
-	Servo::ServoController servo_ctr;
+    hexapod::Gaits gait(TRIPOD_24,NUM_MAX_LEGS);
+    Servo::ServoController servo_ctr;
     servo_ctr.writePositions();
 
-	uint16_t delay_ms = servo_ctr.get_frame_length_ms();
-	ESP_LOGI(HEXA_TASK_TAG," delay: %d", delay_ms );
-	// more tasks?
+    uint16_t delay_ms = servo_ctr.get_frame_length_ms();
+    ESP_LOGI(HEXA_TASK_TAG, " delay: %d", delay_ms);
 
+    // Configurar velocidades
+    gait.set_xspeed(0);
+    gait.set_yspeed(0);
+    gait.set_rspeed(30000);
 
-	gait.set_xspeed(0);
-	gait.set_yspeed(0);
-	gait.set_rspeed(30000);
+    vTaskDelay(pdMS_TO_TICKS(1000));
 
-	vTaskDelay(pdMS_TO_TICKS(1000));
-
-	static int64_t last_time = esp_timer_get_time();
-	static int64_t new_time;
-
-    while(1)
-    {
-		//new_time = esp_timer_get_time() / 1000;
-		//ESP_LOGI(HEXA_TASK_TAG," tiempo pasado(ms): %lld", ( new_time - last_time ) );
-
-        // 1. get_parameters: leemos de la app los comandos de movimiento
-        // 2. is_moving()?
-        // 3. calculate_gait_step
-
-        //get_parameters()
-		//ESP_LOGI(HEXA_TASK_TAG,"Interpolando: %d", servo_ctr.isInterpolating());
-
-        if ( !servo_ctr.isInterpolating() )//&& gait.isMoving())
-        {
-            for( uint8_t leg = LEFT_FRONT; leg < NUM_MAX_LEGS; leg++ )
-            {
-				//ESP_LOGI(HEXA_TASK_TAG, "HEXA iterating legs: START");
-				//ESP_LOGI(HEXA_TASK_TAG," --- LEG: %d ---", leg );
-
-				// 1. Gait step calculation
-                transformations3D::Tmatrix tgait = gait.step(leg);
-
-				//ESP_LOGI(HEXA_TASK_TAG,"T gait x: %f", tgait.t_x);
-				//ESP_LOGI(HEXA_TASK_TAG,"T gait y: %f", tgait.t_y);
-				//ESP_LOGI(HEXA_TASK_TAG,"T gait z: %f", tgait.t_z);
-				//ESP_LOGI(HEXA_TASK_TAG,"T gait r: %f", tgait.rot_z);
-
-				// 2. Total Vect
-                transformations3D::Vectors::vector3d leg_vect = calculate_total_vector( leg );
-
-				//ESP_LOGI(HEXA_TASK_TAG,"endpoint x: %f", leg_endpoints[leg].x);
-				//ESP_LOGI(HEXA_TASK_TAG,"endpoint y: %f", leg_endpoints[leg].y);
-				//ESP_LOGI(HEXA_TASK_TAG,"endpoint z: %f", leg_endpoints[leg].z);
-				//ESP_LOGI(HEXA_TASK_TAG,"endpoint r: %f", tgait.rot_z);
-				//ESP_LOGI(HEXA_TASK_TAG,"coxa x: %f", coxa_endpoints[leg].x);
-				//ESP_LOGI(HEXA_TASK_TAG,"coxa y: %f", coxa_endpoints[leg].y);
-
-				//ESP_LOGI(HEXA_TASK_TAG,"TOTAL Vect x: %f", leg_vect.x);
-				//ESP_LOGI(HEXA_TASK_TAG,"TOTAL Vect y: %f", leg_vect.y);
-				//ESP_LOGI(HEXA_TASK_TAG,"TOTAL Vect z: %f", leg_vect.z);
-
-				// 3. Apply Transformation matrix to leg_vector
-                leg_vect = tgait.apply(leg_vect); // vector modificado
-
-				//ESP_LOGI(HEXA_TASK_TAG,"TOTAL Vect x trans: %f", leg_vect.x);
-				//ESP_LOGI(HEXA_TASK_TAG,"TOTAL Vect y trans: %f", leg_vect.y);
-				//ESP_LOGI(HEXA_TASK_TAG,"TOTAL Vect z trans: %f", leg_vect.z);
-
-				// 4. Calculate leg vector
-                leg_vect = recalculate_leg_vector( leg, leg_vect );
-
-				//ESP_LOGI(HEXA_TASK_TAG,"Vect x trans: %f", leg_vect.x);
-				//ESP_LOGI(HEXA_TASK_TAG,"Vect y trans: %f", leg_vect.y);
-				//ESP_LOGI(HEXA_TASK_TAG,"Vect z trans: %f", leg_vect.z);
-
-				// 5. Solve IK
-                hexapod::Hexaik::ik_angles ik_angles = hexapod::Hexaik::legIK( (leg_id)leg, leg_vect.x, leg_vect.y, leg_vect.z );
-
-				// 6. Save nextpose
-				servo_ctr.save_nextpose(leg * 3, 	 ik_angles.coxa );
-				servo_ctr.save_nextpose(leg * 3 + 1, ik_angles.femur );
-				servo_ctr.save_nextpose(leg * 3 + 2, ik_angles.tibia );
-
-				//ESP_LOGI(HEXA_TASK_TAG, "HEXA iterating legs: END");
+    while (true)
+	{
+        if ( !gait.isMoving() )
+		{
+            if ( !init_position )
+			{
+                resetToInitPosition(servo_ctr);
             }
 
-            // 7. Set Next Gait step
-            gait.next_step(); // Increment gait step
+			gait.init_tgaits();
+        }
+		else
+		{
+            init_position = false;
 
-			servo_ctr.interpolate_setup(gait.get_gait_transition_time());
+            if ( !servo_ctr.isInterpolating() )
+			{
+                performGaitStep(gait, servo_ctr);
+            }
+
+            servo_ctr.Interpolate_step();
         }
 
-		// update joints
-		servo_ctr.Interpolate_step();
-
-		last_time = esp_timer_get_time() / 1000;
-		vTaskDelay(pdMS_TO_TICKS(delay_ms));
-
+        vTaskDelay(pdMS_TO_TICKS(delay_ms));
     }
 
 

@@ -41,4 +41,10 @@ namespace transformations3D
 
         return result;
     }
+
+    void Tmatrix::reset()
+    {
+        t_x = t_y = t_z = 0.0f;
+        rot_x = rot_y = rot_z = 0.0f;
+    }
 }

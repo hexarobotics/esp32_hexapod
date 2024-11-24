@@ -18,6 +18,9 @@ namespace transformations3D
           // Aplica la transformación al vector dado
           transformations3D::Vectors::vector3d apply(const transformations3D::Vectors::vector3d& vec) const;
 
+          // Método para resetear todos los valores a 0
+          void reset();
+          
           // Setters para las traslaciones
           void setTranslationX(int16_t tx) { t_x = tx; }
           void setTranslationY(int16_t ty) { t_y = ty; }

@@ -12,10 +12,11 @@ namespace hexapod
     {
         public:
             // Constructor
-            Gaits(GaitType gait);
+            Gaits(GaitType gait, uint16_t num_legs);
 
             // Métodos públicos
-            bool isMoving(void) const;
+            bool isMoving(void);
+            void init_tgaits(void);
             void gait_select(GaitType type);
             //void generateGait(uint8_t leg);
             void configureBody();
@@ -47,6 +48,7 @@ namespace hexapod
             float Rspeed_max; // radians
 
             // Steps in gait
+            uint16_t num_legs_;
             uint16_t stepsInCycle;
             uint16_t pushSteps;
             uint8_t desfase;
@@ -55,8 +57,9 @@ namespace hexapod
             float cycleTime;    // Total time. cycleTime =  (stepsInCycle * tranTime(ms)) / 1000.0 (to s) 
 
             uint8_t gaitleg_order[6];
-            transformations3D::Tmatrix gaits[6];
+            transformations3D::Tmatrix tgait[6];
             bool parado;
+            bool moving;
             int8_t gait_step;
             int8_t leg_step; //int8_t ok, puede salir negativo -> refactorizar
             bool modo_control;	// 0 movimiento cuerpo; 1 movimiento robot
@@ -75,7 +78,6 @@ namespace hexapod
             };
 
             float map(int16_t value, int16_t in_min, int16_t in_max, float out_min, float out_max);
-            void log_info(const char* msg);
     };
 }
 
