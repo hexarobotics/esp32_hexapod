@@ -49,7 +49,7 @@ namespace hexapod
             LEG_SIXTH,
             LEG_MAX_ORD
         };
-        
+
         const char *TAG_GAIT = "GAIT";
 
         // Velocities and space parameters
@@ -80,10 +80,10 @@ namespace hexapod
         GaitType current_gait;
 
         // Métodos privados auxiliares
-        void handle_step_phase(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move);
-        void handle_step_6(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move);
-        void handle_step_12(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move);
-        void handle_step_24(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move);
+        void handle_step_phase(uint8_t leg, int8_t leg_step);
+        void handle_step_3_stages(uint8_t leg, int8_t leg_step);
+        void handle_step_5_stages(uint8_t leg, int8_t leg_step);
+        void handle_step_7_stages(uint8_t leg, int8_t leg_step);
 
         float map(int16_t value, int16_t in_min, int16_t in_max, float out_min, float out_max);
     };

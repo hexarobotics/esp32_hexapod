@@ -167,153 +167,149 @@ namespace hexapod
 		return tranTime;
 	}
 
-	transformations3D::Tmatrix Gaits::step(uint8_t leg)
+    transformations3D::Tmatrix Gaits::step(uint8_t leg)
     {
         leg_step = gait_step - (gaitleg_order[leg] - 1) * desfase;
-        if (leg_step < 0) leg_step += stepsInCycle;
+		if (leg_step < 0)	leg_step=stepsInCycle + leg_step;
         if (leg_step == 0) leg_step = stepsInCycle;
 
-        float x_move = (Xspeed * cycleTime * pushSteps) / static_cast<float>(stepsInCycle);
-        float y_move = (Yspeed * cycleTime * pushSteps) / static_cast<float>(stepsInCycle);
-        float r_move = (Rspeed * cycleTime * pushSteps) / static_cast<float>(stepsInCycle);
-
-        handle_step_phase(leg, leg_step, x_move, y_move, r_move);
+        handle_step_phase(leg, leg_step);
 
         return tgait[leg];
     }
 
-	void Gaits::handle_step_phase(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move)
+    void Gaits::handle_step_phase(uint8_t leg, int8_t leg_step)
 	{
 		if ( ( current_gait == RIPPLE_6) || ( current_gait == TRIPOD_6 ) || ( current_gait == WAVE_12 ) ) 	// ### 3 ETAPAS ###
 		{
-			handle_step_6(leg, leg_step, x_move, y_move, r_move);
+			handle_step_3_stages(leg, leg_step);
 		}
 		else if ( ( current_gait == RIPPLE_12 ) || ( current_gait == WAVE_24 ) || ( current_gait == TRIPOD_12 ) )	//	### 5 ETAPAS ###
 		{
-			handle_step_12(leg, leg_step, x_move, y_move, r_move);
+			handle_step_5_stages(leg, leg_step);
 		}
 		else if ( ( current_gait == RIPPLE_24 ) || ( current_gait == TRIPOD_24 ) ) //	### 7 ETAPAS ###
 		{
-			handle_step_24(leg, leg_step, x_move, y_move, r_move);
+			handle_step_7_stages(leg, leg_step);
 		}
 	}
 
-	void Gaits::handle_step_6(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move)
-	{
-		if (leg_step == 1) // UP
-		{
-			tgait[leg].t_x = 0.0f;
-			tgait[leg].t_y = 0.0f;
-			tgait[leg].t_z = liftHeight;
-			tgait[leg].rot_z = 0.0f;
-		}
-		else if (leg_step == 2) // DOWN
-		{
-			tgait[leg].t_x = x_move / 2.0f;
-			tgait[leg].t_y = y_move / 2.0f;
-			tgait[leg].t_z = 0.0f;
-			tgait[leg].rot_z = r_move / 2.0f;
-		}
-		else // MOVE BODY FORWARD
-		{
-			tgait[leg].t_x -= x_move;
-			tgait[leg].t_y -= y_move;
-			tgait[leg].t_z = 0.0f;
-			tgait[leg].rot_z -= r_move;
-		}
-	}
+    void Gaits::handle_step_3_stages(uint8_t leg, int8_t leg_step)
+    {
+        if (leg_step == 1) // UP
+        {
+            tgait[leg].t_x = 0.0f;
+            tgait[leg].t_y = 0.0f;
+            tgait[leg].t_z = liftHeight;
+            tgait[leg].rot_z = 0.0f;
+        }
+        else if (leg_step == 2) // DOWN
+        {
+            tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+            tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+            tgait[leg].t_z = 0.0f;
+            tgait[leg].rot_z = (Rspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+        }
+        else // MOVE BODY FORWARD
+        {
+            tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_z = 0.0f;
+            tgait[leg].rot_z -= (Rspeed * cycleTime) / stepsInCycle;
+        }
+    }
 
-	void Gaits::handle_step_12(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move)
-	{
-		if (leg_step == stepsInCycle) // UP/2
-		{
-			tgait[leg].t_x = tgait[leg].t_x / 2.0f;
-			tgait[leg].t_y = tgait[leg].t_y / 2.0f;
-			tgait[leg].t_z = liftHeight / 2.0f;
-			tgait[leg].rot_z = tgait[leg].rot_z / 2.0f;
-		}
-		else if (leg_step == 1) // UP
-		{
-			tgait[leg].t_x = 0.0f;
-			tgait[leg].t_y = 0.0f;
-			tgait[leg].t_z = liftHeight;
-			tgait[leg].rot_z = 0.0f;
-		}
-		else if (leg_step == 2) // DOWN/2
-		{
-			tgait[leg].t_x = x_move / 4.0f;
-			tgait[leg].t_y = y_move / 4.0f;
-			tgait[leg].t_z = liftHeight / 2.0f;
-			tgait[leg].rot_z = r_move / 4.0f;
-		}
-		else if (leg_step == 3) // DOWN
-		{
-			tgait[leg].t_x = x_move / 2.0f;
-			tgait[leg].t_y = y_move / 2.0f;
-			tgait[leg].t_z = 0.0f;
-			tgait[leg].rot_z = r_move / 2.0f;
-		}
-		else // MOVE BODY FORWARD
-		{
-			tgait[leg].t_x -= x_move;
-			tgait[leg].t_y -= y_move;
-			tgait[leg].t_z = 0.0f;
-			tgait[leg].rot_z -= r_move;
-		}
-	}
+    void Gaits::handle_step_5_stages(uint8_t leg, int8_t leg_step)
+    {
+        if (leg_step == stepsInCycle) // UP/2
+        {
+            tgait[leg].t_x = tgait[leg].t_x / 2.0f;
+            tgait[leg].t_y = tgait[leg].t_y / 2.0f;
+            tgait[leg].t_z = liftHeight / 2.0f;
+            tgait[leg].rot_z = tgait[leg].rot_z / 2.0f;
+        }
+        else if (leg_step == 1) // UP
+        {
+            tgait[leg].t_x = 0.0f;
+            tgait[leg].t_y = 0.0f;
+            tgait[leg].t_z = liftHeight;
+            tgait[leg].rot_z = 0.0f;
+        }
+        else if (leg_step == 2) // DOWN/2
+        {
+            tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) / (4.0f * stepsInCycle);
+            tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) / (4.0f * stepsInCycle);
+            tgait[leg].t_z = liftHeight / 2.0f;
+            tgait[leg].rot_z = (Rspeed * cycleTime * pushSteps) / (4.0f * stepsInCycle);
+        }
+        else if (leg_step == 3) // DOWN
+        {
+            tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+            tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+            tgait[leg].t_z = 0.0f;
+            tgait[leg].rot_z = (Rspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+        }
+        else // MOVE BODY FORWARD
+        {
+            tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_z = 0.0f;
+            tgait[leg].rot_z -= (Rspeed * cycleTime) / stepsInCycle;
+        }
+    }
 
-	void Gaits::handle_step_24(uint8_t leg, int8_t leg_step, float x_move, float y_move, float r_move)
-	{
-		if (leg_step == stepsInCycle - 1) // UP 1/3
-		{
-			tgait[leg].t_x = tgait[leg].t_x / 3.0f;
-			tgait[leg].t_y = tgait[leg].t_y / 3.0f;
-			tgait[leg].t_z = liftHeight / 3.0f;
-			tgait[leg].rot_z = tgait[leg].rot_z / 3.0f;
-		}
-		else if (leg_step == stepsInCycle) // UP 2/3
-		{
-			tgait[leg].t_x = tgait[leg].t_x * 2.0f / 3.0f;
-			tgait[leg].t_y = tgait[leg].t_y * 2.0f / 3.0f;
-			tgait[leg].t_z = liftHeight * 2.0f / 3.0f;
-			tgait[leg].rot_z = tgait[leg].rot_z * 2.0f / 3.0f;
-		}
-		else if (leg_step == 1) // UP
-		{
-			tgait[leg].t_x = 0.0f;
-			tgait[leg].t_y = 0.0f;
-			tgait[leg].t_z = liftHeight;
-			tgait[leg].rot_z = 0.0f;
-		}
-		else if (leg_step == 2) // DOWN 1/3
-		{
-			tgait[leg].t_x = x_move / 3.0f;
-			tgait[leg].t_y = y_move / 3.0f;
-			tgait[leg].t_z = liftHeight * 2.0f / 3.0f;
-			tgait[leg].rot_z = r_move / 3.0f;
-		}
-		else if (leg_step == 3) // DOWN 2/3
-		{
-			tgait[leg].t_x = 2.0f * x_move / 3.0f;
-			tgait[leg].t_y = 2.0f * y_move / 3.0f;
-			tgait[leg].t_z = liftHeight / 3.0f;
-			tgait[leg].rot_z = 2.0f * r_move / 3.0f;
-		}
-		else if (leg_step == 4) // DOWN
-		{
-			tgait[leg].t_x = x_move / 2.0f;
-			tgait[leg].t_y = y_move / 2.0f;
-			tgait[leg].t_z = 0.0f;
-			tgait[leg].rot_z = r_move / 2.0f;
-		}
-		else // MOVE BODY FORWARD
-		{
-			tgait[leg].t_x -= x_move;
-			tgait[leg].t_y -= y_move;
-			tgait[leg].t_z = 0.0f;
-			tgait[leg].rot_z -= r_move;
-		}
-	}
+    void Gaits::handle_step_7_stages(uint8_t leg, int8_t leg_step)
+    {
+        if (leg_step == stepsInCycle - 1) // UP 1/3
+        {
+            tgait[leg].t_x = tgait[leg].t_x / 3.0f;
+            tgait[leg].t_y = tgait[leg].t_y / 3.0f;
+            tgait[leg].t_z = liftHeight / 3.0f;
+            tgait[leg].rot_z = tgait[leg].rot_z / 3.0f;
+        }
+        else if (leg_step == stepsInCycle) // UP 2/3
+        {
+            tgait[leg].t_x = tgait[leg].t_x * 2.0f / 3.0f;
+            tgait[leg].t_y = tgait[leg].t_y * 2.0f / 3.0f;
+            tgait[leg].t_z = liftHeight * 2.0f / 3.0f;
+            tgait[leg].rot_z = tgait[leg].rot_z * 2.0f / 3.0f;
+        }
+        else if (leg_step == 1) // UP
+        {
+            tgait[leg].t_x = 0.0f;
+            tgait[leg].t_y = 0.0f;
+            tgait[leg].t_z = liftHeight;
+            tgait[leg].rot_z = 0.0f;
+        }
+        else if (leg_step == 2) // DOWN 1/3
+        {
+            tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) / (3.0f * stepsInCycle);
+            tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) / (3.0f * stepsInCycle);
+            tgait[leg].t_z = liftHeight * 2.0f / 3.0f;
+            tgait[leg].rot_z = (Rspeed * cycleTime * pushSteps) / (3.0f * stepsInCycle);
+        }
+        else if (leg_step == 3) // DOWN 2/3
+        {
+            tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) * 2.0f / (3.0f * stepsInCycle);
+            tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) * 2.0f / (3.0f * stepsInCycle);
+            tgait[leg].t_z = liftHeight / 3.0f;
+            tgait[leg].rot_z = (Rspeed * cycleTime * pushSteps) * 2.0f / (3.0f * stepsInCycle);
+        }
+        else if (leg_step == 4) // DOWN
+        {
+            tgait[leg].t_x = (Xspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+            tgait[leg].t_y = (Yspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+            tgait[leg].t_z = 0.0f;
+            tgait[leg].rot_z = (Rspeed * cycleTime * pushSteps) / (2.0f * stepsInCycle);
+        }
+        else // MOVE BODY FORWARD
+        {
+            tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_z = 0.0f;
+            tgait[leg].rot_z -= (Rspeed * cycleTime) / stepsInCycle;
+        }
+    }
 
 	void Gaits::next_step( void )
     {
