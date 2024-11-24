@@ -114,7 +114,7 @@ void hexa_main_task(void *pvParameters)
     ESP_LOGI(HEXA_TASK_TAG, "hexa_main_task initialization");
     hexa_core_init();
 
-    hexapod::Gaits gait(TRIPOD_24,NUM_MAX_LEGS);
+    hexapod::Gaits gait(TRIPOD_24,HEXAPOD);
     Servo::ServoController servo_ctr;
     servo_ctr.writePositions();
 

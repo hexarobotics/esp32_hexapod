@@ -3,11 +3,6 @@
 
 namespace hexapod
 {
-    enum RobotType
-    {
-        HEXAPOD,
-        QUADRUPED
-    };
 
     extern const char *HEXA_TASK_TAG;
 

@@ -6,20 +6,20 @@
 namespace hexapod
 {
 	// Constructor Gaits
-	Gaits::Gaits(GaitType gait, uint16_t num_legs) : 
+	Gaits::Gaits(GaitType gait, RobotType robot_type) : 
 		Xspeed(0.0), Yspeed(0.0), Rspeed(0.0), liftHeight(45),
-		num_legs_(num_legs), stepsInCycle(0), pushSteps(0), desfase(0),
+		num_legs_(robot_type == HEXAPOD ? 6 : 4), // Número de patas dinámico
+		stepsInCycle(0), pushSteps(0), desfase(0),
 		tranTime(0), cycleTime(0.0),
-		gaitleg_order{0}, parado(true), moving(false),
+		gaitleg_order{0},
 		gait_step(1), leg_step(0),
-		modo_control(0), current_gait(NUM_MAX_GAITS)
+		robot_type_(robot_type), // Inicializa el tipo de robot
+		current_gait(NUM_MAX_GAITS)
 	{
-		// Inicializamos el orden de las patas
-		gait_select(gait);
-
-		init_tgaits();
-
-		ESP_LOGI(TAG_GAIT,"Gait object created");
+		gait_select(gait);  // Selecciona el gait inicial
+		init_tgaits();      // Inicializa los valores del gait
+		ESP_LOGI(TAG_GAIT, "Gait object created for %s", 
+				robot_type_ == HEXAPOD ? "Hexapod" : "Quadruped");
 	}
 
 	void Gaits::init_tgaits(void)
@@ -60,106 +60,119 @@ namespace hexapod
 	// Nuevo método para configurar el orden de las patas según el gait
 	void Gaits::setLegOrderByGait(GaitType GaitType)
 	{
-		switch (GaitType)
+		if (robot_type_ == HEXAPOD) 
 		{
-			case RIPPLE_6:
-			case RIPPLE_12:
-			case RIPPLE_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;
-					gaitleg_order[LEFT_MIDDLE]  = LEG_FIFTH;
-					gaitleg_order[LEFT_REAR] 	= LEG_THIRD;
-					gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;
-					gaitleg_order[RIGHT_MIDDLE] = LEG_SECOND;
-					gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;
-				break;
-			case TRIPOD_6:
-			case TRIPOD_12:
-			case TRIPOD_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
-					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
-					gaitleg_order[LEFT_REAR] 	= LEG_FIRST;   // LEFT_FRONT
-					gaitleg_order[RIGHT_FRONT] 	= LEG_SECOND;  // LEFT_REAR
-					gaitleg_order[RIGHT_MIDDLE] = LEG_FIRST;   // LEFT_MIDDLE
-					gaitleg_order[RIGHT_REAR] 	= LEG_SECOND;  // RIGHT_MIDDLE
-				break;
-			case WAVE_12:
-			case WAVE_24:
-					gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
-					gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
-					gaitleg_order[LEFT_REAR] 	= LEG_THIRD;   // LEFT_FRONT
-					gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;  // LEFT_REAR
-					gaitleg_order[RIGHT_MIDDLE] = LEG_FIFTH;   // RIGHT_MIDDLE
-					gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;   // LEFT_MIDDLE
-				break;
-			default:
-				// Podríamos agregar un manejo de error aquí si fuera necesario
-				break;
+			switch (GaitType)
+			{
+				case RIPPLE_6:
+				case RIPPLE_12:
+				case RIPPLE_24:
+						gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;
+						gaitleg_order[LEFT_MIDDLE]  = LEG_FIFTH;
+						gaitleg_order[LEFT_REAR] 	= LEG_THIRD;
+						gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;
+						gaitleg_order[RIGHT_MIDDLE] = LEG_SECOND;
+						gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;
+					break;
+				case TRIPOD_6:
+				case TRIPOD_12:
+				case TRIPOD_24:
+						gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
+						gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
+						gaitleg_order[LEFT_REAR] 	= LEG_FIRST;   // LEFT_FRONT
+						gaitleg_order[RIGHT_FRONT] 	= LEG_SECOND;  // LEFT_REAR
+						gaitleg_order[RIGHT_MIDDLE] = LEG_FIRST;   // LEFT_MIDDLE
+						gaitleg_order[RIGHT_REAR] 	= LEG_SECOND;  // RIGHT_MIDDLE
+					break;
+				case WAVE_12:
+				case WAVE_24:
+						gaitleg_order[LEFT_FRONT] 	= LEG_FIRST;   // RIGHT_FRONT
+						gaitleg_order[LEFT_MIDDLE]  = LEG_SECOND;  // RIGHT_REAR
+						gaitleg_order[LEFT_REAR] 	= LEG_THIRD;   // LEFT_FRONT
+						gaitleg_order[RIGHT_FRONT] 	= LEG_FOURTH;  // LEFT_REAR
+						gaitleg_order[RIGHT_MIDDLE] = LEG_FIFTH;   // RIGHT_MIDDLE
+						gaitleg_order[RIGHT_REAR] 	= LEG_SIXTH;   // LEFT_MIDDLE
+					break;
+				default:
+					// Podríamos agregar un manejo de error aquí si fuera necesario
+					break;
+			}
+		}
+		else if (robot_type_ == QUADRUPED) 
+		{
+			// implement cuadruped
 		}
 	}
 
 	// Método para actualizar los parámetros del gait (pushSteps, stepsInCycle, etc.)
 	void Gaits::update_gait_params(GaitType type)
 	{
-		switch (type)
+		if (robot_type_ == HEXAPOD)
+    	{
+			switch (type)
+			{
+				case RIPPLE_6: 
+					pushSteps = 4;
+					stepsInCycle = 6;
+					desfase = 1;
+					tranTime = 140;
+					break;
+
+				case RIPPLE_12:
+					pushSteps = 8;
+					stepsInCycle = 12;
+					desfase = 2;
+					tranTime = 120;
+					break;
+
+				case RIPPLE_24:
+					pushSteps = 12;
+					stepsInCycle = 18;
+					desfase = 3;
+					tranTime = 120;
+					break;
+
+				case TRIPOD_6:
+					pushSteps = 2;
+					stepsInCycle = 4;
+					desfase = 2;
+					tranTime = 140;
+					break;
+
+				case TRIPOD_12:
+					pushSteps = 4;
+					stepsInCycle = 8;
+					desfase = 4;
+					tranTime = 120;
+					break;
+
+				case TRIPOD_24:
+					pushSteps = 6;
+					stepsInCycle = 12;
+					desfase = 6;
+					tranTime = 120;
+					break;
+
+				case WAVE_12:
+					pushSteps = 10;
+					stepsInCycle = 12;
+					desfase = 2;
+					tranTime = 80;
+					break;
+
+				case WAVE_24:
+					pushSteps = 20;
+					stepsInCycle = 24;
+					desfase = 4;
+					tranTime = 80;
+					break;
+
+				default:
+					break;
+			}
+		}
+	    else if (robot_type_ == QUADRUPED)
 		{
-			case RIPPLE_6: 
-				pushSteps = 4;
-				stepsInCycle = 6;
-				desfase = 1;
-				tranTime = 140;
-				break;
-
-			case RIPPLE_12:
-				pushSteps = 8;
-				stepsInCycle = 12;
-				desfase = 2;
-				tranTime = 120;
-				break;
-
-			case RIPPLE_24:
-				pushSteps = 12;
-				stepsInCycle = 18;
-				desfase = 3;
-				tranTime = 120;
-				break;
-
-			case TRIPOD_6:
-				pushSteps = 2;
-				stepsInCycle = 4;
-				desfase = 2;
-				tranTime = 140;
-				break;
-
-			case TRIPOD_12:
-				pushSteps = 4;
-				stepsInCycle = 8;
-				desfase = 4;
-				tranTime = 120;
-				break;
-
-			case TRIPOD_24:
-				pushSteps = 6;
-				stepsInCycle = 12;
-				desfase = 6;
-				tranTime = 120;
-				break;
-
-			case WAVE_12:
-				pushSteps = 10;
-				stepsInCycle = 12;
-				desfase = 2;
-				tranTime = 80;
-				break;
-
-			case WAVE_24:
-				pushSteps = 20;
-				stepsInCycle = 24;
-				desfase = 4;
-				tranTime = 80;
-				break;
-
-			default:
-				break;
 		}
 	}
 
@@ -170,7 +183,7 @@ namespace hexapod
 	 *	 Veloc_max =   ----------------------------------------------
 	*                      (trantime(ms) / conv_ms_to_s) * pushsteps
 	*/
-	void Gaits::update_velocities(void) 
+	void Gaits::update_velocities(void)
 	{
 		Xspeed_max = 70.0f / ((static_cast<float>(tranTime) / 1000.0f) * pushSteps);
 		Yspeed_max = 70.0f / ((static_cast<float>(tranTime) / 1000.0f) * pushSteps);
@@ -191,12 +204,9 @@ namespace hexapod
 
 	bool Gaits::isMoving() // refactorizar, lo veo obsoleto, hay otras maneras mejores de hacerlo
 	{
-		//ESP_LOGI(TAG_GAIT,"Xspeed: %f", Xspeed);
-		moving = ( Xspeed > 1.50f || Xspeed < -1.50f ) || 
-				 ( Yspeed > 1.50f || Yspeed < -1.50f ) || 
-				 ( Rspeed > 0.05f || Rspeed < -0.05f );
-
-		return moving;
+		return  ( Xspeed > 1.50f || Xspeed < -1.50f ) || 
+				( Yspeed > 1.50f || Yspeed < -1.50f ) || 
+				( Rspeed > 0.05f || Rspeed < -0.05f );
 	}
 
 	uint16_t Gaits::get_gait_transition_time(void)
@@ -250,10 +260,10 @@ namespace hexapod
 			}
 			else 	  // MOVE BODY FORWARD
 			{
-				tgait[leg].t_x = tgait[leg].t_x - (Xspeed * cycleTime) / stepsInCycle;
-				tgait[leg].t_y = tgait[leg].t_y - (Yspeed * cycleTime) / stepsInCycle;
+				tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
+				tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
 				tgait[leg].t_z = 0.0f;
-				tgait[leg].rot_z = tgait[leg].rot_z - (Rspeed*cycleTime) / stepsInCycle;
+				tgait[leg].rot_z -= (Rspeed*cycleTime) / stepsInCycle;
 			}
 		}//6
 		else if ( ( current_gait == RIPPLE_12 ) || ( current_gait == WAVE_24 ) || ( current_gait == TRIPOD_12 ) )	//	### 5 ETAPAS ###
@@ -288,10 +298,10 @@ namespace hexapod
 			}
 			else	// MOVE BODY FORWARD
 			{
-				tgait[leg].t_x = tgait[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;
-				tgait[leg].t_y = tgait[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;
+				tgait[leg].t_x -= (Xspeed*cycleTime)/stepsInCycle;
+				tgait[leg].t_y -= (Yspeed*cycleTime)/stepsInCycle;
 				tgait[leg].t_z = 0.0f;
-				tgait[leg].rot_z = tgait[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;
+				tgait[leg].rot_z -= (Rspeed*cycleTime)/stepsInCycle;
 			}
 		}//12
 		else if ( ( current_gait == RIPPLE_24 ) || ( current_gait == TRIPOD_24 ) ) //	### 7 ETAPAS ###
@@ -340,10 +350,10 @@ namespace hexapod
 			}
 			else	// MOVE BODY FORWARD
 			{
-				tgait[leg].t_x = tgait[leg].t_x - (Xspeed*cycleTime)/stepsInCycle;// same as Xspeed*trantime
-				tgait[leg].t_y = tgait[leg].t_y - (Yspeed*cycleTime)/stepsInCycle;// same as Yspeed*trantime
+				tgait[leg].t_x -= (Xspeed*cycleTime)/stepsInCycle;// same as Xspeed*trantime
+				tgait[leg].t_y -= (Yspeed*cycleTime)/stepsInCycle;// same as Yspeed*trantime
 				tgait[leg].t_z = 0.0f;
-				tgait[leg].rot_z = tgait[leg].rot_z - (Rspeed*cycleTime)/stepsInCycle;// same as Rspeed*trantime
+				tgait[leg].rot_z -= (Rspeed*cycleTime)/stepsInCycle;// same as Rspeed*trantime
 			}
 		}//24
 
