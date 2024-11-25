@@ -1,8 +1,20 @@
 /* Styling for the Control Page */
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    overflow: hidden;
+}
+
 header {
     background-color: #3a3f58;
     color: #ffffff;
-    padding: 10px;
+    width: 100%;
+    padding: 10px 0;
     text-align: center;
 }
 
@@ -11,35 +23,33 @@ header {
     text-align: center;
 }
 
-/* Contenedor principal para los joysticks */
 #joysticks {
-    display: flex; /* Alinear en fila */
-    justify-content: space-around; /* Espaciado uniforme */
-    align-items: center; /* Centrado vertical */
-    margin-top: 20px;
-    gap: 20px; /* Espacio extra entre los joysticks */
+    display: flex;
+    justify-content: space-between; /* Espacio entre los joysticks */
+    align-items: center;
+    width: 90%; /* Espacio disponible horizontal */
+    height: 70%; /* Joysticks ocupan el 70% de la altura */
+    margin-top: 10px;
+    flex-wrap: wrap; /* Si el espacio no es suficiente, organiza en dos filas */
 }
 
-/* Cada contenedor de joystick */
+/* Contenedores de los joysticks */
 .joystick-container {
     display: flex;
-    flex-direction: column; /* Título y joystick en columna */
-    align-items: center; /* Centrado horizontal */
-    width: 45%; /* Ajustar ancho */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 48%; /* Cada joystick ocupa el 48% del ancho disponible */
+    height: 100%; /* Usan todo el espacio vertical */
 }
 
-/* Joysticks (círculos) */
+/* Estilo para los joysticks */
 #joystick1, #joystick2 {
-    width: 200px;
-    height: 200px;
-    border: 2px solid #1d3557; /* Borde azul oscuro */
-    border-radius: 50%; /* Círculo perfecto */
-    background: radial-gradient(circle, #e0e0e0, #c0c0c0); /* Efecto degradado */
-    position: relative; /* Necesario para nipple.js */
-    overflow: hidden; /* Evitar elementos fuera del contenedor */
-    margin: 10px auto; /* Centrarlos con márgenes */
-}
-
-.joystick-container h2 {
-    margin-bottom: 10px; /* Separar el título del joystick */
+    width: 90%; /* El joystick ocupa el 90% del ancho del contenedor */
+    aspect-ratio: 1 / 1; /* Mantiene un aspecto cuadrado */
+    border: 2px solid #1d3557;
+    border-radius: 50%; /* Hace el joystick circular */
+    background: radial-gradient(circle, #e0e0e0, #c0c0c0);
+    position: relative;
+    margin: 10px 0;
 }
