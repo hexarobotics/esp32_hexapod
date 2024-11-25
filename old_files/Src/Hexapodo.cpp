@@ -275,27 +275,10 @@ ik_req_t bodyIK(uint8_t leg ){//, float Zrot){
 ik_sol_t legIK(int X, int Y, int Z, int leg){
     ik_sol_t ans; // angulo en servo pwm
 
-/*
-	Serial.print("PATA :	 ");
-	Serial.println(leg);
-
-		Serial.print("X : ");
-		Serial.println(X);
-		Serial.print("Y : ");
-		Serial.println(Y);
-		Serial.print("Z : ");
-		Serial.println(Z);
-*/
 
     // primero, resolver el angulo coxa para conseguir que nuestro problema se reduzca a un problema 2D
 		ans.coxa = radToServoV2(atan2(Y,X));//pata ya es una direccion de memoria
 
-	#ifdef DEBUG_IK
-		Serial.print("O1 grados: ");
-		Serial.println(degrees(atan2(X,Y)));
-		Serial.print("O1 servo: ");
-		Serial.println(ans.coxa);
-	#endif
 
     long trueX = sqrt(sq((long)X)+sq((long)Y)) - L_COXA;
     long im = sqrt(sq((long)trueX)+sq((long)Z));    // length of imaginary leg
@@ -307,81 +290,14 @@ ik_sol_t legIK(int X, int Y, int Z, int leg){
     ans.femur = radToServoV2((q2+q1)); // lo pongo positivo pero ahora la z es negativa ya que el centro esta en coxa y endpoint esta por debajo
 	//float intermedio=q2-q1;
 
-	#ifdef DEBUG_IK
-		Serial.print("trueY: ");
-		Serial.println(trueY);
-		Serial.print("im: ");
-		Serial.println(im);
-		Serial.print("q1 grados: ");
-		Serial.println(degrees(q1));
-		Serial.print("d1: ");
-		Serial.println(n1);
-		Serial.print("d2: ");
-		Serial.println(d2);
-		Serial.print("q2 grados: ");
-		Serial.println(degrees(q2));
-		Serial.print("O2 grados: ");
-		Serial.println(degrees(q2+q1));
-		Serial.print("O2 servo: ");
-		Serial.println(ans.femur);
-	#endif
     // and tibia angle from femur...
     n1 = sq(im)-sq(L_FEMUR)-sq(L_TIBIA);
     d2 = -2*L_FEMUR*L_TIBIA;
     //alfa=n1/d2 //teta3=alfa-90�
     ans.tibia = radToServoV2((acos((float)n1/(float)d2))-1.57);
 
-	#ifdef DEBUG_IK
-		Serial.print("d1: ");
-		Serial.println(n1);
-		Serial.print("d2: ");
-		Serial.println(d2);
-		Serial.print("O3 grados: ");
-		Serial.println(degrees((acos((float)n1/(float)d2))-1.57));
-		Serial.print("O3 servo: ");
-		Serial.println(ans.tibia);
-		Serial.println( );
-//###########	TODOS LOS ANGULOS DE LOS SERVOS	##############
-		Serial.print("O1 servo: ");
-		Serial.println(degrees(atan2(X,Y)));
-		Serial.print("O2 servo: ");
-		Serial.println(degrees(q2+q1));
-		Serial.print("O3 servo: ");
-		Serial.println(degrees((acos((float)n1/(float)d2))-1.57));
-#endif // _DEBUG
-
-
 		//  ##### adaptar los �ngulos reales ##### 	//
 		  ans=Real_angle( leg, ans);//		pasamos la soluci�n de los angulos y los adaptamos a cada servomotor
-
-/*
-			Serial.println("ANTES	");
-
-			Serial.print("		Valor Coxa:	");
-			Serial.print(int(ans.coxa));
-			Serial.print("		Valor Femur:	");
-			Serial.print(int(ans.femur));
-			Serial.print("		Valor Tibia:	");
-			Serial.println(int(ans.tibia));
-			//Serial.println("	DESPUES	");
-
-			 */
-//	delay(5);
-
-
-		  /*
- 	 	 	 Serial.print("PATA :	 ");
-			Serial.print(leg);
-			Serial.print("		Valor Coxa:	");
-			Serial.print(ServoToDEG(ans.coxa));
-			Serial.print("		Valor Femur:	");
-			Serial.print( ServoToDEG(ans.femur));
-			Serial.print("		Valor Tibia:	");
-			Serial.println(ServoToDEG(ans.tibia));
-*/
-
-
-
 
 
     return ans;

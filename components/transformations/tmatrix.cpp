@@ -10,21 +10,22 @@ namespace transformations3D
     Vectors::vector3d Tmatrix::apply(const Vectors::vector3d& vec) const
     {
         // Si los ángulos son 0, la rotación es la identidad
-        if (alpha_x == 0 && theta_y == 0 && phi_z == 0)
+        constexpr double MARGEN = 1e-6;
+        if (std::abs(rot_x) < MARGEN && std::abs(rot_y) < MARGEN && std::abs(rot_z) < MARGEN)
         {
             // Solo aplicar la traslación
             Vectors::vector3d result;
-            result.x = translationX + vec.x;
-            result.y = translationY + vec.y;
-            result.z = translationZ + vec.z;
+            result.x = t_x + vec.x;
+            result.y = t_y + vec.y;
+            result.z = t_z + vec.z;
             
             return result;
         } 
 
         // Precalcular senos y cosenos
-        double Cthe = std::cos(theta_y), Sthe = std::sin(theta_y);
-        double Calf = std::cos(alpha_x), Salf = std::sin(alpha_x);
-        double Cphi = std::cos(phi_z), Sphi = std::sin(phi_z);
+        double Cthe = std::cos(rot_z), Sthe = std::sin(rot_z); // Yaw (θ)
+        double Calf = std::cos(rot_x), Salf = std::sin(rot_x); // Roll (α)
+        double Cphi = std::cos(rot_y), Sphi = std::sin(rot_y); // Pitch (φ)
 
         // Matriz de rotación
         Vectors::vector3d rotated;
@@ -34,10 +35,16 @@ namespace transformations3D
 
         // Traslación
         Vectors::vector3d result;
-        result.x = translationX + rotated.x;
-        result.y = translationY + rotated.y;
-        result.z = translationZ + rotated.z;
+        result.x = t_x + rotated.x;
+        result.y = t_y + rotated.y;
+        result.z = t_z + rotated.z;
 
         return result;
+    }
+
+    void Tmatrix::reset()
+    {
+        t_x = t_y = t_z = 0.0f;
+        rot_x = rot_y = rot_z = 0.0f;
     }
 }

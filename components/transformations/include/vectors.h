@@ -16,6 +16,17 @@ namespace transformations3D
             vector3d(double x_val, double y_val, double z_val);
         };
 
+        // Estructura para un vector 2D
+        struct vector2d
+        {
+            double x, y;
+
+            // Constructor por defecto que asigna todo a 0
+            vector2d();
+            // Constructor que inicializa con valores específicos
+            vector2d(double x_val, double y_val);
+        };
+
         // Declaraciones de funciones
         static vector3d add(const vector3d& v1, const vector3d& v2);
         static vector3d subtract(const vector3d& v1, const vector3d& v2);

@@ -14,6 +14,18 @@ namespace transformations3D
     {
     }
 
+    // === Implementaciones de vector2d ===
+
+    // Constructor por defecto que asigna todo a 0
+    Vectors::vector2d::vector2d() : x(0), y(0)
+    {
+    }
+
+    // Constructor que inicializa con valores específicos
+    Vectors::vector2d::vector2d(double x_val, double y_val) : x(x_val), y(y_val)
+    {
+    }
+
     // Suma de vectores
     Vectors::vector3d Vectors::add(const vector3d& v1, const vector3d& v2)
     {
