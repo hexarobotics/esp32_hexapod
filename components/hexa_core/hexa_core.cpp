@@ -114,7 +114,7 @@ void hexa_main_task(void *pvParameters)
     ESP_LOGI(HEXA_TASK_TAG, "hexa_main_task initialization");
     hexa_core_init();
 
-    hexapod::Gaits gait(TRIPOD_24,HEXAPOD);
+    hexapod::Gaits gait(RIPPLE_6,HEXAPOD);
     Servo::ServoController servo_ctr;
     servo_ctr.writePositions();
 
@@ -124,7 +124,7 @@ void hexa_main_task(void *pvParameters)
     // Configurar velocidades
     gait.set_xspeed(0);
     gait.set_yspeed(0);
-    gait.set_rspeed(30000);
+    gait.set_rspeed(-25000);
 
     vTaskDelay(pdMS_TO_TICKS(1000));
 

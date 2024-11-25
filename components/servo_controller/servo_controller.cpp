@@ -4,9 +4,6 @@
 
 namespace Servo
 {
-    
-
-
     ServoController::ServoController() :
         frame_length_ms_(DEFAULT_FRAME_TIME_MS),
         frame_length_us_(DEFAULT_FRAME_TIME_MS * 1000),
