@@ -39,13 +39,10 @@ header {
 
 /* Joysticks (círculos) */
 #joystick1, #joystick2 {
-    aspect-ratio: 1 / 1; /* Mantiene el círculo proporcional */
-    max-width: 50%; /* Máximo 35% del ancho de la ventana */
-    max-height: 50vh; /* Máximo 35% de la altura visible */
-    min-width: 150px; /* Tamaño mínimo para evitar que se reduzcan demasiado */
-    min-height: 150px;
+    width: 160px; /* Tamaño fijo para los joysticks */
+    height: 160px; /* Tamaño fijo para los joysticks */
     border: 2px solid #1d3557; /* Borde azul oscuro */
-    border-radius: 70%; /* Hace el círculo */
+    border-radius: 50%; /* Hace el círculo */
     background: radial-gradient(circle, #e0e0e0, #c0c0c0); /* Efecto degradado */
     position: relative; /* Necesario para nipple.js */
 }

@@ -1,77 +1,115 @@
-// Función para ajustar el tamaño de los joysticks dinámicamente
-function adjustJoysticks()
-{
-    const joysticks = document.querySelectorAll("#joystick1, #joystick2");
-    const width = window.innerWidth;
-    const height = window.innerHeight;
 
-    // Tamaño dinámico basado en el menor entre ancho y alto
-    const size = Math.min(width * 0.4, height * 0.4); // 35% del ancho o alto
+// Variables globales para almacenar las coordenadas como int16_t
+let x = 0, y = 0, z = 0;
 
-    joysticks.forEach(joystick => {
-        joystick.style.width = `${size}px`;
-        joystick.style.height = `${size}px`;
-    });
+// Variables para guardar los últimos valores enviados
+let lastX = 0, lastY = 0, lastZ = 0;
+
+// Función para limitar los valores al rango de int16_t
+function clampInt16(value) {
+    return Math.max(Math.min(Math.round(value), 32767), -32768);
 }
 
-// Inicializa los joysticks y eventos al cargar la página
-$(document).ready(function ()
-{
-    // Ajusta los tamaños iniciales
-    adjustJoysticks();
+// Función para enviar los datos de los joysticks al servidor
+function sendJoystickData() {
+    // Verificar si ha habido cambios en las coordenadas antes de enviarlas
+    if (x !== lastX || y !== lastY || z !== lastZ) {
+        // Crea un objeto con los datos a enviar
+        const data = {
+            x: x,
+            y: y,
+            z: z
+        };
 
-    // Joystick X-Y
+        // Enviar los datos al servidor
+        fetch('/joystick-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Datos enviados al ESP32:', result);
+        })
+        .catch(error => {
+            console.error('Error enviando datos al ESP32:', error);
+        });
+
+        // Actualizamos los últimos valores enviados
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+    } else {
+        console.log('No hubo cambios en las coordenadas, no se envían datos.');
+    }
+}
+
+
+$(document).ready(function () {
+    // Crear joystick X-Y
     const joystick1 = nipplejs.create({
-        zone: document.getElementById('joystick1'),
-        mode: 'static',
-        position: { left: '50%', top: '50%' },
-        color: 'blue',
-        size: 200
+        zone: document.getElementById("joystick1"),
+        mode: "static",
+        position: { left: "50%", top: "50%" },
+        color: "blue",
+        size: 105 // Tamaño fijo para el joystick
     });
 
-    // Cambia el tamaño del círculo interior
-    joystick1.on("added", function (evt, joystick) {
-        joystick.ui.front.style.width = "40%"; // 40% del tamaño del círculo exterior
-        joystick.ui.front.style.height = "40%";
-    });
-
-    // Eventos para Joystick X-Y
-    joystick1.on('move', function (evt, data)
-    {
-        if (data && data.distance !== undefined && data.angle)
-        {
-            const distance = data.distance.toFixed(2);
-            const angleRad = data.angle.radian;
-            const x = (distance * Math.cos(angleRad)).toFixed(2);
-            const y = (distance * Math.sin(angleRad)).toFixed(2);
-            console.log(`Joystick X-Y -> X: ${x}, Y: ${y}, Distancia: ${distance}`);
-        }
-    });
-
-    joystick1.on('end', function ()
-    {
-        console.log('Joystick X-Y -> Liberado');
-    });
-
-    // Eventos para Joystick Z
-
-    // Joystick Z
-    const joystick2 = nipplejs.create(
-    {
+    // Crear joystick Z
+    const joystick2 = nipplejs.create({
         zone: document.getElementById("joystick2"),
         mode: "static",
         position: { left: "50%", top: "50%" },
         color: "red",
-        size: 200
+        size: 105 // Tamaño fijo para el joystick
     });
 
-    joystick2.on('move', function (evt, data) {
+    // Eventos para joystick X-Y
+    joystick1.on("move", function (evt, data) {
+        if (data && data.distance !== undefined && data.angle) {
+            const distance = data.distance;
+            const angleRad = data.angle.radian;
+
+            // Calcular las coordenadas x, y
+            let rawX = distance * Math.cos(angleRad);
+            let rawY = distance * Math.sin(angleRad);
+
+            // Limitar los valores a int16_t
+            x = clampInt16(rawX);
+            y = clampInt16(rawY);
+
+            console.log(`Joystick X-Y -> X: ${x}, Y: ${y}`);
+        }
+    });
+
+    joystick1.on("end", function () {
+        console.log("Joystick X-Y -> Liberado");
+        // Restablecer las coordenadas a cero al liberar el joystick
+        x = 0;
+        y = 0;
+    });
+
+    // Eventos para joystick Z
+    joystick2.on("move", function (evt, data) {
         if (data && data.distance !== undefined) {
-            const z = data.distance.toFixed(2);
+            let rawZ = data.distance;
+
+            // Limitar Z a int16_t
+            z = clampInt16(rawZ);
+
             console.log(`Joystick Z -> Distance: ${z}`);
         }
     });
 
-    // Ajustar el tamaño de los joysticks dinámicamente al cambiar el tamaño de la ventana
-    window.addEventListener("resize", adjustJoysticks);
+    // Restablece Z a 0 cuando se suelta el joystick Z
+    joystick2.on("end", function () {
+        console.log("Joystick Z -> Liberado");
+        z = 0;
+    });
+
+    // Función para verificar y enviar los datos cada 100 ms
+    setInterval(sendJoystickData, 100);
+
 });

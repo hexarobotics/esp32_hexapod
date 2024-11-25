@@ -77,33 +77,35 @@ function updateProgress(oEvent)
 /**
  * Posts the firmware udpate status.
  */
-function getUpdateStatus() 
+function getUpdateStatus()
 {
     var xhr = new XMLHttpRequest();
     var requestURL = "/OTAstatus";
-    xhr.open('POST', requestURL, false);
-    xhr.send('ota_update_status');
+    xhr.open('POST', requestURL, true); // Cambiado a true para hacerlo asíncrono
 
-    if (xhr.readyState == 4 && xhr.status == 200) 
-	{		
-        var response = JSON.parse(xhr.responseText);
-						
-	 	document.getElementById("latest_firmware").innerHTML = response.compile_date + " - " + response.compile_time
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    document.getElementById("latest_firmware").innerHTML = response.compile_date + " - " + response.compile_time;
 
-		// If flashing was complete it will return a 1, else -1
-		// A return of 0 is just for information on the Latest Firmware request
-        if (response.ota_update_status == 1) 
-		{
-    		// Set the countdown timer time
-            seconds = 10;
-            // Start the countdown timer
-            otaRebootTimer();
-        } 
-        else if (response.ota_update_status == -1)
-		{
-            document.getElementById("ota_update_status").innerHTML = "!!! Upload Error !!!";
+                    if (response.ota_update_status == 1) {
+                        seconds = 10;
+                        otaRebootTimer();
+                    } else if (response.ota_update_status == -1) {
+                        document.getElementById("ota_update_status").innerHTML = "!!! Upload Error !!!";
+                    }
+                } catch (e) {
+                    console.error("Error al parsear la respuesta:", e);
+                }
+            } else {
+                console.error("Error en la solicitud:", xhr.status);
+            }
         }
-    }
+    };
+
+    xhr.send('ota_update_status');
 }
 
 /**

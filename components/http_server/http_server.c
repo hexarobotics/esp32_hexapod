@@ -6,6 +6,7 @@
  */
 
 #include "esp_http_server.h"
+#include <string.h>
 #include "esp_log.h"
 #include "esp_ota_ops.h"
 #include "esp_timer.h"
@@ -154,6 +155,48 @@ static void http_server_monitor_task(void *parameter)
 			}
 		}
 	}
+}
+
+// Tag used for ESP serial console messages
+static const char TAG_JOY[] = "http_server_joystick_data";
+
+// Handler para recibir los datos del joystick
+static esp_err_t http_server_joystick_data_handler(httpd_req_t *req)
+{
+    // Buffer para recibir el contenido del cuerpo de la solicitud
+    char content[100];
+    int ret, remaining = req->content_len;
+
+    // Leer el contenido de la solicitud (POST)
+    while (remaining > 0) {
+        if ((ret = httpd_req_recv(req, content, MIN(remaining, sizeof(content)))) <= 0) {
+            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+                continue;
+            }
+            return ESP_FAIL;
+        }
+        remaining -= ret;
+    }
+
+    // Asegurarse de que el contenido esté terminado en nulo
+    content[req->content_len] = '\0';
+
+    // Logear el contenido recibido
+    ESP_LOGI(TAG_JOY, "Datos recibidos: %s", content);
+
+    // Analizar el JSON para extraer los valores de x, y, z
+    int16_t x = 0, y = 0, z = 0;
+    sscanf(content, "{\"x\":%hd,\"y\":%hd,\"z\":%hd}", &x, &y, &z);
+
+    // Mostrar los valores en los logs
+    ESP_LOGI(TAG_JOY, "Joystick Data -> X: %d, Y: %d, Z: %d", x, y, z);
+
+    // Responder al cliente con una confirmación
+    const char resp[] = "{\"status\":\"success\"}";
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, resp, strlen(resp));
+
+    return ESP_OK;
 }
 
 /**
@@ -771,6 +814,15 @@ static httpd_handle_t http_server_configure(void)
 				.user_ctx = NULL
 		};
 		httpd_register_uri_handler(http_server_handle, &nipplejs_min_js);
+
+		// Handler para los datos del joystick
+        httpd_uri_t joystick_data_uri = {
+            .uri = "/joystick-data",
+            .method = HTTP_POST,
+            .handler = http_server_joystick_data_handler,
+            .user_ctx = NULL
+        };
+        httpd_register_uri_handler(http_server_handle, &joystick_data_uri);
 
 		return http_server_handle;
 	}
