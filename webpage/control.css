@@ -12,18 +12,28 @@ header {
     text-align: center;
 }
 
-.joystick-container {
-    display: inline-block;
-    width: 45%;
-    margin: 20px;
-    text-align: center;
+/* Contenedor principal para los joysticks */
+#joysticks {
+    display: flex; /* Usamos flexbox para alinear los joysticks en línea */
+    justify-content: space-around; /* Espacio uniforme entre los joysticks */
+    align-items: center; /* Centra verticalmente */
+    margin-top: 20px;
 }
 
+/* Cada contenedor de joystick */
+.joystick-container {
+    display: flex;
+    flex-direction: column; /* Organiza el título y el joystick en columna */
+    align-items: center; /* Centra todo horizontalmente */
+    width: 45%; /* Cada joystick ocupa casi la mitad del ancho */
+}
+
+/* Joysticks (círculos) */
 #joystick1, #joystick2 {
     width: 200px;
     height: 200px;
-    margin: 0 auto;
-    border: 2px solid #1d3557;
-    border-radius: 50%;
-    background: radial-gradient(circle, #e0e0e0, #c0c0c0);
+    border: 2px solid #1d3557; /* Borde azul oscuro */
+    border-radius: 50%; /* Hace el círculo */
+    background: radial-gradient(circle, #e0e0e0, #c0c0c0); /* Efecto degradado */
+    position: relative; /* Necesario para que el joystick (de nipple.js) esté dentro del círculo */
 }

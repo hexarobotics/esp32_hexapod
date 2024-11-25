@@ -51,8 +51,10 @@ const esp_timer_create_args_t fw_update_reset_args = {
 esp_timer_handle_t fw_update_reset;
 
 // Embedded files: JQuery, index.html, app.css, app.js, favicon.ico, control.html, control.css, control.js
-extern const uint8_t jquery_3_3_1_min_js_start[]    asm("_binary_jquery_3_3_1_min_js_start");
-extern const uint8_t jquery_3_3_1_min_js_end[]      asm("_binary_jquery_3_3_1_min_js_end");
+extern const uint8_t jquery_3_3_1_min_js_start[]   asm("_binary_jquery_3_3_1_min_js_start");
+extern const uint8_t jquery_3_3_1_min_js_end[]     asm("_binary_jquery_3_3_1_min_js_end");
+extern const uint8_t nipplejs_min_js_start[]       asm("_binary_nipplejs_min_js_start");
+extern const uint8_t nipplejs_min_js_end[]         asm("_binary_nipplejs_min_js_end");
 extern const uint8_t index_html_start[]            asm("_binary_index_html_start");
 extern const uint8_t index_html_end[]              asm("_binary_index_html_end");
 extern const uint8_t app_css_start[]               asm("_binary_app_css_start");
@@ -227,6 +229,66 @@ static esp_err_t http_server_favicon_ico_handler(httpd_req_t *req)
 	httpd_resp_send(req, (const char *)favicon_ico_start, favicon_ico_end - favicon_ico_start);
 
 	return ESP_OK;
+}
+
+/**
+ * control.html get handler is requested when accessing the control page.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_control_html_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "control.html requested");
+
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, (const char *)control_html_start, control_html_end - control_html_start);
+
+    return ESP_OK;
+}
+
+/**
+ * control.css get handler is requested when accessing the control page styles.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_control_css_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "control.css requested");
+
+    httpd_resp_set_type(req, "text/css");
+    httpd_resp_send(req, (const char *)control_css_start, control_css_end - control_css_start);
+
+    return ESP_OK;
+}
+
+/**
+ * control.js get handler is requested when accessing the control page script.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_control_js_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "control.js requested");
+
+    httpd_resp_set_type(req, "application/javascript");
+    httpd_resp_send(req, (const char *)control_js_start, control_js_end - control_js_start);
+
+    return ESP_OK;
+}
+
+/**
+ * nipplejs.min.js get handler is requested when accessing the nipple.js library.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_nipplejs_min_js_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "nipplejs.min.js requested");
+
+    httpd_resp_set_type(req, "application/javascript");
+    httpd_resp_send(req, (const char *)nipplejs_min_js_start, nipplejs_min_js_end - nipplejs_min_js_start);
+
+    return ESP_OK;
 }
 
 /**
@@ -566,6 +628,15 @@ static httpd_handle_t http_server_configure(void)
 		};
 		httpd_register_uri_handler(http_server_handle, &index_html);
 
+		// register /index.html handler
+		httpd_uri_t index_html_page = {
+			.uri = "/index.html",
+			.method = HTTP_GET,
+			.handler = http_server_index_html_handler,
+			.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &index_html_page);
+
 		// register app.css handler
 		httpd_uri_t app_css = {
 				.uri = "/app.css",
@@ -664,6 +735,42 @@ static httpd_handle_t http_server_configure(void)
 				.user_ctx = NULL
 		};
 		httpd_register_uri_handler(http_server_handle, &ap_ssid_json);
+
+		// register control.html handler
+		httpd_uri_t control_html = {
+				.uri = "/control.html",
+				.method = HTTP_GET,
+				.handler = http_server_control_html_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &control_html);
+
+		// register control.css handler
+		httpd_uri_t control_css = {
+				.uri = "/control.css",
+				.method = HTTP_GET,
+				.handler = http_server_control_css_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &control_css);
+
+		// register control.js handler
+		httpd_uri_t control_js = {
+				.uri = "/control.js",
+				.method = HTTP_GET,
+				.handler = http_server_control_js_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &control_js);
+
+		// register nipplejs.min.js handler
+		httpd_uri_t nipplejs_min_js = {
+				.uri = "/nipplejs.min.js",
+				.method = HTTP_GET,
+				.handler = http_server_nipplejs_min_js_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &nipplejs_min_js);
 
 		return http_server_handle;
 	}
