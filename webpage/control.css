@@ -27,29 +27,29 @@ header {
     display: flex;
     justify-content: space-between; /* Espacio entre los joysticks */
     align-items: center;
-    width: 90%; /* Espacio disponible horizontal */
-    height: 70%; /* Joysticks ocupan el 70% de la altura */
-    margin-top: 10px;
-    flex-wrap: wrap; /* Si el espacio no es suficiente, organiza en dos filas */
+    width: 100%; /* Usar todo el ancho */
+    height: calc(100% - 100px); /* Excluir el tamaño del header */
+    padding: 10px;
+    box-sizing: border-box;
 }
 
-/* Contenedores de los joysticks */
 .joystick-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: 48%; /* Cada joystick ocupa el 48% del ancho disponible */
-    height: 100%; /* Usan todo el espacio vertical */
+    width: 45%; /* Cada joystick ocupa un 45% del ancho */
+    height: 100%; /* Joysticks ocupan toda la altura disponible */
 }
 
-/* Estilo para los joysticks */
+/* Joysticks */
 #joystick1, #joystick2 {
     width: 90%; /* El joystick ocupa el 90% del ancho del contenedor */
     aspect-ratio: 1 / 1; /* Mantiene un aspecto cuadrado */
+    max-width: 150px; /* Tamaño máximo para evitar que sean enormes */
+    max-height: 150px;
     border: 2px solid #1d3557;
     border-radius: 50%; /* Hace el joystick circular */
     background: radial-gradient(circle, #e0e0e0, #c0c0c0);
     position: relative;
-    margin: 10px 0;
 }
