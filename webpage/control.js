@@ -1,44 +1,45 @@
-$(document).ready(function () {
-    // Función para ajustar el tamaño de los joysticks dinámicamente
-    function resizeJoysticks() {
-        const joystickContainers = document.querySelectorAll('.joystick-container');
-        const joysticks = document.querySelectorAll('#joystick1, #joystick2');
+// Función para ajustar el tamaño de los joysticks dinámicamente
+function adjustJoysticks()
+{
+    const joysticks = document.querySelectorAll("#joystick1, #joystick2");
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
-        joystickContainers.forEach((container, index) => {
-            const containerWidth = container.offsetWidth;
-            const containerHeight = container.offsetHeight;
+    // Tamaño dinámico basado en el menor entre ancho y alto
+    const size = Math.min(width * 0.4, height * 0.4); // 35% del ancho o alto
 
-            // Calcular tamaño en base al espacio disponible (90% del menor de ancho o alto)
-            const joystickSize = Math.min(containerWidth, containerHeight) * 0.9;
+    joysticks.forEach(joystick => {
+        joystick.style.width = `${size}px`;
+        joystick.style.height = `${size}px`;
+    });
+}
 
-            // Aplicar el tamaño calculado
-            joysticks[index].style.width = `${joystickSize}px`;
-            joysticks[index].style.height = `${joystickSize}px`;
-        });
-    }
+// Inicializa los joysticks y eventos al cargar la página
+$(document).ready(function ()
+{
+    // Ajusta los tamaños iniciales
+    adjustJoysticks();
 
-    // Ejecutar la función al cargar la página y al redimensionar la ventana
-    resizeJoysticks();
-    $(window).on('resize', resizeJoysticks);
-
-    // Inicializar los joysticks con nipple.js
+    // Joystick X-Y
     const joystick1 = nipplejs.create({
         zone: document.getElementById('joystick1'),
         mode: 'static',
         position: { left: '50%', top: '50%' },
         color: 'blue',
+        size: 200
     });
 
-    const joystick2 = nipplejs.create({
-        zone: document.getElementById('joystick2'),
-        mode: 'static',
-        position: { left: '50%', top: '50%' },
-        color: 'red',
+    // Cambia el tamaño del círculo interior
+    joystick1.on("added", function (evt, joystick) {
+        joystick.ui.front.style.width = "40%"; // 40% del tamaño del círculo exterior
+        joystick.ui.front.style.height = "40%";
     });
 
     // Eventos para Joystick X-Y
-    joystick1.on('move', function (evt, data) {
-        if (data && data.distance !== undefined && data.angle) {
+    joystick1.on('move', function (evt, data)
+    {
+        if (data && data.distance !== undefined && data.angle)
+        {
             const distance = data.distance.toFixed(2);
             const angleRad = data.angle.radian;
             const x = (distance * Math.cos(angleRad)).toFixed(2);
@@ -47,11 +48,23 @@ $(document).ready(function () {
         }
     });
 
-    joystick1.on('end', function () {
+    joystick1.on('end', function ()
+    {
         console.log('Joystick X-Y -> Liberado');
     });
 
     // Eventos para Joystick Z
+
+    // Joystick Z
+    const joystick2 = nipplejs.create(
+    {
+        zone: document.getElementById("joystick2"),
+        mode: "static",
+        position: { left: "50%", top: "50%" },
+        color: "red",
+        size: 200
+    });
+
     joystick2.on('move', function (evt, data) {
         if (data && data.distance !== undefined) {
             const z = data.distance.toFixed(2);
@@ -59,7 +72,6 @@ $(document).ready(function () {
         }
     });
 
-    joystick2.on('end', function () {
-        console.log('Joystick Z -> Liberado');
-    });
+    // Ajustar el tamaño de los joysticks dinámicamente al cambiar el tamaño de la ventana
+    window.addEventListener("resize", adjustJoysticks);
 });

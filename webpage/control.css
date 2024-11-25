@@ -2,19 +2,15 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    height: 100vh;
-    overflow: hidden;
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #f1f1f1;
 }
 
+/* Header styles */
 header {
     background-color: #3a3f58;
     color: #ffffff;
-    width: 100%;
-    padding: 10px 0;
+    padding: 10px;
     text-align: center;
 }
 
@@ -23,33 +19,33 @@ header {
     text-align: center;
 }
 
+/* Contenedor principal para los joysticks */
 #joysticks {
     display: flex;
-    justify-content: space-between; /* Espacio entre los joysticks */
-    align-items: center;
-    width: 100%; /* Usar todo el ancho */
-    height: calc(100% - 100px); /* Excluir el tamaño del header */
+    justify-content: space-around; /* Distribuye espacio entre los joysticks */
+    align-items: center; /* Centra verticalmente */
+    height: 100vh; /* Ocupa toda la altura de la ventana */
     padding: 10px;
-    box-sizing: border-box;
 }
 
+/* Cada contenedor de joystick */
 .joystick-container {
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 45%; /* Cada joystick ocupa un 45% del ancho */
-    height: 100%; /* Joysticks ocupan toda la altura disponible */
+    flex-direction: column; /* Coloca el título encima del joystick */
+    align-items: center; /* Centra horizontalmente */
+    flex: 1; /* Cada joystick ocupa el mismo espacio proporcional */
+    margin: 10px;
 }
 
-/* Joysticks */
+/* Joysticks (círculos) */
 #joystick1, #joystick2 {
-    width: 90%; /* El joystick ocupa el 90% del ancho del contenedor */
-    aspect-ratio: 1 / 1; /* Mantiene un aspecto cuadrado */
-    max-width: 150px; /* Tamaño máximo para evitar que sean enormes */
-    max-height: 150px;
-    border: 2px solid #1d3557;
-    border-radius: 50%; /* Hace el joystick circular */
-    background: radial-gradient(circle, #e0e0e0, #c0c0c0);
-    position: relative;
+    aspect-ratio: 1 / 1; /* Mantiene el círculo proporcional */
+    max-width: 50%; /* Máximo 35% del ancho de la ventana */
+    max-height: 50vh; /* Máximo 35% de la altura visible */
+    min-width: 150px; /* Tamaño mínimo para evitar que se reduzcan demasiado */
+    min-height: 150px;
+    border: 2px solid #1d3557; /* Borde azul oscuro */
+    border-radius: 70%; /* Hace el círculo */
+    background: radial-gradient(circle, #e0e0e0, #c0c0c0); /* Efecto degradado */
+    position: relative; /* Necesario para nipple.js */
 }
