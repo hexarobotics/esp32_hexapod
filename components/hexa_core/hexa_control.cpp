@@ -18,7 +18,7 @@ namespace hexapod
     }
 
 
-    control_mode_e set_control_mode( control_mode_e new_mode )
+    void set_control_mode( control_mode_e new_mode )
     {
         modo_control = new_mode;
     }
