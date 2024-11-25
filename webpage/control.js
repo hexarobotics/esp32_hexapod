@@ -17,12 +17,14 @@ $(document).ready(function () {
 
     // Evento para el joystick X-Y
     joystick1.on('move', function (evt, data) {
-        if (data && data.vector) { // Verificar que data y data.vector existen
-            const x = data.vector.x.toFixed(2);
-            const y = data.vector.y.toFixed(2);
-            console.log(`Joystick X-Y -> X: ${x}, Y: ${y}`);
+        if (data && data.distance !== undefined && data.angle) {
+            const distance = data.distance.toFixed(2); // Distancia desde el centro
+            const angleRad = data.angle.radian; // Ángulo en radianes
+            const x = (distance * Math.cos(angleRad)).toFixed(2); // Calcular X
+            const y = (distance * Math.sin(angleRad)).toFixed(2); // Calcular Y
+            console.log(`Joystick X-Y -> X: ${x}, Y: ${y}, Distancia: ${distance}`);
         } else {
-            console.warn('Joystick X-Y: Datos de movimiento incompletos', data);
+            console.warn('Joystick X-Y: Movimiento no detectado', data);
         }
     });
 
@@ -32,11 +34,11 @@ $(document).ready(function () {
 
     // Evento para el joystick Z
     joystick2.on('move', function (evt, data) {
-        if (data && data.distance !== undefined) { // Verificar que data y data.distance existen
-            const z = data.distance.toFixed(2);
+        if (data && data.distance !== undefined) {
+            const z = data.distance.toFixed(2); // Distancia como control Z
             console.log(`Joystick Z -> Distance: ${z}`);
         } else {
-            console.warn('Joystick Z: Datos de movimiento incompletos', data);
+            console.warn('Joystick Z: Movimiento no detectado', data);
         }
     });
 
