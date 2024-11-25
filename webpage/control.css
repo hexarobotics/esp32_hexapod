@@ -1,4 +1,3 @@
-
 /* Styling for the Control Page */
 header {
     background-color: #3a3f58;
@@ -14,18 +13,19 @@ header {
 
 /* Contenedor principal para los joysticks */
 #joysticks {
-    display: flex; /* Usamos flexbox para alinear los joysticks en línea */
-    justify-content: space-around; /* Espacio uniforme entre los joysticks */
-    align-items: center; /* Centra verticalmente */
+    display: flex; /* Alinear en fila */
+    justify-content: space-around; /* Espaciado uniforme */
+    align-items: center; /* Centrado vertical */
     margin-top: 20px;
+    gap: 20px; /* Espacio extra entre los joysticks */
 }
 
 /* Cada contenedor de joystick */
 .joystick-container {
     display: flex;
-    flex-direction: column; /* Organiza el título y el joystick en columna */
-    align-items: center; /* Centra todo horizontalmente */
-    width: 45%; /* Cada joystick ocupa casi la mitad del ancho */
+    flex-direction: column; /* Título y joystick en columna */
+    align-items: center; /* Centrado horizontal */
+    width: 45%; /* Ajustar ancho */
 }
 
 /* Joysticks (círculos) */
@@ -33,7 +33,13 @@ header {
     width: 200px;
     height: 200px;
     border: 2px solid #1d3557; /* Borde azul oscuro */
-    border-radius: 50%; /* Hace el círculo */
+    border-radius: 50%; /* Círculo perfecto */
     background: radial-gradient(circle, #e0e0e0, #c0c0c0); /* Efecto degradado */
-    position: relative; /* Necesario para que el joystick (de nipple.js) esté dentro del círculo */
+    position: relative; /* Necesario para nipple.js */
+    overflow: hidden; /* Evitar elementos fuera del contenedor */
+    margin: 10px auto; /* Centrarlos con márgenes */
+}
+
+.joystick-container h2 {
+    margin-bottom: 10px; /* Separar el título del joystick */
 }
