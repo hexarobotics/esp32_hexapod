@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="app.css">
+    <link rel="stylesheet" href="control.css">
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="nipplejs.min.js"></script>
+    <script src="control.js" defer></script>
+    <title>Robot Control</title>
+</head>
+<body>
+    <header>
+        <h1>Robot Control</h1>
+        <div class="buttons">
+            <input type="button" value="Back to Home" onclick="window.location.href='index.html';" />
+        </div>
+    </header>
+    
+    <section id="joysticks">
+        <div id="joystick-left" class="joystick-container">
+            <h2>Joystick X-Y</h2>
+            <div id="joystick1"></div>
+        </div>
+        <div id="joystick-right" class="joystick-container">
+            <h2>Joystick Z</h2>
+            <div id="joystick2"></div>
+        </div>
+    </section>
+</body>
+</html>

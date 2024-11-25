@@ -1,0 +1,29 @@
+
+/* Styling for the Control Page */
+header {
+    background-color: #3a3f58;
+    color: #ffffff;
+    padding: 10px;
+    text-align: center;
+}
+
+.buttons {
+    margin: 10px;
+    text-align: center;
+}
+
+.joystick-container {
+    display: inline-block;
+    width: 45%;
+    margin: 20px;
+    text-align: center;
+}
+
+#joystick1, #joystick2 {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border: 2px solid #1d3557;
+    border-radius: 50%;
+    background: radial-gradient(circle, #e0e0e0, #c0c0c0);
+}

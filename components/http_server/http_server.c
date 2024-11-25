@@ -50,17 +50,23 @@ const esp_timer_create_args_t fw_update_reset_args = {
 };
 esp_timer_handle_t fw_update_reset;
 
-// Embedded files: JQuery, index.html, app.css, app.js and favicon.ico files
-extern const uint8_t jquery_3_3_1_min_js_start[]	asm("_binary_jquery_3_3_1_min_js_start");
-extern const uint8_t jquery_3_3_1_min_js_end[]		asm("_binary_jquery_3_3_1_min_js_end");
-extern const uint8_t index_html_start[]				asm("_binary_index_html_start");
-extern const uint8_t index_html_end[]				asm("_binary_index_html_end");
-extern const uint8_t app_css_start[]				asm("_binary_app_css_start");
-extern const uint8_t app_css_end[]					asm("_binary_app_css_end");
-extern const uint8_t app_js_start[]					asm("_binary_app_js_start");
-extern const uint8_t app_js_end[]					asm("_binary_app_js_end");
-extern const uint8_t favicon_ico_start[]			asm("_binary_favicon_ico_start");
-extern const uint8_t favicon_ico_end[]				asm("_binary_favicon_ico_end");
+// Embedded files: JQuery, index.html, app.css, app.js, favicon.ico, control.html, control.css, control.js
+extern const uint8_t jquery_3_3_1_min_js_start[]    asm("_binary_jquery_3_3_1_min_js_start");
+extern const uint8_t jquery_3_3_1_min_js_end[]      asm("_binary_jquery_3_3_1_min_js_end");
+extern const uint8_t index_html_start[]            asm("_binary_index_html_start");
+extern const uint8_t index_html_end[]              asm("_binary_index_html_end");
+extern const uint8_t app_css_start[]               asm("_binary_app_css_start");
+extern const uint8_t app_css_end[]                 asm("_binary_app_css_end");
+extern const uint8_t app_js_start[]                asm("_binary_app_js_start");
+extern const uint8_t app_js_end[]                  asm("_binary_app_js_end");
+extern const uint8_t favicon_ico_start[]           asm("_binary_favicon_ico_start");
+extern const uint8_t favicon_ico_end[]             asm("_binary_favicon_ico_end");
+extern const uint8_t control_html_start[]          asm("_binary_control_html_start");
+extern const uint8_t control_html_end[]            asm("_binary_control_html_end");
+extern const uint8_t control_css_start[]           asm("_binary_control_css_start");
+extern const uint8_t control_css_end[]             asm("_binary_control_css_end");
+extern const uint8_t control_js_start[]            asm("_binary_control_js_start");
+extern const uint8_t control_js_end[]              asm("_binary_control_js_end");
 
 /**
  * Checks the g_fw_update_status and creates the fw_update_reset timer if g_fw_update_status is true.
