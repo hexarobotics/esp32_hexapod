@@ -1,4 +1,3 @@
-
 // Variables globales para almacenar las coordenadas como int16_t
 let x = 0, y = 0, z = 0;
 
@@ -15,27 +14,23 @@ function sendJoystickData() {
     // Verificar si ha habido cambios en las coordenadas antes de enviarlas
     if (x !== lastX || y !== lastY || z !== lastZ) {
         // Crea un objeto con los datos a enviar
-        const data = {
-            x: x,
-            y: y,
-            z: z
-        };
+        const data = { x, y, z };
 
         // Enviar los datos al servidor
         fetch('/joystick-data', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
         })
-        .then(response => response.json())
-        .then(result => {
-            console.log('Datos enviados al ESP32:', result);
-        })
-        .catch(error => {
-            console.error('Error enviando datos al ESP32:', error);
-        });
+            .then((response) => response.json())
+            .then((result) => {
+                console.log('Datos enviados al ESP32:', result);
+            })
+            .catch((error) => {
+                console.error('Error enviando datos al ESP32:', error);
+            });
 
         // Actualizamos los últimos valores enviados
         lastX = x;
@@ -46,70 +41,101 @@ function sendJoystickData() {
     }
 }
 
+// Inicializar el joystick X-Y
+function initJoystickXY() {
+    const container = document.getElementById('joystick1');
+    const joystick = document.createElement('div');
+    joystick.className = 'joystick';
+    container.appendChild(joystick);
 
-$(document).ready(function () {
-    // Crear joystick X-Y
-    const joystick1 = nipplejs.create({
-        zone: document.getElementById("joystick1"),
-        mode: "static",
-        position: { left: "50%", top: "50%" },
-        color: "blue",
-        size: 105 // Tamaño fijo para el joystick
+    const maxOffset = () => container.offsetWidth / 2 - joystick.offsetWidth / 2;
+
+    let isDragging = false;
+
+    // Eventos del mouse
+    joystick.addEventListener('mousedown', () => {
+        isDragging = true;
     });
-
-    // Crear joystick Z
-    const joystick2 = nipplejs.create({
-        zone: document.getElementById("joystick2"),
-        mode: "static",
-        position: { left: "50%", top: "50%" },
-        color: "red",
-        size: 105 // Tamaño fijo para el joystick
-    });
-
-    // Eventos para joystick X-Y
-    joystick1.on("move", function (evt, data) {
-        if (data && data.distance !== undefined && data.angle) {
-            const distance = data.distance;
-            const angleRad = data.angle.radian;
-
-            // Calcular las coordenadas x, y
-            let rawX = distance * Math.cos(angleRad);
-            let rawY = distance * Math.sin(angleRad);
-
-            // Limitar los valores a int16_t
-            x = clampInt16(rawX);
-            y = clampInt16(rawY);
-
-            console.log(`Joystick X-Y -> X: ${x}, Y: ${y}`);
-        }
-    });
-
-    joystick1.on("end", function () {
-        console.log("Joystick X-Y -> Liberado");
-        // Restablecer las coordenadas a cero al liberar el joystick
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
         x = 0;
         y = 0;
+        joystick.style.left = '50%';
+        joystick.style.top = '50%';
     });
+    document.addEventListener('mousemove', (event) => {
+        if (!isDragging) return;
 
-    // Eventos para joystick Z
-    joystick2.on("move", function (evt, data) {
-        if (data && data.distance !== undefined) {
-            let rawZ = data.distance;
+        const rect = container.getBoundingClientRect();
+        const centerX = rect.left + container.offsetWidth / 2;
+        const centerY = rect.top + container.offsetHeight / 2;
 
-            // Limitar Z a int16_t
-            z = clampInt16(rawZ);
+        const rawX = event.clientX - centerX;
+        const rawY = event.clientY - centerY;
 
-            console.log(`Joystick Z -> Distance: ${z}`);
+        const distance = Math.sqrt(rawX * rawX + rawY * rawY);
+        const maxDist = maxOffset();
+
+        if (distance > maxDist) {
+            const angle = Math.atan2(rawY, rawX);
+            x = clampInt16(maxDist * Math.cos(angle));
+            y = clampInt16(maxDist * Math.sin(angle));
+        } else {
+            x = clampInt16(rawX);
+            y = clampInt16(rawY);
         }
-    });
 
-    // Restablece Z a 0 cuando se suelta el joystick Z
-    joystick2.on("end", function () {
-        console.log("Joystick Z -> Liberado");
+        joystick.style.left = `${50 + (x / maxDist) * 50}%`;
+        joystick.style.top = `${50 + (y / maxDist) * 50}%`;
+    });
+}
+
+// Inicializar el joystick Z
+function initJoystickZ() {
+    const container = document.getElementById('joystick2');
+    const joystick = document.createElement('div');
+    joystick.className = 'joystick';
+    container.appendChild(joystick);
+
+    const maxOffset = () => container.offsetWidth / 2 - joystick.offsetWidth / 2;
+
+    let isDragging = false;
+
+    // Eventos del mouse
+    joystick.addEventListener('mousedown', () => {
+        isDragging = true;
+    });
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
         z = 0;
+        joystick.style.left = '50%';
+        joystick.style.top = '50%';
     });
+    document.addEventListener('mousemove', (event) => {
+        if (!isDragging) return;
 
-    // Función para verificar y enviar los datos cada 100 ms
+        const rect = container.getBoundingClientRect();
+        const centerY = rect.top + container.offsetHeight / 2;
+
+        let rawZ = event.clientY - centerY;
+
+        // Limitar Z al rango permitido
+        z = clampInt16(rawZ);
+        const maxDist = maxOffset();
+
+        if (Math.abs(z) > maxDist) {
+            z = clampInt16(maxDist * Math.sign(z));
+        }
+
+        joystick.style.top = `${50 + (z / maxDist) * 50}%`;
+    });
+}
+
+// Inicializar joysticks al cargar el DOM
+document.addEventListener('DOMContentLoaded', () => {
+    initJoystickXY();
+    initJoystickZ();
+
+    // Verificar y enviar los datos cada 100 ms
     setInterval(sendJoystickData, 100);
-
 });

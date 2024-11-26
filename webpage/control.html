@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="app.css">
     <link rel="stylesheet" href="control.css">
     <script src="jquery-3.3.1.min.js"></script>
-    <script src="nipplejs.min.js"></script>
     <script src="control.js" defer></script>
     <title>Robot Control</title>
 </head>
@@ -18,13 +17,15 @@
         </div>
     </header>
     <section id="joysticks">
+        <!-- Joystick para controlar X-Y -->
         <div id="joystick-left" class="joystick-container">
             <h2>Joystick X-Y</h2>
-            <div id="joystick1"></div>
+            <div id="joystick1" class="joystick"></div>
         </div>
+        <!-- Joystick para controlar Z -->
         <div id="joystick-right" class="joystick-container">
             <h2>Joystick Z</h2>
-            <div id="joystick2"></div>
+            <div id="joystick2" class="joystick"></div>
         </div>
     </section>
 </body>
