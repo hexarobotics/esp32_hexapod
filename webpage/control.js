@@ -10,7 +10,7 @@ function clampInt16(value) {
     return Math.max(Math.min(Math.round(value), 32767), -32768);
 }
 
-// Función para enviar datos de los joysticks al servidor
+// Función para enviar datos de los joysticks al servidor cada 100ms
 function sendJoystickData() {
     if (x !== lastX || y !== lastY || z !== lastZ) {
         const data = { x, y, z };
@@ -48,12 +48,12 @@ function calculateJoystickPosition(touch, container, outerRadius) {
 
     // Normalizar la distancia al radio exterior
     const normalizedDistance = Math.min(distance, outerRadius);
-    
+
     return {
         x: normalizedDistance * Math.cos(angle) / outerRadius,
         y: normalizedDistance * Math.sin(angle) / outerRadius,
         rawX: deltaX,
-        rawY: deltaY
+        rawY: deltaY,
     };
 }
 
@@ -72,7 +72,7 @@ function initJoystick(containerId, axis) {
             if (activeTouchId === null) {
                 const touch = event.changedTouches[0];
                 activeTouchId = touch.identifier;
-                
+
                 const position = calculateJoystickPosition(touch, container, outerRadius);
                 joystick.style.left = `${50 + position.x * 50}%`;
                 joystick.style.top = `${50 + position.y * 50}%`;
@@ -84,7 +84,6 @@ function initJoystick(containerId, axis) {
                     z = clampInt16(position.rawY / outerRadius * 32767);
                 }
 
-                sendJoystickData();
                 event.preventDefault();
             }
         }, { passive: false });
@@ -104,7 +103,6 @@ function initJoystick(containerId, axis) {
                 z = clampInt16(position.rawY / outerRadius * 32767);
             }
 
-            sendJoystickData();
             event.preventDefault();
         }, { passive: false });
 
@@ -122,8 +120,6 @@ function initJoystick(containerId, axis) {
             } else if (axis === 'z') {
                 z = 0;
             }
-
-            sendJoystickData();
         });
     } else {
         // Comportamiento para dispositivos PC
@@ -140,8 +136,6 @@ function initJoystick(containerId, axis) {
                     } else if (axis === 'z') {
                         z = clampInt16(position.rawY / outerRadius * 32767);
                     }
-
-                    sendJoystickData();
                 },
                 end() {
                     joystick.style.left = '50%';
@@ -153,16 +147,17 @@ function initJoystick(containerId, axis) {
                     } else if (axis === 'z') {
                         z = 0;
                     }
-
-                    sendJoystickData();
                 },
             },
         });
     }
 }
 
-// Inicializar ambos joysticks
+// Inicializar ambos joysticks y configurar el envío de datos cada 100ms
 document.addEventListener('DOMContentLoaded', () => {
     initJoystick('joystick1', 'xy');
     initJoystick('joystick2', 'z');
+
+    // Configurar el intervalo de envío de datos cada 100ms
+    setInterval(sendJoystickData, 100);
 });
