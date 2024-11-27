@@ -44,14 +44,14 @@ function calculateJoystickPosition(touch, container, outerRadius) {
     const deltaY = touch.clientY - centerY;
 
     const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+
+    // Limitar la distancia al radio máximo (outerRadius)
+    const limitedDistance = Math.min(distance, outerRadius);
     const angle = Math.atan2(deltaY, deltaX);
 
-    // Normalizar la distancia al radio exterior
-    const normalizedDistance = Math.min(distance, outerRadius);
-
     return {
-        x: normalizedDistance * Math.cos(angle) / outerRadius,
-        y: normalizedDistance * Math.sin(angle) / outerRadius,
+        x: limitedDistance * Math.cos(angle) / outerRadius,
+        y: limitedDistance * Math.sin(angle) / outerRadius,
         rawX: deltaX,
         rawY: deltaY,
     };
@@ -78,9 +78,8 @@ function initJoystick(containerId, axis) {
 
                 if (axis === 'xy') {
                     x = clampInt16(position.rawX / outerRadius * 32767);
-                    y = -clampInt16(position.rawY / outerRadius * 32767);
+                    y = clampInt16(-position.rawY / outerRadius * 32767); // Invertir el eje Y
                 } else if (axis === 'z') {
-                    // Z depende de deltaX para dirección positiva o negativa
                     z = clampInt16(position.rawX / outerRadius * 32767);
                 }
 
@@ -98,9 +97,8 @@ function initJoystick(containerId, axis) {
 
             if (axis === 'xy') {
                 x = clampInt16(position.rawX / outerRadius * 32767);
-                y = -clampInt16(position.rawY / outerRadius * 32767);
+                y = clampInt16(-position.rawY / outerRadius * 32767); // Invertir el eje Y
             } else if (axis === 'z') {
-                // Z depende de deltaX para dirección positiva o negativa
                 z = clampInt16(position.rawX / outerRadius * 32767);
             }
 
@@ -133,9 +131,8 @@ function initJoystick(containerId, axis) {
 
                     if (axis === 'xy') {
                         x = clampInt16(position.rawX / outerRadius * 32767);
-                        y = -clampInt16(position.rawY / outerRadius * 32767);
+                        y = clampInt16(-position.rawY / outerRadius * 32767); // Invertir el eje Y
                     } else if (axis === 'z') {
-                        // Z depende de deltaX para dirección positiva o negativa
                         z = clampInt16(position.rawX / outerRadius * 32767);
                     }
                 },
