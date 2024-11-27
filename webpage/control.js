@@ -5,6 +5,9 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 let x = 0, y = 0, z = 0;
 let lastX = 0, lastY = 0, lastZ = 0;
 
+// Almacenar los radios y dimensiones recalculados de los joysticks
+const joystickData = {};
+
 // Función para limitar valores a un rango válido
 function clampInt16(value) {
     return Math.max(Math.min(Math.round(value), 32767), -32768);
@@ -35,8 +38,9 @@ function sendJoystickData() {
 }
 
 // Función para calcular la posición del joystick
-function calculateJoystickPosition(touch, container, outerRadius) {
-    const rect = container.getBoundingClientRect();
+function calculateJoystickPosition(touch, containerId) {
+    const { outerRadius, rect } = joystickData[containerId];
+
     const centerX = rect.left + outerRadius;
     const centerY = rect.top + outerRadius;
 
@@ -62,25 +66,29 @@ function initJoystick(containerId, axis) {
     const container = document.getElementById(containerId).parentNode;
     const joystick = document.getElementById(containerId);
 
-    const outerRadius = container.offsetWidth / 2;
+    joystickData[containerId] = {
+        outerRadius: container.offsetWidth / 2,
+        rect: container.getBoundingClientRect(),
+    };
 
     let activeTouchId = null;
 
     if (isMobile) {
         container.addEventListener('touchstart', (event) => {
             if (activeTouchId === null) {
+                joystickData[containerId].rect = container.getBoundingClientRect(); // Recalcular posición
                 const touch = event.changedTouches[0];
                 activeTouchId = touch.identifier;
 
-                const position = calculateJoystickPosition(touch, container, outerRadius);
+                const position = calculateJoystickPosition(touch, containerId);
                 joystick.style.left = `${50 + position.x * 50}%`;
                 joystick.style.top = `${50 + position.y * 50}%`;
 
                 if (axis === 'xy') {
-                    x = clampInt16(position.rawX / outerRadius * 32767);
-                    y = clampInt16(-position.rawY / outerRadius * 32767); // Invertir el eje Y
+                    x = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
+                    y = clampInt16(-position.rawY / joystickData[containerId].outerRadius * 32767);
                 } else if (axis === 'z') {
-                    z = clampInt16(position.rawX / outerRadius * 32767);
+                    z = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
                 }
 
                 event.preventDefault();
@@ -91,15 +99,15 @@ function initJoystick(containerId, axis) {
             const touch = Array.from(event.touches).find(t => t.identifier === activeTouchId);
             if (!touch) return;
 
-            const position = calculateJoystickPosition(touch, container, outerRadius);
+            const position = calculateJoystickPosition(touch, containerId);
             joystick.style.left = `${50 + position.x * 50}%`;
             joystick.style.top = `${50 + position.y * 50}%`;
 
             if (axis === 'xy') {
-                x = clampInt16(position.rawX / outerRadius * 32767);
-                y = clampInt16(-position.rawY / outerRadius * 32767); // Invertir el eje Y
+                x = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
+                y = clampInt16(-position.rawY / joystickData[containerId].outerRadius * 32767);
             } else if (axis === 'z') {
-                z = clampInt16(position.rawX / outerRadius * 32767);
+                z = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
             }
 
             event.preventDefault();
@@ -125,15 +133,15 @@ function initJoystick(containerId, axis) {
         interact(joystick).draggable({
             listeners: {
                 move(event) {
-                    const position = calculateJoystickPosition(event, container, outerRadius);
+                    const position = calculateJoystickPosition(event, containerId);
                     joystick.style.left = `${50 + position.x * 50}%`;
                     joystick.style.top = `${50 + position.y * 50}%`;
 
                     if (axis === 'xy') {
-                        x = clampInt16(position.rawX / outerRadius * 32767);
-                        y = clampInt16(-position.rawY / outerRadius * 32767); // Invertir el eje Y
+                        x = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
+                        y = clampInt16(-position.rawY / joystickData[containerId].outerRadius * 32767);
                     } else if (axis === 'z') {
-                        z = clampInt16(position.rawX / outerRadius * 32767);
+                        z = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
                     }
                 },
                 end() {
@@ -152,15 +160,21 @@ function initJoystick(containerId, axis) {
     }
 }
 
-// Reajustar el diseño al cambiar de orientación
+// Reajustar el diseño y recalcular los radios al cambiar orientación
 function adjustJoysticksLayout() {
     const joysticks = document.getElementById('joysticks');
     if (window.innerWidth > window.innerHeight) {
         joysticks.style.flexDirection = 'row'; // Horizontal en landscape
     } else {
         joysticks.style.flexDirection = 'row'; // Horizontal en portrait
-        joysticks.style.justifyContent = 'space-around'; // Distribuir equitativamente
     }
+
+    // Recalcular dimensiones y posiciones
+    Object.keys(joystickData).forEach((id) => {
+        const container = document.getElementById(id).parentNode;
+        joystickData[id].outerRadius = container.offsetWidth / 2;
+        joystickData[id].rect = container.getBoundingClientRect();
+    });
 }
 
 // Inicializar ambos joysticks y configurar el envío de datos cada 100ms
