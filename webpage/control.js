@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.documentElement.requestFullscreen().catch((err) => {
                 alert(`Error al entrar en modo pantalla completa: ${err.message} (${err.name})`);
             });
-            fullscreenBtn.value = "Exit";
+            fullscreenBtn.value = "Exit FS";
         } else {
             document.exitFullscreen();
             fullscreenBtn.value = "Full Screen";
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!document.fullscreenElement) {
             fullscreenBtn.value = "Full Screen";
         } else {
-            fullscreenBtn.value = "Exit";
+            fullscreenBtn.value = "Exit FS";
         }
     });
 
