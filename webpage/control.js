@@ -78,7 +78,7 @@ function initJoystick(containerId, axis) {
 
                 if (axis === 'xy') {
                     x = clampInt16(position.rawX / outerRadius * 32767);
-                    y = clampInt16(position.rawY / outerRadius * 32767);
+                    y = -clampInt16(position.rawY / outerRadius * 32767);
                 } else if (axis === 'z') {
                     // Z depende de deltaX para dirección positiva o negativa
                     z = clampInt16(position.rawX / outerRadius * 32767);
@@ -98,7 +98,7 @@ function initJoystick(containerId, axis) {
 
             if (axis === 'xy') {
                 x = clampInt16(position.rawX / outerRadius * 32767);
-                y = clampInt16(position.rawY / outerRadius * 32767);
+                y = -clampInt16(position.rawY / outerRadius * 32767);
             } else if (axis === 'z') {
                 // Z depende de deltaX para dirección positiva o negativa
                 z = clampInt16(position.rawX / outerRadius * 32767);
@@ -133,7 +133,7 @@ function initJoystick(containerId, axis) {
 
                     if (axis === 'xy') {
                         x = clampInt16(position.rawX / outerRadius * 32767);
-                        y = clampInt16(position.rawY / outerRadius * 32767);
+                        y = -clampInt16(position.rawY / outerRadius * 32767);
                     } else if (axis === 'z') {
                         // Z depende de deltaX para dirección positiva o negativa
                         z = clampInt16(position.rawX / outerRadius * 32767);

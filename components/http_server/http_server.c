@@ -182,7 +182,7 @@ static esp_err_t http_server_joystick_data_handler(httpd_req_t *req)
     content[req->content_len] = '\0';
 
     // Logear el contenido recibido
-    ESP_LOGI(TAG_JOY, "Datos recibidos: %s", content);
+    //ESP_LOGI(TAG_JOY, "Datos recibidos: %s", content);
 
     // Analizar el JSON para extraer los valores de x, y, z
     int16_t x = 0, y = 0, z = 0;
