@@ -14,6 +14,7 @@ function clampInt16(value) {
 
 // Función para enviar datos de los joysticks al servidor
 function sendJoystickData() {
+    // Enviar solo si hay cambios
     if (x !== lastX || y !== lastY || z !== lastZ) {
         const data = { x, y, z };
 
@@ -22,13 +23,13 @@ function sendJoystickData() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
         })
-        .then((response) => response.json())
-        .then((result) => {
-            console.log('Datos enviados al servidor:', result);
-        })
-        .catch((error) => {
-            console.error('Error enviando datos al servidor:', error);
-        });
+            .then((response) => response.json())
+            .then((result) => {
+                console.log('Datos enviados al servidor:', result);
+            })
+            .catch((error) => {
+                console.error('Error enviando datos al servidor:', error);
+            });
 
         // Actualizar últimos valores enviados
         lastX = x;
@@ -59,12 +60,13 @@ function initJoystick(containerId, axis) {
         joystick.addEventListener('touchmove', (event) => {
             event.preventDefault(); // Evitar el scroll en móviles
             const touch = event.touches[0];
-            const deltaX = touch.clientX - startX;
-            const deltaY = touch.clientY - startY;
 
             const rect = container.getBoundingClientRect();
             const centerX = rect.left + outerRadius;
             const centerY = rect.top + outerRadius;
+
+            const deltaX = touch.clientX - centerX;
+            const deltaY = touch.clientY - centerY;
 
             const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
 
@@ -79,10 +81,10 @@ function initJoystick(containerId, axis) {
 
             // Actualizar valores según el eje
             if (axis === 'xy') {
-                x = clampInt16((deltaX / outerRadius) * 32767);
-                y = clampInt16((deltaY / outerRadius) * 32767);
+                x = clampInt16((deltaX / (outerRadius - innerRadius)) * 32767);
+                y = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
             } else if (axis === 'z') {
-                z = clampInt16((deltaY / outerRadius) * 32767);
+                z = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
             }
 
             sendJoystickData();
@@ -131,10 +133,10 @@ function initJoystick(containerId, axis) {
 
                     // Actualizar valores según el eje
                     if (axis === 'xy') {
-                        x = clampInt16((deltaX / outerRadius) * 32767);
-                        y = clampInt16((deltaY / outerRadius) * 32767);
+                        x = clampInt16((deltaX / (outerRadius - innerRadius)) * 32767);
+                        y = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
                     } else if (axis === 'z') {
-                        z = clampInt16((deltaY / outerRadius) * 32767);
+                        z = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
                     }
 
                     sendJoystickData();
@@ -161,7 +163,4 @@ function initJoystick(containerId, axis) {
 document.addEventListener('DOMContentLoaded', () => {
     initJoystick('joystick1', 'xy');
     initJoystick('joystick2', 'z');
-
-    // Enviar datos regularmente aunque no haya interacción
-    setInterval(sendJoystickData, 100);
 });
