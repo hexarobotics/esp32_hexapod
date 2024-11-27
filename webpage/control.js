@@ -1,33 +1,9 @@
-// Variables globales para coordenadas
-let x = 0, y = 0, z = 0;
-let lastX = 0, lastY = 0, lastZ = 0;
+// Variables globales
+let x = 0, y = 0, z = 0; // Coordenadas de los joysticks
 
-// Función para limitar valores dentro del rango permitido
+// Función para limitar valores a un rango válido
 function clampInt16(value) {
     return Math.max(Math.min(Math.round(value), 32767), -32768);
-}
-
-// Función para enviar datos del joystick
-function sendJoystickData() {
-    if (x !== lastX || y !== lastY || z !== lastZ) {
-        const data = { x, y, z };
-
-        // Log de los valores actuales
-        console.log(`Enviando datos: X=${x}, Y=${y}, Z=${z}`);
-
-        fetch('/joystick-data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        })
-            .then((response) => response.json())
-            .then((result) => console.log('Datos enviados:', result))
-            .catch((error) => console.error('Error enviando datos:', error));
-
-        lastX = x;
-        lastY = y;
-        lastZ = z;
-    }
 }
 
 // Inicializar joystick con Interact.js
@@ -39,6 +15,7 @@ function initJoystick(containerId, axis) {
     const innerRadius = joystick.offsetWidth / 2; // Radio del círculo interior
 
     interact(joystick).draggable({
+        inertia: false,
         listeners: {
             move(event) {
                 const rect = container.getBoundingClientRect();
@@ -50,17 +27,17 @@ function initJoystick(containerId, axis) {
 
                 const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
 
-                // Limitar el joystick al borde del círculo exterior
-                if (distance <= outerRadius) {
+                // Limitar el movimiento al borde del círculo
+                if (distance <= outerRadius - innerRadius) {
                     joystick.style.left = `${50 + (deltaX / outerRadius) * 50}%`;
                     joystick.style.top = `${50 + (deltaY / outerRadius) * 50}%`;
                 } else {
                     const angle = Math.atan2(deltaY, deltaX);
-                    joystick.style.left = `${50 + (Math.cos(angle) * outerRadius) / outerRadius * 50}%`;
-                    joystick.style.top = `${50 + (Math.sin(angle) * outerRadius) / outerRadius * 50}%`;
+                    joystick.style.left = `${50 + (Math.cos(angle) * (outerRadius - innerRadius)) / outerRadius * 50}%`;
+                    joystick.style.top = `${50 + (Math.sin(angle) * (outerRadius - innerRadius)) / outerRadius * 50}%`;
                 }
 
-                // Actualizar valores según el eje
+                // Actualizar coordenadas
                 if (axis === 'xy') {
                     x = clampInt16((deltaX / outerRadius) * 32767);
                     y = clampInt16((deltaY / outerRadius) * 32767);
@@ -68,11 +45,10 @@ function initJoystick(containerId, axis) {
                     z = clampInt16((deltaY / outerRadius) * 32767);
                 }
 
-                // Log de valores
                 console.log(`Joystick ${axis.toUpperCase()}: X=${x}, Y=${y}, Z=${z}`);
             },
-            end(event) {
-                // Resetear el joystick al centro
+            end() {
+                // Volver al centro al soltar
                 joystick.style.left = '50%';
                 joystick.style.top = '50%';
 
@@ -89,9 +65,8 @@ function initJoystick(containerId, axis) {
     });
 }
 
-// Inicializar joysticks al cargar el DOM
+// Inicializar ambos joysticks
 document.addEventListener('DOMContentLoaded', () => {
     initJoystick('joystick1', 'xy');
     initJoystick('joystick2', 'z');
-    setInterval(sendJoystickData, 100); // Enviar datos cada 100 ms
 });

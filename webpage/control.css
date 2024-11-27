@@ -7,6 +7,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    overscroll-behavior-y: none;
     height: 100vh;
 }
 
@@ -56,10 +57,10 @@ header .buttons input:hover {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-top: 100px; /* Espacio suficiente debajo del encabezado */
-    width: 90%;
-    max-width: 1000px; /* Limita el tamaño en pantallas grandes */
-    gap: 40px;
+    margin-top: 100px;
+    width: 100%; /* Ocupa el ancho completo */
+    gap: 20px; /* Espacio entre los joysticks */
+    flex-wrap: wrap; /* Permite que los joysticks se adapten en filas en pantallas pequeñas */
 }
 
 /* Joystick container */
@@ -67,11 +68,15 @@ header .buttons input:hover {
     position: relative;
     background: #e9ecef;
     border-radius: 50%;
-    width: 200px;
-    height: 200px;
+    width: 30vw; /* Tamaño dinámico según el ancho de la pantalla */
+    height: 30vw; /* Mantiene proporción circular */
+    max-width: 200px; /* Tamaño máximo */
+    max-height: 200px;
+    min-width: 120px; /* Tamaño mínimo */
+    min-height: 120px;
     border: 2px solid #adb5bd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: visible; /* Permite que el joystick interior sobresalga */
+    overflow: visible; /* Permite que el joystick sobresalga */
 }
 
 /* Inner circle (joystick knob) */
@@ -79,25 +84,26 @@ header .buttons input:hover {
     position: absolute;
     background: linear-gradient(135deg, #6c757d, #343a40);
     border-radius: 50%;
-    width: 20%; /* Tamaño relativo al contenedor */
-    height: 20%;
+    width: 25%; /* Tamaño relativo al contenedor */
+    height: 25%;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     cursor: grab;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1);
-    z-index: 10; /* Asegura que esté sobre el círculo exterior */
+    z-index: 10;
 }
 
 /* Inner circle active */
 .inner-circle:active {
     cursor: grabbing;
-    z-index: 11; /* Aumenta z-index mientras está activo */
+    z-index: 11;
 }
 
 /* Titles for joysticks */
 .joystick-container h2 {
     font-size: 1rem;
     margin-bottom: 10px; /* Espacio fuera del círculo */
+    text-align: center;
     color: #495057;
 }
