@@ -152,6 +152,17 @@ function initJoystick(containerId, axis) {
     }
 }
 
+// Reajustar el diseño al cambiar de orientación
+function adjustJoysticksLayout() {
+    const joysticks = document.getElementById('joysticks');
+    if (window.innerWidth > window.innerHeight) {
+        joysticks.style.flexDirection = 'row'; // Horizontal en landscape
+    } else {
+        joysticks.style.flexDirection = 'row'; // Horizontal en portrait
+        joysticks.style.justifyContent = 'space-around'; // Distribuir equitativamente
+    }
+}
+
 // Inicializar ambos joysticks y configurar el envío de datos cada 100ms
 document.addEventListener('DOMContentLoaded', () => {
     initJoystick('joystick1', 'xy');
@@ -184,13 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ajustar los joysticks al cambiar de orientación
-    window.addEventListener('orientationchange', () => {
-        const joysticks = document.getElementById('joysticks');
-        if (window.innerWidth > window.innerHeight) {
-            joysticks.style.flexDirection = 'row';
-        } else {
-            joysticks.style.flexDirection = 'column';
-        }
-    });
+    // Ajustar diseño al cambiar orientación
+    window.addEventListener('resize', adjustJoysticksLayout);
+    adjustJoysticksLayout();
 });
