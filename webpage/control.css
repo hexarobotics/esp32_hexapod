@@ -18,7 +18,7 @@ header {
     left: 0;
     background: #343a40;
     color: white;
-    padding: 15px;
+    padding: 10px;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -57,7 +57,7 @@ header .buttons input:hover {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-top: 100px;
+    margin-top: 50px;
     width: 100%; /* Ocupa el ancho completo */
     gap: 20px; /* Espacio entre los joysticks */
     flex-wrap: wrap; /* Permite que los joysticks se adapten en filas en pantallas pequeñas */
@@ -68,8 +68,8 @@ header .buttons input:hover {
     position: relative;
     background: #e9ecef;
     border-radius: 50%;
-    width: 30vw; /* Tamaño dinámico según el ancho de la pantalla */
-    height: 30vw; /* Mantiene proporción circular */
+    width: 40vw; /* Tamaño dinámico según el ancho de la pantalla */
+    height: 40vw; /* Mantiene proporción circular */
     max-width: 200px; /* Tamaño máximo */
     max-height: 200px;
     min-width: 120px; /* Tamaño mínimo */
