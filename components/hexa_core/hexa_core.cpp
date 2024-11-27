@@ -6,6 +6,7 @@
 #include "Servo_controller.h"
 #include <esp_log.h>
 #include "esp_timer.h"
+#include "gaits_control_interface.h"
 
 namespace hexapod
 {
@@ -115,6 +116,9 @@ void hexa_main_task(void *pvParameters)
     hexa_core_init();
 
     hexapod::Gaits gait(RIPPLE_6,HEXAPOD);
+    // Inicializa la interfaz de control con el objeto Gaits
+    gaits_control_interface_init(static_cast<void*>(&gait));
+
     Servo::ServoController servo_ctr;
     servo_ctr.writePositions();
 
@@ -122,9 +126,9 @@ void hexa_main_task(void *pvParameters)
     ESP_LOGI(HEXA_TASK_TAG, " delay: %d", delay_ms);
 
     // Configurar velocidades
-    gait.set_xspeed(0);
-    gait.set_yspeed(0);
-    gait.set_rspeed(-25000);
+    //gait.set_xspeed(0);
+    //gait.set_yspeed(0);
+    //gait.set_rspeed(-25000);
 
     vTaskDelay(pdMS_TO_TICKS(1000));
 

@@ -22,7 +22,7 @@ namespace hexapod
 
     void Gaits::init_tgaits(void)
     {
-        for (int leg = 0; leg < num_legs_; leg++) 
+        for (int leg = 0; leg < num_legs_; leg++)
         {
             tgait[leg].reset();
         }

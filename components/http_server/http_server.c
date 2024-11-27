@@ -18,6 +18,8 @@
 #include "sntp_time_sync.h"
 #include "tasks_manager.h"
 #include "wifi_app.h"
+#include "gaits_control_interface.h"
+
 
 // Tag used for ESP serial console messages
 static const char TAG[] = "http_server";
@@ -190,6 +192,7 @@ static esp_err_t http_server_joystick_data_handler(httpd_req_t *req)
 
     // Mostrar los valores en los logs
     ESP_LOGI(TAG_JOY, "Joystick Data -> X: %d, Y: %d, Z: %d", x, y, z);
+	gaits_control_interface_set_speeds(x, y, z);
 
     // Responder al cliente con una confirmación
     const char resp[] = "{\"status\":\"success\"}";

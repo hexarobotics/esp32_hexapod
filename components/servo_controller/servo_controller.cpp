@@ -154,7 +154,7 @@ namespace Servo
             pose_[i] = initial_pose_[i];      // Inicializa a 90
         }
 
-        interpolate_setup(500);
+        interpolate_setup(1000);
 
         while (interpolating_ > 0)
         {
