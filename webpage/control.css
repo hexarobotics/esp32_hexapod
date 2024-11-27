@@ -70,11 +70,11 @@ header .buttons input:hover {
     position: relative;
     background: #e9ecef;
     border-radius: 50%;
-    width: 40vw;
+    width: 40vw; /* Tamaño dinámico según el ancho de la pantalla */
     height: 40vw;
-    max-width: 300px;
+    max-width: 300px; /* Tamaño máximo */
     max-height: 300px;
-    min-width: 120px;
+    min-width: 120px; /* Tamaño mínimo */
     min-height: 120px;
     border: 2px solid #adb5bd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -86,7 +86,7 @@ header .buttons input:hover {
     position: absolute;
     background: linear-gradient(135deg, #6c757d, #343a40);
     border-radius: 50%;
-    width: 25%;
+    width: 25%; /* Tamaño relativo al contenedor */
     height: 25%;
     left: 50%;
     top: 50%;
@@ -108,4 +108,32 @@ header .buttons input:hover {
     margin-bottom: 10px;
     text-align: center;
     color: #495057;
+}
+
+/* Responsive adjustments for landscape mode */
+@media screen and (orientation: landscape) {
+    #joysticks {
+        flex-direction: row; /* Organiza los joysticks en una fila */
+        gap: 10px; /* Reduce el espacio entre los joysticks */
+    }
+
+    .outer-circle {
+        width: 30vw; /* Reduce el tamaño del joystick */
+        height: 30vw;
+        max-width: 200px; /* Ajusta el tamaño máximo */
+        max-height: 200px;
+    }
+
+    .inner-circle {
+        width: 30%; /* Aumenta el tamaño relativo del círculo interior */
+        height: 30%;
+    }
+
+    header h1 {
+        font-size: 1.2rem; /* Reduce el tamaño del título en landscape */
+    }
+
+    header .buttons input {
+        font-size: 0.9rem; /* Reduce el tamaño de los botones */
+    }
 }

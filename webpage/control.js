@@ -184,4 +184,14 @@ document.addEventListener('DOMContentLoaded', () => {
             fullscreenBtn.value = "Exit";
         }
     });
+
+    // Ajustar los joysticks al cambiar de orientación
+    window.addEventListener('orientationchange', () => {
+        const joysticks = document.getElementById('joysticks');
+        if (window.innerWidth > window.innerHeight) {
+            joysticks.style.flexDirection = 'row';
+        } else {
+            joysticks.style.flexDirection = 'column';
+        }
+    });
 });
