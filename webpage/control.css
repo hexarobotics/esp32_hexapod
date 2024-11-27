@@ -35,7 +35,9 @@ header h1 {
 }
 
 header .buttons {
-    margin-right: 20px; /* Margen derecho para el botón */
+    margin-right: 20px; /* Margen derecho para los botones */
+    display: flex;
+    gap: 10px; /* Espacio entre los botones */
 }
 
 header .buttons input {
@@ -57,10 +59,10 @@ header .buttons input:hover {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    margin-top: 50px;
-    width: 100%; /* Ocupa el ancho completo */
-    gap: 20px; /* Espacio entre los joysticks */
-    flex-wrap: wrap; /* Permite que los joysticks se adapten en filas en pantallas pequeñas */
+    margin-top: 70px; /* Ajuste para evitar que el header tape contenido */
+    width: 100%;
+    gap: 20px;
+    flex-wrap: wrap;
 }
 
 /* Joystick container */
@@ -68,15 +70,15 @@ header .buttons input:hover {
     position: relative;
     background: #e9ecef;
     border-radius: 50%;
-    width: 40vw; /* Tamaño dinámico según el ancho de la pantalla */
-    height: 40vw; /* Mantiene proporción circular */
-    max-width: 300px; /* Tamaño máximo */
+    width: 40vw;
+    height: 40vw;
+    max-width: 300px;
     max-height: 300px;
-    min-width: 120px; /* Tamaño mínimo */
+    min-width: 120px;
     min-height: 120px;
     border: 2px solid #adb5bd;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    overflow: visible; /* Permite que el joystick sobresalga */
+    overflow: visible;
 }
 
 /* Inner circle (joystick knob) */
@@ -84,7 +86,7 @@ header .buttons input:hover {
     position: absolute;
     background: linear-gradient(135deg, #6c757d, #343a40);
     border-radius: 50%;
-    width: 25%; /* Tamaño relativo al contenedor */
+    width: 25%;
     height: 25%;
     left: 50%;
     top: 50%;
@@ -103,7 +105,7 @@ header .buttons input:hover {
 /* Titles for joysticks */
 .joystick-container h2 {
     font-size: 1rem;
-    margin-bottom: 10px; /* Espacio fuera del círculo */
+    margin-bottom: 10px;
     text-align: center;
     color: #495057;
 }

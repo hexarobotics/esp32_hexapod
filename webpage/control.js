@@ -160,4 +160,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Configurar el intervalo de envío de datos cada 100ms
     setInterval(sendJoystickData, 100);
+
+    // Agregar funcionalidad de pantalla completa
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                alert(`Error al entrar en modo pantalla completa: ${err.message} (${err.name})`);
+            });
+            fullscreenBtn.value = "Exit";
+        } else {
+            document.exitFullscreen();
+            fullscreenBtn.value = "Full Screen";
+        }
+    });
+
+    // Cambiar el texto del botón cuando se cambia el estado de pantalla completa
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            fullscreenBtn.value = "Full Screen";
+        } else {
+            fullscreenBtn.value = "Exit";
+        }
+    });
 });
