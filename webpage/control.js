@@ -14,7 +14,6 @@ function clampInt16(value) {
 
 // Función para enviar datos de los joysticks al servidor
 function sendJoystickData() {
-    // Enviar solo si hay cambios
     if (x !== lastX || y !== lastY || z !== lastZ) {
         const data = { x, y, z };
 
@@ -38,28 +37,36 @@ function sendJoystickData() {
     }
 }
 
-// Inicializar joystick para PC y móviles
+// Inicializar joystick
 function initJoystick(containerId, axis) {
     const container = document.getElementById(containerId).parentNode;
     const joystick = document.getElementById(containerId);
 
     const outerRadius = container.offsetWidth / 2; // Radio del círculo exterior
-    const innerRadius = joystick.offsetWidth / 2; // Radio del círculo interior
-    const maxMovementRadius = outerRadius - innerRadius; // Máximo movimiento permitido para el joystick
+    const maxDistance = outerRadius; // Máxima distancia permitida (igual al radio del círculo exterior)
 
-    // Variables para el desplazamiento
-    let startX = 0, startY = 0;
+    const updateJoystickPosition = (deltaX, deltaY) => {
+        const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+
+        // Limitar el joystick para que su centro llegue al borde del círculo exterior
+        if (distance <= maxDistance) {
+            joystick.style.left = `${50 + (deltaX / maxDistance) * 50}%`;
+            joystick.style.top = `${50 + (deltaY / maxDistance) * 50}%`;
+        } else {
+            const angle = Math.atan2(deltaY, deltaX);
+            joystick.style.left = `${50 + (Math.cos(angle) * maxDistance) / maxDistance * 50}%`;
+            joystick.style.top = `${50 + (Math.sin(angle) * maxDistance) / maxDistance * 50}%`;
+        }
+    };
 
     if (isMobile) {
         // Comportamiento para dispositivos móviles
         joystick.addEventListener('touchstart', (event) => {
             const touch = event.touches[0];
-            startX = touch.clientX;
-            startY = touch.clientY;
         });
 
         joystick.addEventListener('touchmove', (event) => {
-            event.preventDefault(); // Evitar el scroll en móviles
+            event.preventDefault();
             const touch = event.touches[0];
 
             const rect = container.getBoundingClientRect();
@@ -69,23 +76,14 @@ function initJoystick(containerId, axis) {
             const deltaX = touch.clientX - centerX;
             const deltaY = touch.clientY - centerY;
 
-            const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-
-            if (distance <= maxMovementRadius) {
-                joystick.style.left = `${50 + (deltaX / outerRadius) * 50}%`;
-                joystick.style.top = `${50 + (deltaY / outerRadius) * 50}%`;
-            } else {
-                const angle = Math.atan2(deltaY, deltaX);
-                joystick.style.left = `${50 + Math.cos(angle) * maxMovementRadius / outerRadius * 50}%`;
-                joystick.style.top = `${50 + Math.sin(angle) * maxMovementRadius / outerRadius * 50}%`;
-            }
+            updateJoystickPosition(deltaX, deltaY);
 
             // Actualizar valores según el eje
             if (axis === 'xy') {
-                x = clampInt16((deltaX / maxMovementRadius) * 32767);
-                y = clampInt16((deltaY / maxMovementRadius) * 32767);
+                x = clampInt16((deltaX / maxDistance) * 32767);
+                y = clampInt16((deltaY / maxDistance) * 32767);
             } else if (axis === 'z') {
-                z = clampInt16((deltaY / maxMovementRadius) * 32767);
+                z = clampInt16((deltaY / maxDistance) * 32767);
             }
 
             sendJoystickData();
@@ -108,11 +106,6 @@ function initJoystick(containerId, axis) {
         // Comportamiento para dispositivos PC
         interact(joystick).draggable({
             listeners: {
-                start(event) {
-                    const rect = joystick.getBoundingClientRect();
-                    startX = rect.left + rect.width / 2;
-                    startY = rect.top + rect.height / 2;
-                },
                 move(event) {
                     const rect = container.getBoundingClientRect();
                     const centerX = rect.left + outerRadius;
@@ -121,23 +114,14 @@ function initJoystick(containerId, axis) {
                     const deltaX = event.clientX - centerX;
                     const deltaY = event.clientY - centerY;
 
-                    const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
-
-                    if (distance <= maxMovementRadius) {
-                        joystick.style.left = `${50 + (deltaX / outerRadius) * 50}%`;
-                        joystick.style.top = `${50 + (deltaY / outerRadius) * 50}%`;
-                    } else {
-                        const angle = Math.atan2(deltaY, deltaX);
-                        joystick.style.left = `${50 + Math.cos(angle) * maxMovementRadius / outerRadius * 50}%`;
-                        joystick.style.top = `${50 + Math.sin(angle) * maxMovementRadius / outerRadius * 50}%`;
-                    }
+                    updateJoystickPosition(deltaX, deltaY);
 
                     // Actualizar valores según el eje
                     if (axis === 'xy') {
-                        x = clampInt16((deltaX / maxMovementRadius) * 32767);
-                        y = clampInt16((deltaY / maxMovementRadius) * 32767);
+                        x = clampInt16((deltaX / maxDistance) * 32767);
+                        y = clampInt16((deltaY / maxDistance) * 32767);
                     } else if (axis === 'z') {
-                        z = clampInt16((deltaY / maxMovementRadius) * 32767);
+                        z = clampInt16((deltaY / maxDistance) * 32767);
                     }
 
                     sendJoystickData();
