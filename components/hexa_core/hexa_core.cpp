@@ -78,7 +78,34 @@ void hexa_core_init(void)
 // Restablecer la posición inicial
 void resetToInitPosition(Servo::ServoController &servo_ctr)
 {
-    servo_ctr.back_to_init_position();
+    for (uint8_t leg = LEFT_FRONT; leg < NUM_MAX_LEGS; leg++)
+	{
+        // 1. Vector total y transformaciones
+        transformations3D::Vectors::vector3d leg_vect;
+
+        leg_vect.x = leg_endpoints[leg].x + leg_offsets[leg].x;
+        leg_vect.y = leg_endpoints[leg].y + leg_offsets[leg].y;
+        leg_vect.z = leg_endpoints[leg].z + leg_offsets[leg].z;
+
+        // 2. Resolver cinemática inversa y guardar posiciones
+        hexapod::Hexaik::ik_angles ik_angles = hexapod::Hexaik::legIK(
+            static_cast<leg_id>(leg), leg_vect.x, leg_vect.y, leg_vect.z);
+
+        // 3. Guardar nextpose
+        servo_ctr.save_nextpose(leg * 3, ik_angles.coxa);
+        servo_ctr.save_nextpose(leg * 3 + 1, ik_angles.femur);
+        servo_ctr.save_nextpose(leg * 3 + 2, ik_angles.tibia);
+    }
+
+    servo_ctr.interpolate_setup(200);
+
+    while( servo_ctr.isInterpolating() )
+    {
+        servo_ctr.Interpolate_step();
+
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
+
     init_position = true;
 }
 
@@ -122,8 +149,8 @@ void hexa_main_task(void *pvParameters)
     Servo::ServoController servo_ctr;
     servo_ctr.writePositions();
 
-    uint16_t delay_ms = servo_ctr.get_frame_length_ms();
-    ESP_LOGI(HEXA_TASK_TAG, " delay: %d", delay_ms);
+    uint16_t frame_delay_ms = servo_ctr.get_frame_length_ms();
+    ESP_LOGI(HEXA_TASK_TAG, " delay: %d", frame_delay_ms);
 
     // Configurar velocidades
     //gait.set_xspeed(0);
@@ -136,12 +163,12 @@ void hexa_main_task(void *pvParameters)
 	{
         if ( !gait.isMoving() )
 		{
+            gait.init_tgaits();
+
             if ( !init_position )
 			{
                 resetToInitPosition(servo_ctr);
             }
-
-			gait.init_tgaits();
         }
 		else
 		{
@@ -155,7 +182,7 @@ void hexa_main_task(void *pvParameters)
             servo_ctr.Interpolate_step();
         }
 
-        vTaskDelay(pdMS_TO_TICKS(delay_ms));
+        vTaskDelay(pdMS_TO_TICKS(frame_delay_ms));
     }
 
 

@@ -26,6 +26,7 @@ namespace hexapod
         {
             tgait[leg].reset();
         }
+        
         gait_step = 1;
     }
 

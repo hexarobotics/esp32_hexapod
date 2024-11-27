@@ -187,12 +187,12 @@ static esp_err_t http_server_joystick_data_handler(httpd_req_t *req)
     //ESP_LOGI(TAG_JOY, "Datos recibidos: %s", content);
 
     // Analizar el JSON para extraer los valores de x, y, z
-    int16_t x = 0, y = 0, z = 0;
-    sscanf(content, "{\"x\":%hd,\"y\":%hd,\"z\":%hd}", &x, &y, &z);
+    int16_t x_speed = 0, y_speed = 0, r_speed = 0;
+    sscanf(content, "{\"x\":%hd,\"y\":%hd,\"z\":%hd}", &x_speed, &y_speed, &r_speed);
 
     // Mostrar los valores en los logs
-    ESP_LOGI(TAG_JOY, "Joystick Data -> X: %d, Y: %d, Z: %d", x, y, z);
-	gaits_control_interface_set_speeds(x, y, z);
+    ESP_LOGI(TAG_JOY, "Joystick Data -> X: %d, Y: %d, Z: %d", x_speed, y_speed, r_speed);
+	gaits_control_interface_set_speeds(x_speed, y_speed, r_speed);
 
     // Responder al cliente con una confirmación
     const char resp[] = "{\"status\":\"success\"}";

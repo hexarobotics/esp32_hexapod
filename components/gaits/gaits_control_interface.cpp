@@ -15,14 +15,14 @@ void gaits_control_interface_init(void* gaits_obj) {
 }
 
 // Actualiza las velocidades
-void gaits_control_interface_set_speeds(int16_t x, int16_t y, int16_t z) {
+void gaits_control_interface_set_speeds(int16_t x_speed, int16_t y_speed, int16_t r_speed) {
     if (!gaits_controller) {
         ESP_LOGE("GAITS_CONTROL_INTERFACE", "Gaits controller not initialized!");
         return; // Evita llamadas si no está inicializado
     }
-    gaits_controller->set_xspeed(x);
-    gaits_controller->set_yspeed(y);
-    gaits_controller->set_rspeed(z);
+    gaits_controller->set_xspeed(x_speed);
+    gaits_controller->set_yspeed(y_speed);
+    gaits_controller->set_rspeed(r_speed);
 }
 
 }
