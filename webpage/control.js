@@ -45,6 +45,7 @@ function initJoystick(containerId, axis) {
 
     const outerRadius = container.offsetWidth / 2; // Radio del círculo exterior
     const innerRadius = joystick.offsetWidth / 2; // Radio del círculo interior
+    const maxMovementRadius = outerRadius - innerRadius; // Máximo movimiento permitido para el joystick
 
     // Variables para el desplazamiento
     let startX = 0, startY = 0;
@@ -70,21 +71,21 @@ function initJoystick(containerId, axis) {
 
             const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
 
-            if (distance <= outerRadius - innerRadius) {
+            if (distance <= maxMovementRadius) {
                 joystick.style.left = `${50 + (deltaX / outerRadius) * 50}%`;
                 joystick.style.top = `${50 + (deltaY / outerRadius) * 50}%`;
             } else {
                 const angle = Math.atan2(deltaY, deltaX);
-                joystick.style.left = `${50 + Math.cos(angle) * (outerRadius - innerRadius) / outerRadius * 50}%`;
-                joystick.style.top = `${50 + Math.sin(angle) * (outerRadius - innerRadius) / outerRadius * 50}%`;
+                joystick.style.left = `${50 + Math.cos(angle) * maxMovementRadius / outerRadius * 50}%`;
+                joystick.style.top = `${50 + Math.sin(angle) * maxMovementRadius / outerRadius * 50}%`;
             }
 
             // Actualizar valores según el eje
             if (axis === 'xy') {
-                x = clampInt16((deltaX / (outerRadius - innerRadius)) * 32767);
-                y = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
+                x = clampInt16((deltaX / maxMovementRadius) * 32767);
+                y = clampInt16((deltaY / maxMovementRadius) * 32767);
             } else if (axis === 'z') {
-                z = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
+                z = clampInt16((deltaY / maxMovementRadius) * 32767);
             }
 
             sendJoystickData();
@@ -122,21 +123,21 @@ function initJoystick(containerId, axis) {
 
                     const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
 
-                    if (distance <= outerRadius - innerRadius) {
+                    if (distance <= maxMovementRadius) {
                         joystick.style.left = `${50 + (deltaX / outerRadius) * 50}%`;
                         joystick.style.top = `${50 + (deltaY / outerRadius) * 50}%`;
                     } else {
                         const angle = Math.atan2(deltaY, deltaX);
-                        joystick.style.left = `${50 + Math.cos(angle) * (outerRadius - innerRadius) / outerRadius * 50}%`;
-                        joystick.style.top = `${50 + Math.sin(angle) * (outerRadius - innerRadius) / outerRadius * 50}%`;
+                        joystick.style.left = `${50 + Math.cos(angle) * maxMovementRadius / outerRadius * 50}%`;
+                        joystick.style.top = `${50 + Math.sin(angle) * maxMovementRadius / outerRadius * 50}%`;
                     }
 
                     // Actualizar valores según el eje
                     if (axis === 'xy') {
-                        x = clampInt16((deltaX / (outerRadius - innerRadius)) * 32767);
-                        y = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
+                        x = clampInt16((deltaX / maxMovementRadius) * 32767);
+                        y = clampInt16((deltaY / maxMovementRadius) * 32767);
                     } else if (axis === 'z') {
-                        z = clampInt16((deltaY / (outerRadius - innerRadius)) * 32767);
+                        z = clampInt16((deltaY / maxMovementRadius) * 32767);
                     }
 
                     sendJoystickData();
