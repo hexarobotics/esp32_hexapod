@@ -4,9 +4,37 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 // Variables globales
 let x = 0, y = 0, z = 0;
 
+// Últimos valores enviados para evitar redundancia
+let lastX = 0, lastY = 0, lastZ = 0;
+
 // Función para limitar valores a un rango válido
 function clampInt16(value) {
     return Math.max(Math.min(Math.round(value), 32767), -32768);
+}
+
+// Función para enviar datos de los joysticks al servidor
+function sendJoystickData() {
+    if (x !== lastX || y !== lastY || z !== lastZ) {
+        const data = { x, y, z };
+
+        fetch('/joystick-data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        })
+        .then((response) => response.json())
+        .then((result) => {
+            console.log('Datos enviados al servidor:', result);
+        })
+        .catch((error) => {
+            console.error('Error enviando datos al servidor:', error);
+        });
+
+        // Actualizar últimos valores enviados
+        lastX = x;
+        lastY = y;
+        lastZ = z;
+    }
 }
 
 // Inicializar joystick para PC y móviles
@@ -57,7 +85,7 @@ function initJoystick(containerId, axis) {
                 z = clampInt16((deltaY / outerRadius) * 32767);
             }
 
-            console.log(`Joystick ${axis.toUpperCase()}: X=${x}, Y=${y}, Z=${z}`);
+            sendJoystickData();
         });
 
         joystick.addEventListener('touchend', () => {
@@ -71,7 +99,7 @@ function initJoystick(containerId, axis) {
                 z = 0;
             }
 
-            console.log(`Joystick ${axis.toUpperCase()} reseteado: X=${x}, Y=${y}, Z=${z}`);
+            sendJoystickData();
         });
     } else {
         // Comportamiento para dispositivos PC
@@ -109,7 +137,7 @@ function initJoystick(containerId, axis) {
                         z = clampInt16((deltaY / outerRadius) * 32767);
                     }
 
-                    console.log(`Joystick ${axis.toUpperCase()}: X=${x}, Y=${y}, Z=${z}`);
+                    sendJoystickData();
                 },
                 end() {
                     joystick.style.left = '50%';
@@ -122,7 +150,7 @@ function initJoystick(containerId, axis) {
                         z = 0;
                     }
 
-                    console.log(`Joystick ${axis.toUpperCase()} reseteado: X=${x}, Y=${y}, Z=${z}`);
+                    sendJoystickData();
                 },
             },
         });
@@ -133,4 +161,7 @@ function initJoystick(containerId, axis) {
 document.addEventListener('DOMContentLoaded', () => {
     initJoystick('joystick1', 'xy');
     initJoystick('joystick2', 'z');
+
+    // Enviar datos regularmente aunque no haya interacción
+    setInterval(sendJoystickData, 100);
 });

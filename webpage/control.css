@@ -70,8 +70,8 @@ header .buttons input:hover {
     border-radius: 50%;
     width: 40vw; /* Tamaño dinámico según el ancho de la pantalla */
     height: 40vw; /* Mantiene proporción circular */
-    max-width: 200px; /* Tamaño máximo */
-    max-height: 200px;
+    max-width: 300px; /* Tamaño máximo */
+    max-height: 300px;
     min-width: 120px; /* Tamaño mínimo */
     min-height: 120px;
     border: 2px solid #adb5bd;
