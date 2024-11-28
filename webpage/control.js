@@ -1,35 +1,33 @@
-// Detectar si es un dispositivo móvil
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+// Configuración y constantes
+const CONFIG = {
+    sendInterval: 100, // Intervalo de envío de datos en ms
+    maxJoystickValue: 32767,
+};
 
 // Variables globales
+let joystickData = {};
 let x = 0, y = 0, z = 0;
 let lastX = 0, lastY = 0, lastZ = 0;
 
-// Almacenar los radios y dimensiones recalculados de los joysticks
-const joystickData = {};
+// Detectar si es un dispositivo móvil
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-// Función para limitar valores a un rango válido
+// Función para limitar valores al rango de int16_t
 function clampInt16(value) {
-    return Math.max(Math.min(Math.round(value), 32767), -32768);
+    return Math.max(Math.min(Math.round(value), CONFIG.maxJoystickValue), -CONFIG.maxJoystickValue);
 }
 
-// Función para enviar datos de los joysticks al servidor cada 100ms
+// Función para enviar datos del joystick
 function sendJoystickData() {
     if (x !== lastX || y !== lastY || z !== lastZ) {
-        const data = { x, y, z };
-
         fetch('/joystick-data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ x, y, z }),
         })
-            .then((response) => response.json())
-            .then((result) => {
-                console.log('Datos enviados al servidor:', result);
-            })
-            .catch((error) => {
-                console.error('Error enviando datos al servidor:', error);
-            });
+        .then((res) => res.json())
+        .then((result) => console.log('Datos enviados:', result))
+        .catch((err) => console.error('Error:', err));
 
         lastX = x;
         lastY = y;
@@ -37,179 +35,146 @@ function sendJoystickData() {
     }
 }
 
-// Función para calcular la posición del joystick
-function calculateJoystickPosition(touch, containerId) {
-    const { outerRadius, rect } = joystickData[containerId];
+// Clase para manejar un joystick
+class Joystick {
+    constructor(containerId, axis) {
+        this.container = document.getElementById(containerId).parentNode;
+        this.joystick = document.getElementById(containerId);
+        this.axis = axis;
+        this.outerRadius = 0;
+        this.rect = {};
+        this.activeTouchId = null;
 
-    const centerX = rect.left + outerRadius;
-    const centerY = rect.top + outerRadius;
+        this.init();
+    }
 
-    const deltaX = touch.clientX - centerX;
-    const deltaY = touch.clientY - centerY;
+    // Inicializar el joystick
+    init() {
+        this.recalculateDimensions();
 
-    const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+        if (isMobile) {
+            this.setupMobileEvents();
+        } else {
+            this.setupPCEvents();
+        }
+    }
 
-    // Limitar la distancia al radio máximo (outerRadius)
-    const limitedDistance = Math.min(distance, outerRadius);
-    const angle = Math.atan2(deltaY, deltaX);
+    // Recalcular dimensiones
+    recalculateDimensions() {
+        this.outerRadius = this.container.offsetWidth / 2;
+        this.rect = this.container.getBoundingClientRect();
+    }
 
-    return {
-        x: limitedDistance * Math.cos(angle) / outerRadius,
-        y: limitedDistance * Math.sin(angle) / outerRadius,
-        rawX: deltaX,
-        rawY: deltaY,
-    };
-}
+    // Calcular posición
+    calculatePosition(touch) {
+        const centerX = this.rect.left + this.outerRadius;
+        const centerY = this.rect.top + this.outerRadius;
 
-// Inicializar joystick para PC y móviles
-function initJoystick(containerId, axis) {
-    const container = document.getElementById(containerId).parentNode;
-    const joystick = document.getElementById(containerId);
+        const deltaX = touch.clientX - centerX;
+        const deltaY = touch.clientY - centerY;
 
-    joystickData[containerId] = {
-        outerRadius: container.offsetWidth / 2,
-        rect: container.getBoundingClientRect(),
-    };
+        const distance = Math.sqrt(deltaX ** 2 + deltaY ** 2);
+        const limitedDistance = Math.min(distance, this.outerRadius);
+        const angle = Math.atan2(deltaY, deltaX);
 
-    let activeTouchId = null;
+        return {
+            x: limitedDistance * Math.cos(angle) / this.outerRadius,
+            y: limitedDistance * Math.sin(angle) / this.outerRadius,
+            rawX: deltaX,
+            rawY: deltaY,
+        };
+    }
 
-    if (isMobile) {
-        container.addEventListener('touchstart', (event) => {
-            if (activeTouchId === null) {
-                joystickData[containerId].rect = container.getBoundingClientRect(); // Recalcular posición
+    // Configurar eventos para móviles
+    setupMobileEvents() {
+        this.container.addEventListener('touchstart', (event) => {
+            if (this.activeTouchId === null) {
+                this.recalculateDimensions();
                 const touch = event.changedTouches[0];
-                activeTouchId = touch.identifier;
-
-                const position = calculateJoystickPosition(touch, containerId);
-                joystick.style.left = `${50 + position.x * 50}%`;
-                joystick.style.top = `${50 + position.y * 50}%`;
-
-                if (axis === 'xy') {
-                    x = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
-                    y = clampInt16(-position.rawY / joystickData[containerId].outerRadius * 32767);
-                } else if (axis === 'z') {
-                    z = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
-                }
-
-                event.preventDefault();
+                this.activeTouchId = touch.identifier;
+                this.updatePosition(touch);
             }
         }, { passive: false });
 
-        container.addEventListener('touchmove', (event) => {
-            const touch = Array.from(event.touches).find(t => t.identifier === activeTouchId);
-            if (!touch) return;
-
-            const position = calculateJoystickPosition(touch, containerId);
-            joystick.style.left = `${50 + position.x * 50}%`;
-            joystick.style.top = `${50 + position.y * 50}%`;
-
-            if (axis === 'xy') {
-                x = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
-                y = clampInt16(-position.rawY / joystickData[containerId].outerRadius * 32767);
-            } else if (axis === 'z') {
-                z = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
+        this.container.addEventListener('touchmove', (event) => {
+            const touch = Array.from(event.touches).find(t => t.identifier === this.activeTouchId);
+            if (touch) {
+                this.updatePosition(touch);
             }
-
-            event.preventDefault();
         }, { passive: false });
 
-        container.addEventListener('touchend', (event) => {
-            const touch = Array.from(event.changedTouches).find(t => t.identifier === activeTouchId);
-            if (!touch) return;
-
-            activeTouchId = null;
-            joystick.style.left = '50%';
-            joystick.style.top = '50%';
-
-            if (axis === 'xy') {
-                x = 0;
-                y = 0;
-            } else if (axis === 'z') {
-                z = 0;
+        this.container.addEventListener('touchend', (event) => {
+            const touch = Array.from(event.changedTouches).find(t => t.identifier === this.activeTouchId);
+            if (touch) {
+                this.resetPosition();
             }
         });
-    } else {
-        // Comportamiento para dispositivos PC
-        interact(joystick).draggable({
+    }
+
+    // Configurar eventos para PC
+    setupPCEvents() {
+        interact(this.joystick).draggable({
             listeners: {
-                move(event) {
-                    const position = calculateJoystickPosition(event, containerId);
-                    joystick.style.left = `${50 + position.x * 50}%`;
-                    joystick.style.top = `${50 + position.y * 50}%`;
-
-                    if (axis === 'xy') {
-                        x = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
-                        y = clampInt16(-position.rawY / joystickData[containerId].outerRadius * 32767);
-                    } else if (axis === 'z') {
-                        z = clampInt16(position.rawX / joystickData[containerId].outerRadius * 32767);
-                    }
-                },
-                end() {
-                    joystick.style.left = '50%';
-                    joystick.style.top = '50%';
-
-                    if (axis === 'xy') {
-                        x = 0;
-                        y = 0;
-                    } else if (axis === 'z') {
-                        z = 0;
-                    }
-                },
+                start: () => this.recalculateDimensions(),
+                move: (event) => this.updatePosition(event),
+                end: () => this.resetPosition(),
             },
         });
     }
-}
 
-// Reajustar el diseño y recalcular los radios al cambiar orientación
-function adjustJoysticksLayout() {
-    const joysticks = document.getElementById('joysticks');
-    if (window.innerWidth > window.innerHeight) {
-        joysticks.style.flexDirection = 'row'; // Horizontal en landscape
-    } else {
-        joysticks.style.flexDirection = 'row'; // Horizontal en portrait
+    // Actualizar posición del joystick
+    updatePosition(touch) {
+        const position = this.calculatePosition(touch);
+        this.joystick.style.left = `${50 + position.x * 50}%`;
+        this.joystick.style.top = `${50 + position.y * 50}%`;
+
+        if (this.axis === 'xy') {
+            x = clampInt16(position.rawX / this.outerRadius * CONFIG.maxJoystickValue);
+            y = clampInt16(-position.rawY / this.outerRadius * CONFIG.maxJoystickValue); // Invertir Y
+        } else if (this.axis === 'z') {
+            z = clampInt16(position.rawX / this.outerRadius * CONFIG.maxJoystickValue);
+        }
     }
 
-    // Recalcular dimensiones y posiciones
-    Object.keys(joystickData).forEach((id) => {
-        const container = document.getElementById(id).parentNode;
-        joystickData[id].outerRadius = container.offsetWidth / 2;
-        joystickData[id].rect = container.getBoundingClientRect();
-    });
+    // Reiniciar posición del joystick
+    resetPosition() {
+        this.joystick.style.left = '50%';
+        this.joystick.style.top = '50%';
+        this.activeTouchId = null;
+
+        if (this.axis === 'xy') {
+            x = 0;
+            y = 0;
+        } else if (this.axis === 'z') {
+            z = 0;
+        }
+    }
 }
 
-// Inicializar ambos joysticks y configurar el envío de datos cada 100ms
+// Ajustar diseño de los joysticks
+function adjustJoysticksLayout() {
+    const joysticks = document.getElementById('joysticks');
+    joysticks.style.flexDirection = window.innerWidth > window.innerHeight ? 'row' : 'column';
+
+    Object.values(joystickData).forEach((joystick) => joystick.recalculateDimensions());
+}
+
+// Inicializar joysticks
 document.addEventListener('DOMContentLoaded', () => {
-    initJoystick('joystick1', 'xy');
-    initJoystick('joystick2', 'z');
+    joystickData['joystick1'] = new Joystick('joystick1', 'xy');
+    joystickData['joystick2'] = new Joystick('joystick2', 'z');
 
-    // Configurar el intervalo de envío de datos cada 100ms
-    setInterval(sendJoystickData, 100);
+    setInterval(sendJoystickData, CONFIG.sendInterval);
 
-    // Agregar funcionalidad de pantalla completa
     const fullscreenBtn = document.getElementById('fullscreen-btn');
-
     fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch((err) => {
-                alert(`Error al entrar en modo pantalla completa: ${err.message} (${err.name})`);
-            });
-            fullscreenBtn.value = "Exit FS";
+            document.documentElement.requestFullscreen();
         } else {
             document.exitFullscreen();
-            fullscreenBtn.value = "Full Screen";
         }
     });
 
-    // Cambiar el texto del botón cuando se cambia el estado de pantalla completa
-    document.addEventListener('fullscreenchange', () => {
-        if (!document.fullscreenElement) {
-            fullscreenBtn.value = "Full Screen";
-        } else {
-            fullscreenBtn.value = "Exit FS";
-        }
-    });
-
-    // Ajustar diseño al cambiar orientación
     window.addEventListener('resize', adjustJoysticksLayout);
     adjustJoysticksLayout();
 });
