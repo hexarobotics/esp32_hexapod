@@ -153,9 +153,7 @@ class Joystick {
 
 // Ajustar diseño de los joysticks
 function adjustJoysticksLayout() {
-    const joysticks = document.getElementById('joysticks');
-    joysticks.style.flexDirection = window.innerWidth > window.innerHeight ? 'row' : 'column';
-
+    // Recalcular dimensiones y posiciones de los joysticks
     Object.values(joystickData).forEach((joystick) => joystick.recalculateDimensions());
 }
 

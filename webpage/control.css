@@ -57,12 +57,13 @@ header .buttons input:hover {
 /* Section for joysticks */
 #joysticks {
     display: flex;
+    flex-direction: row; /* Siempre en fila */
     justify-content: space-around;
     align-items: center;
     margin-top: 70px; /* Ajuste para evitar que el header tape contenido */
     width: 100%;
     gap: 20px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap; /* Evita que los joysticks se envuelvan */
 }
 
 /* Joystick container */
