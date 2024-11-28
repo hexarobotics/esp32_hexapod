@@ -113,12 +113,25 @@ class Joystick {
 
     // Configurar eventos para PC
     setupPCEvents() {
-        interact(this.joystick).draggable({
-            listeners: {
-                start: () => this.recalculateDimensions(),
-                move: (event) => this.updatePosition(event),
-                end: () => this.resetPosition(),
-            },
+        let isDragging = false;
+
+        this.joystick.addEventListener('mousedown', (event) => {
+            this.recalculateDimensions(); // Recalcular dimensiones al comenzar
+            isDragging = true;
+            this.updatePosition(event); // Actualizar la posición inicial
+        });
+
+        window.addEventListener('mousemove', (event) => {
+            if (isDragging) {
+                this.updatePosition(event); // Actualizar mientras se arrastra
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                this.resetPosition(); // Reiniciar posición al soltar
+            }
         });
     }
 
@@ -165,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(sendJoystickData, CONFIG.sendInterval);
 
     const fullscreenBtn = document.getElementById('fullscreen-btn');
+
     fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
