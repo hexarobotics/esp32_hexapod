@@ -56,8 +56,8 @@ esp_timer_handle_t fw_update_reset;
 // Embedded files: JQuery, index.html, app.css, app.js, favicon.ico, control.html, control.css, control.js
 extern const uint8_t jquery_3_3_1_min_js_start[]   asm("_binary_jquery_3_3_1_min_js_start");
 extern const uint8_t jquery_3_3_1_min_js_end[]     asm("_binary_jquery_3_3_1_min_js_end");
-extern const uint8_t interact_min_js_start[]       asm("_binary_interact_min_js_start");
-extern const uint8_t interact_min_js_end[]         asm("_binary_interact_min_js_end");
+//extern const uint8_t interact_min_js_start[]       asm("_binary_interact_min_js_start");
+//extern const uint8_t interact_min_js_end[]         asm("_binary_interact_min_js_end");
 extern const uint8_t index_html_start[]            asm("_binary_index_html_start");
 extern const uint8_t index_html_end[]              asm("_binary_index_html_end");
 extern const uint8_t app_css_start[]               asm("_binary_app_css_start");
@@ -327,15 +327,15 @@ static esp_err_t http_server_control_js_handler(httpd_req_t *req)
  * @param req HTTP request for which the uri needs to be handled.
  * @return ESP_OK
  */
-static esp_err_t http_server_interact_min_js_handler(httpd_req_t *req)
-{
-    ESP_LOGI(TAG, "interact.min.js requested");
-
-    httpd_resp_set_type(req, "application/javascript");
-    httpd_resp_send(req, (const char *)interact_min_js_start, interact_min_js_end - interact_min_js_start);
-
-    return ESP_OK;
-}
+//static esp_err_t http_server_interact_min_js_handler(httpd_req_t *req)
+//{
+//    ESP_LOGI(TAG, "interact.min.js requested");
+//
+//    httpd_resp_set_type(req, "application/javascript");
+//    httpd_resp_send(req, (const char *)interact_min_js_start, interact_min_js_end - interact_min_js_start);
+//
+//    return ESP_OK;
+//}
 
 /**
  * Receives the .bin file fia the web page and handles the firmware update
@@ -810,13 +810,13 @@ static httpd_handle_t http_server_configure(void)
 		httpd_register_uri_handler(http_server_handle, &control_js);
 
 		// register interact.min.js handler
-		httpd_uri_t interact_min_js = {
-				.uri = "/interact.min.js",
-				.method = HTTP_GET,
-				.handler = http_server_interact_min_js_handler,
-				.user_ctx = NULL
-		};
-		httpd_register_uri_handler(http_server_handle, &interact_min_js);
+		//httpd_uri_t interact_min_js = {
+		//		.uri = "/interact.min.js",
+		//		.method = HTTP_GET,
+		//		.handler = http_server_interact_min_js_handler,
+		//		.user_ctx = NULL
+		//};
+		//httpd_register_uri_handler(http_server_handle, &interact_min_js);
 
 		// Handler para los datos del joystick
         httpd_uri_t joystick_data_uri = {
