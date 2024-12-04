@@ -7,10 +7,11 @@ namespace hexapod
 {
     // Constructor Gaits
     Gaits::Gaits(GaitType gait, RobotType robot_type) :
-        Xspeed(0.0), Yspeed(0.0), Rspeed(0.0), liftHeight(45),
+        Xspeed(0.0f), Yspeed(0.0f), Rspeed(0.0f), liftHeight(45.0f),
+        Xspeed_max(0.0f), Yspeed_max(0.0f), Rspeed_max(0.0f),
         num_legs_(robot_type == HEXAPOD ? 6 : 4),
         stepsInCycle(0), pushSteps(0), desfase(0),
-        tranTime(0), cycleTime(0.0),
+        tranTime_ms(0), tranTime_s(0), cycleTime(0.0),
         gaitleg_order{0}, gait_step(1), leg_step(0),
         robot_type_(robot_type), current_gait(NUM_MAX_GAITS)
     {
@@ -40,7 +41,7 @@ namespace hexapod
         setLegOrderByGait(current_gait);
         update_gait_params(current_gait);
 
-        cycleTime = (stepsInCycle * static_cast<float>(tranTime)) / 1000.0f;
+        cycleTime = (stepsInCycle * static_cast<float>(tranTime_ms)) / 1000.0f;
         gait_step = 1;
 
         update_velocities();
@@ -162,56 +163,64 @@ namespace hexapod
 					pushSteps = 4;
 					stepsInCycle = 6;
 					desfase = 1;
-					tranTime = 140;
+					tranTime_ms = 140;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case RIPPLE_12:
 					pushSteps = 8;
 					stepsInCycle = 12;
 					desfase = 2;
-					tranTime = 120;
+					tranTime_ms = 120;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case RIPPLE_24:
 					pushSteps = 12;
 					stepsInCycle = 18;
 					desfase = 3;
-					tranTime = 120;
+					tranTime_ms = 120;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case TRIPOD_6:
 					pushSteps = 2;
 					stepsInCycle = 4;
 					desfase = 2;
-					tranTime = 140;
+					tranTime_ms = 140;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case TRIPOD_12:
 					pushSteps = 4;
 					stepsInCycle = 8;
 					desfase = 4;
-					tranTime = 120;
+					tranTime_ms = 120;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case TRIPOD_24:
 					pushSteps = 6;
 					stepsInCycle = 12;
 					desfase = 6;
-					tranTime = 120;
+					tranTime_ms = 120;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case WAVE_12:
 					pushSteps = 10;
 					stepsInCycle = 12;
 					desfase = 2;
-					tranTime = 80;
+					tranTime_ms = 80;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				case WAVE_24:
 					pushSteps = 20;
 					stepsInCycle = 24;
 					desfase = 4;
-					tranTime = 80;
+					tranTime_ms = 80;
+                    tranTime_s = tranTime_ms / 1000.0f;
 					break;
 
 				default:
@@ -228,14 +237,14 @@ namespace hexapod
 	 * @details
 	 *                            Distancia recorrida (mm)
 	 *	 Veloc_max =   ----------------------------------------------
-	*                      (trantime(ms) / conv_ms_to_s) * pushsteps
+	*                      (tranTime_s(s) * pushsteps
 	*/
     void Gaits::update_velocities(void)
     {
-        float time_factor = static_cast<float>(tranTime) / 1000.0f * pushSteps;
+        float time_factor = tranTime_s * pushSteps;
 
         Xspeed_max = 60.0f / time_factor;
-        Yspeed_max = 70.0f / time_factor;
+        Yspeed_max = 80.0f / time_factor;
         Rspeed_max = (M_PI / 7.0f) / time_factor;
 
         ESP_LOGI(TAG_GAIT, "Max speeds updated: X=%.2f, Y=%.2f, R=%.2f", Xspeed_max, Yspeed_max, Rspeed_max);
@@ -243,12 +252,12 @@ namespace hexapod
 
 	void Gaits::configureBody()
 	{
-		tranTime = 140;
+		tranTime_ms = 140;
 	}
 
 	uint16_t Gaits::get_gait_transition_time(void)
 	{
-		return tranTime;
+		return tranTime_ms;
 	}
 
     transformations3D::Tmatrix Gaits::step(uint8_t leg)
@@ -278,13 +287,18 @@ namespace hexapod
 		}
 	}
 
+    float Gaits::actual_speed_percentage(void)
+    {
+        return ( fabs(Yspeed) > fabs(Xspeed) ) ? (fabs(Yspeed) / Yspeed_max) : (fabs(Xspeed) / Xspeed_max);
+    }
+
     void Gaits::handle_step_3_stages(uint8_t leg, int8_t leg_step)
     {
         if (leg_step == 1) // UP
         {
             tgait[leg].t_x = 0.0f;
             tgait[leg].t_y = 0.0f;
-            tgait[leg].t_z = liftHeight;
+            tgait[leg].t_z = liftHeight;// * actual_speed_percentage();
             tgait[leg].rot_z = 0.0f;
         }
         else if (leg_step == 2) // DOWN
@@ -296,10 +310,10 @@ namespace hexapod
         }
         else // MOVE BODY FORWARD
         {
-            tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
-            tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_x -= Xspeed * tranTime_s;
+            tgait[leg].t_y -= Yspeed * tranTime_s;
             tgait[leg].t_z = 0.0f;
-            tgait[leg].rot_z -= (Rspeed * cycleTime) / stepsInCycle;
+            tgait[leg].rot_z -= Rspeed * tranTime_s;
         }
     }
 
@@ -335,10 +349,10 @@ namespace hexapod
         }
         else // MOVE BODY FORWARD
         {
-            tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
-            tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_x -= Xspeed * tranTime_s;
+            tgait[leg].t_y -= Yspeed * tranTime_s;
             tgait[leg].t_z = 0.0f;
-            tgait[leg].rot_z -= (Rspeed * cycleTime) / stepsInCycle;
+            tgait[leg].rot_z -= Rspeed * tranTime_s;
         }
     }
 
@@ -388,10 +402,10 @@ namespace hexapod
         }
         else // MOVE BODY FORWARD
         {
-            tgait[leg].t_x -= (Xspeed * cycleTime) / stepsInCycle;
-            tgait[leg].t_y -= (Yspeed * cycleTime) / stepsInCycle;
+            tgait[leg].t_x -= Xspeed * tranTime_s;
+            tgait[leg].t_y -= Yspeed * tranTime_s;
             tgait[leg].t_z = 0.0f;
-            tgait[leg].rot_z -= (Rspeed * cycleTime) / stepsInCycle;
+            tgait[leg].rot_z -= Rspeed * tranTime_s;
         }
     }
 

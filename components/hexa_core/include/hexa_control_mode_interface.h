@@ -12,7 +12,7 @@ namespace hexapod
         MAX_C_MODES,
     };
 
-    control_mode_e get_control_mode(void);
+    control_mode_e get_control_mode( void );
 
     void set_control_mode( control_mode_e new_mode );
 

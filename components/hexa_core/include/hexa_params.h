@@ -15,34 +15,7 @@
 #define L_COXA_OLD      48  // MM distance from coxa servo to femur servo
 #define L_FEMUR     75 // MM distance from femur servo to tibia servo
 #define L_TIBIA     135 // MM distance from tibia servo to foot
-
 #define L_COXA      44  // MM distance from coxa servo to femur servo
-
-/* Servo Legs*/
-#define RF_COXA 1
-#define RF_FEMUR 2
-#define RF_TIBIA 3
-//
-#define RR_COXA 4
-#define RR_FEMUR 5
-#define RR_TIBIA 6
-//
-#define LF_COXA 7
-#define LF_FEMUR 8
-#define LF_TIBIA 9
-//
-#define LR_COXA 10
-#define LR_FEMUR 11
-#define LR_TIBIA 12
-//
-#define RM_COXA 13
-#define RM_FEMUR 14
-#define RM_TIBIA 15
-//
-#define LM_COXA 16
-#define LM_FEMUR 17
-#define LM_TIBIA 18
-
 
 namespace hexapod
 {
@@ -57,8 +30,36 @@ namespace hexapod
       NUM_MAX_LEGS  
   };
 
+  // Inicialización estática del array en el .cpp
+  const transformations3D::Vectors::vector3d coxa_endpoints[6] =
+  {
+    {-X_COXA, Y_COXA, 0},     // PATA 1: LEFT_FRONT
+    {-MX_COXA, 0, 0},         // PATA 2: LEFT_MIDDLE
+    {-X_COXA, -Y_COXA, 0},    // PATA 3: LEFT_REAR
+    {X_COXA, Y_COXA, 0},      // PATA 4: RIGHT_FRONT
+    {MX_COXA, 0, 0},          // PATA 5: RIGHT_MIDDLE
+    {X_COXA, -Y_COXA, 0}      // PATA 6: RIGHT_REAR
+  };
 
-  static const transformations3D::Vectors::vector2d coxa_pos[NUM_MAX_LEGS];
+  const transformations3D::Vectors::vector3d leg_endpoints[6] =
+  {
+    {-105, 100, -100},     // PATA 1: LEFT_FRONT
+    {-145, 0, -100},       // PATA 2: LEFT_MIDDLE
+    {-105, -100,-100},     // PATA 3: LEFT_REAR
+    {105, 100, -100},      // PATA 4: RIGHT_FRONT
+    {145, 0, -100},        // PATA 5: RIGHT_MIDDLE
+    {105, -100, -100}      // PATA 6: RIGHT_REAR
+  };
+
+  const transformations3D::Vectors::vector3d leg_offsets[6] =
+  {
+    {0, 0, 10},     // PATA 1: LEFT_FRONT
+    {0, 0, 0},     // PATA 2: LEFT_MIDDLE
+    {0, 0, 0},     // PATA 3: LEFT_REAR
+    {0, 0, 2},     // PATA 4: RIGHT_FRONT
+    {0, 0, 0},     // PATA 5: RIGHT_MIDDLE
+    {0, 0, -8}      // PATA 6: RIGHT_REAR
+  };
 
 }
 

@@ -22,9 +22,9 @@ namespace transformations3D
           void reset();
           
           // Setters para las traslaciones
-          void setTranslationX(int16_t tx) { t_x = tx; }
-          void setTranslationY(int16_t ty) { t_y = ty; }
-          void setTranslationZ(int16_t tz) { t_z = tz; }
+          void setTranslationX(float tx) { t_x = tx; }
+          void setTranslationY(float ty) { t_y = ty; }
+          void setTranslationZ(float tz) { t_z = tz; }
 
           // Setters para los ángulos de rotación
           void setAlpha(double a) { rot_x = a; }

@@ -68,7 +68,8 @@ namespace hexapod
         uint16_t pushSteps;
         uint8_t desfase;
 
-        uint16_t tranTime;     // Time between steps in ms
+        uint16_t tranTime_ms;     // Time between steps in ms
+        float    tranTime_s;     // Time between steps in s
         float cycleTime;       // Total time
 
         uint8_t gaitleg_order[6]; // Máximo para hexápodo
@@ -80,6 +81,7 @@ namespace hexapod
         GaitType current_gait;
 
         // Métodos privados auxiliares
+        float actual_speed_percentage(void);
         void handle_step_phase(uint8_t leg, int8_t leg_step);
         void handle_step_3_stages(uint8_t leg, int8_t leg_step);
         void handle_step_5_stages(uint8_t leg, int8_t leg_step);
