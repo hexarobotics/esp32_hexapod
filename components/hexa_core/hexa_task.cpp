@@ -1,13 +1,19 @@
 
 #include "hexa_task.h"
 #include "hexa_params.h"
+
 #include "Hexaik.h"
+
 #include "gaits.h"
+#include "gaits_control_mode.h"
+#include "body_control_mode.h"
+
 #include "Servo_controller.h"
+
 #include <esp_log.h>
 #include "esp_timer.h"
+
 #include "gaits_control_interface.h"
-#include "hexa_gaits_mode.h"
 #include "hexa_control_mode_interface.h"
 
 
@@ -23,6 +29,9 @@ namespace hexapod
         // Inicializa la interfaz de control con el objeto Gaits
         gaits_control_interface_init(static_cast<void*>(&gait));
 
+        hexapod::KinematicsConfig config(L_COXA, L_FEMUR, L_TIBIA);
+        hexapod::HexaIK ik_solver(config);
+
         Servo::ServoController servo_ctr;
         servo_ctr.writePositions();
 
@@ -37,19 +46,16 @@ namespace hexapod
 
             if ( control_mode == C_MODE_GAITS )
             {
-                hexa_gait_step( gait, servo_ctr );
+                hexa_gait_step( ik_solver, gait, servo_ctr );
 
                 vTaskDelay(pdMS_TO_TICKS(frame_delay_ms));
             }
             else if ( control_mode == C_MODE_BODY )
             {
+                hexa_body_step( ik_solver, servo_ctr );
 
+                vTaskDelay(pdMS_TO_TICKS(100));
             }
-
-
-
         }
-
     }
-
 }

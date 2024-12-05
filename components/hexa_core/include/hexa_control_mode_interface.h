@@ -18,6 +18,4 @@ namespace hexapod
 
 }
 
-
-
 #endif // HEXA_CONTROL_H

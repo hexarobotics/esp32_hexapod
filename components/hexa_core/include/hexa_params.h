@@ -12,10 +12,10 @@
 #define MX_COXA  100  // MM between two middle legs /2
 
 /* Legs */
-#define L_COXA_OLD      48  // MM distance from coxa servo to femur servo
-#define L_FEMUR     75 // MM distance from femur servo to tibia servo
-#define L_TIBIA     135 // MM distance from tibia servo to foot
-#define L_COXA      44  // MM distance from coxa servo to femur servo
+#define L_COXA_OLD      48.0  // MM distance from coxa servo to femur servo
+#define L_FEMUR     75.0 // MM distance from femur servo to tibia servo
+#define L_TIBIA     135.0 // MM distance from tibia servo to foot
+#define L_COXA      44.0  // MM distance from coxa servo to femur servo
 
 namespace hexapod
 {
