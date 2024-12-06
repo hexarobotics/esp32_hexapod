@@ -16,7 +16,7 @@ header {
     left: 0;
     background: linear-gradient(135deg, #343a40, #495057);
     color: white;
-    padding: 10px;
+    padding: 10px 20px; /* Añadido padding horizontal para separación */
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -35,9 +35,9 @@ header h1 {
 header .buttons {
     display: flex;
     gap: 10px;
-    margin-right: 10px; /* Añadido margen derecho */
 }
 
+/* Botones del header */
 header .buttons input {
     padding: 8px 15px;
     background: linear-gradient(135deg, #6c757d, #343a40);
@@ -57,13 +57,14 @@ header .buttons input:hover {
 /* Section for joysticks */
 #joysticks {
     display: flex;
-    justify-content: space-between; /* Distribución de los elementos */
+    justify-content: space-between;
     align-items: center;
     margin-top: 60px; /* Altura del header */
     width: 100%;
-    height: calc(100vh - 60px); /* Altura restante debajo del header */
-    padding: 0 10px; /* Espaciado lateral */
+    height: calc(100vh - 60px);
+    padding: 0 10px;
     box-sizing: border-box;
+    touch-action: none; /* Evita acciones táctiles por defecto (scroll) */
 }
 
 /* Joystick para el lado izquierdo */
@@ -84,12 +85,12 @@ header .buttons input:hover {
 
 /* Nuevo contenedor central */
 #center-container {
-    flex: 0 0 20%; /* 20% del ancho total */
+    flex: 0 0 20%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 15px; /* Espaciado entre botones */
+    gap: 15px;
 }
 
 #center-container button {
@@ -118,8 +119,8 @@ header .buttons input:hover {
 .outer-circle {
     background: linear-gradient(135deg, #f8f9fa, #e9ecef);
     border-radius: 50%;
-    width: 90%; /* Ajustar tamaño del joystick */
-    padding-top: 90%; /* Mantener proporción cuadrada */
+    width: 90%;
+    padding-top: 90%;
     position: relative;
     border: 2px solid #adb5bd;
     box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -143,4 +144,9 @@ header .buttons input:hover {
 .inner-circle:active {
     cursor: grabbing;
     transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Debug styles (opcional) */
+.debug-container {
+    outline: 1px solid red;
 }
