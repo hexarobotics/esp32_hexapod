@@ -9,13 +9,38 @@ let joystickData = {};
 let x = 0, y = 0, z = 0;
 let lastX = 0, lastY = 0, lastZ = 0;
 
-// Detectar si es un dispositivo móvil
+// Detectar dispositivo
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent); // Detectar tablets
+
+// Ajustar diseño específico para tablets
+function adjustLayoutForTablet() {
+    if (isTablet) {
+        console.log('Tablet detected');
+        document.body.classList.add('tablet-mode');
+    }
+}
 
 // Función para limitar valores al rango de int16_t
 function clampInt16(value) {
     return Math.max(Math.min(Math.round(value), CONFIG.maxJoystickValue), -CONFIG.maxJoystickValue);
 }
+
+// Inicializar depuración para divisiones principales
+function initDebugForDivisions() {
+    const containers = [
+        document.querySelector('header'),       // Header
+        document.querySelector('#joysticks'),  // Contenedor de joysticks
+        document.body                          // Todo el body
+    ];
+
+    containers.forEach((container) => {
+        if (container) {
+            container.classList.add('debug-container');
+        }
+    });
+}
+
 
 // Función para enviar datos del joystick
 function sendJoystickData() {
@@ -48,24 +73,21 @@ class Joystick {
         this.init();
     }
 
-    // Inicializar el joystick
     init() {
         this.recalculateDimensions();
 
-        if (isMobile) {
+        if (isMobile || isTablet) {
             this.setupMobileEvents();
         } else {
             this.setupPCEvents();
         }
     }
 
-    // Recalcular dimensiones
     recalculateDimensions() {
         this.outerRadius = this.container.offsetWidth / 2;
         this.rect = this.container.getBoundingClientRect();
     }
 
-    // Calcular posición
     calculatePosition(touch) {
         const centerX = this.rect.left + this.outerRadius;
         const centerY = this.rect.top + this.outerRadius;
@@ -85,7 +107,6 @@ class Joystick {
         };
     }
 
-    // Configurar eventos para móviles
     setupMobileEvents() {
         this.container.addEventListener('touchstart', (event) => {
             if (this.activeTouchId === null) {
@@ -111,31 +132,29 @@ class Joystick {
         });
     }
 
-    // Configurar eventos para PC
     setupPCEvents() {
         let isDragging = false;
 
         this.joystick.addEventListener('mousedown', (event) => {
-            this.recalculateDimensions(); // Recalcular dimensiones al comenzar
+            this.recalculateDimensions();
             isDragging = true;
-            this.updatePosition(event); // Actualizar la posición inicial
+            this.updatePosition(event);
         });
 
         window.addEventListener('mousemove', (event) => {
             if (isDragging) {
-                this.updatePosition(event); // Actualizar mientras se arrastra
+                this.updatePosition(event);
             }
         });
 
         window.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
-                this.resetPosition(); // Reiniciar posición al soltar
+                this.resetPosition();
             }
         });
     }
 
-    // Actualizar posición del joystick
     updatePosition(touch) {
         const position = this.calculatePosition(touch);
         this.joystick.style.left = `${50 + position.x * 50}%`;
@@ -143,13 +162,12 @@ class Joystick {
 
         if (this.axis === 'xy') {
             x = clampInt16(position.rawX / this.outerRadius * CONFIG.maxJoystickValue);
-            y = clampInt16(-position.rawY / this.outerRadius * CONFIG.maxJoystickValue); // Invertir Y
+            y = clampInt16(-position.rawY / this.outerRadius * CONFIG.maxJoystickValue);
         } else if (this.axis === 'z') {
             z = clampInt16(position.rawX / this.outerRadius * CONFIG.maxJoystickValue);
         }
     }
 
-    // Reiniciar posición del joystick
     resetPosition() {
         this.joystick.style.left = '50%';
         this.joystick.style.top = '50%';
@@ -166,9 +184,9 @@ class Joystick {
 
 // Ajustar diseño de los joysticks
 function adjustJoysticksLayout() {
-    // Recalcular dimensiones y posiciones de los joysticks
     Object.values(joystickData).forEach((joystick) => joystick.recalculateDimensions());
 }
+
 
 // Inicializar joysticks
 document.addEventListener('DOMContentLoaded', () => {
@@ -178,6 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(sendJoystickData, CONFIG.sendInterval);
 
     const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+    // Agregar eventos para los botones
+    document.getElementById("button-1").addEventListener("click", () => {
+        console.log("Botón Tripod presionado");
+    });
+
+    document.getElementById("button-2").addEventListener("click", () => {
+        console.log("Botón Ripple presionado");
+    });
+
+    document.getElementById("button-3").addEventListener("click", () => {
+        console.log("Botón Wave presionado");
+    });
 
     fullscreenBtn.addEventListener('click', () => {
         if (!document.fullscreenElement) {
@@ -189,4 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('resize', adjustJoysticksLayout);
     adjustJoysticksLayout();
+    adjustLayoutForTablet(); // Llama al ajuste de tabletas
+
+    initDebugForDivisions();
 });
