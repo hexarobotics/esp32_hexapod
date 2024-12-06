@@ -23,6 +23,7 @@ header {
     align-items: center;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 10;
+    border: 1px solid red; /* Debug: ver contorno */
 }
 
 header h1 {
@@ -54,11 +55,12 @@ header .buttons input:hover {
 /* Section for joysticks */
 #joysticks {
     display: flex;
-    justify-content: space-between; /* Distribución de los elementos */
+    justify-content: space-between;
     align-items: center;
     margin-top: 60px; /* Altura del header */
     width: 100%;
     height: calc(100vh - 60px); /* Altura restante debajo del header */
+    border: 1px solid blue; /* Debug: ver contorno */
 }
 
 /* Joystick para el lado izquierdo */
@@ -69,6 +71,7 @@ header .buttons input:hover {
     align-items: center;
     justify-content: center;
     margin-left: 5%; /* Margen izquierdo del 5% */
+    border: 1px dashed green; /* Debug: ver contorno */
 }
 
 /* Joystick para el lado derecho */
@@ -79,6 +82,7 @@ header .buttons input:hover {
     align-items: center;
     justify-content: center;
     margin-right: 5%; /* Margen derecho del 5% */
+    border: 1px dashed green; /* Debug: ver contorno */
 }
 
 /* Nuevo contenedor central */
@@ -89,6 +93,7 @@ header .buttons input:hover {
     align-items: center;
     justify-content: center;
     gap: 15px; /* Espaciado entre botones */
+    border: 1px dashed orange; /* Debug: ver contorno */
 }
 
 #center-container button {
@@ -113,7 +118,7 @@ header .buttons input:hover {
     width: 100%; /* Ajuste automático al 35% del ancho del padre */
     padding-top: 100%; /* Mantener proporción cuadrada */
     position: relative;
-    border: 2px solid #adb5bd;
+    border: 1px solid purple; /* Debug: ver contorno */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -133,12 +138,4 @@ header .buttons input:hover {
 
 .inner-circle:active {
     cursor: grabbing;
-}
-
-/* Titles for joysticks */
-.joystick-container h2 {
-    font-size: 1rem;
-    margin-bottom: 10px;
-    text-align: center;
-    color: #495057;
 }

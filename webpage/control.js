@@ -9,18 +9,6 @@ let joystickData = {};
 let x = 0, y = 0, z = 0;
 let lastX = 0, lastY = 0, lastZ = 0;
 
-// Detectar dispositivo
-const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-const isTablet = /iPad|Android(?!.*Mobile)/i.test(navigator.userAgent); // Detectar tablets
-
-// Ajustar diseño específico para tablets
-function adjustLayoutForTablet() {
-    if (isTablet) {
-        console.log('Tablet detected');
-        document.body.classList.add('tablet-mode');
-    }
-}
-
 // Función para limitar valores al rango de int16_t
 function clampInt16(value) {
     return Math.max(Math.min(Math.round(value), CONFIG.maxJoystickValue), -CONFIG.maxJoystickValue);
@@ -41,8 +29,7 @@ function initDebugForDivisions() {
     });
 }
 
-
-// Función para enviar datos del joystick
+// Función para enviar datos del joystick al ESP32
 function sendJoystickData() {
     if (x !== lastX || y !== lastY || z !== lastZ) {
         fetch('/joystick-data', {
@@ -52,7 +39,7 @@ function sendJoystickData() {
         })
         .then((res) => res.json())
         .then((result) => console.log('Datos enviados:', result))
-        .catch((err) => console.error('Error:', err));
+        .catch((err) => console.error('Error al enviar datos:', err));
 
         lastX = x;
         lastY = y;
@@ -73,21 +60,19 @@ class Joystick {
         this.init();
     }
 
+    // Inicializar eventos y dimensiones
     init() {
         this.recalculateDimensions();
-
-        if (isMobile || isTablet) {
-            this.setupMobileEvents();
-        } else {
-            this.setupPCEvents();
-        }
+        this.setupMobileEvents();
     }
 
+    // Recalcular dimensiones del joystick
     recalculateDimensions() {
         this.outerRadius = this.container.offsetWidth / 2;
         this.rect = this.container.getBoundingClientRect();
     }
 
+    // Calcular posición del joystick
     calculatePosition(touch) {
         const centerX = this.rect.left + this.outerRadius;
         const centerY = this.rect.top + this.outerRadius;
@@ -107,6 +92,7 @@ class Joystick {
         };
     }
 
+    // Configurar eventos para móviles
     setupMobileEvents() {
         this.container.addEventListener('touchstart', (event) => {
             if (this.activeTouchId === null) {
@@ -132,29 +118,7 @@ class Joystick {
         });
     }
 
-    setupPCEvents() {
-        let isDragging = false;
-
-        this.joystick.addEventListener('mousedown', (event) => {
-            this.recalculateDimensions();
-            isDragging = true;
-            this.updatePosition(event);
-        });
-
-        window.addEventListener('mousemove', (event) => {
-            if (isDragging) {
-                this.updatePosition(event);
-            }
-        });
-
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                this.resetPosition();
-            }
-        });
-    }
-
+    // Actualizar posición del joystick
     updatePosition(touch) {
         const position = this.calculatePosition(touch);
         this.joystick.style.left = `${50 + position.x * 50}%`;
@@ -168,6 +132,7 @@ class Joystick {
         }
     }
 
+    // Reiniciar posición del joystick
     resetPosition() {
         this.joystick.style.left = '50%';
         this.joystick.style.top = '50%';
@@ -182,20 +147,24 @@ class Joystick {
     }
 }
 
-// Ajustar diseño de los joysticks
-function adjustJoysticksLayout() {
-    Object.values(joystickData).forEach((joystick) => joystick.recalculateDimensions());
+// Cambiar automáticamente a modo horizontal
+function lockOrientationLandscape() {
+    if (window.screen.orientation) {
+        window.screen.orientation.lock('landscape').catch((err) => {
+            console.error("Error al cambiar a modo horizontal:", err);
+        });
+    }
 }
 
-
-// Inicializar joysticks
+// Inicializar joysticks y eventos al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
     joystickData['joystick1'] = new Joystick('joystick1', 'xy');
     joystickData['joystick2'] = new Joystick('joystick2', 'z');
 
     setInterval(sendJoystickData, CONFIG.sendInterval);
 
-    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    // Bloquear la orientación en modo horizontal
+    lockOrientationLandscape();
 
     // Agregar eventos para los botones
     document.getElementById("button-1").addEventListener("click", () => {
@@ -210,17 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Botón Wave presionado");
     });
 
-    fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-        } else {
-            document.exitFullscreen();
-        }
-    });
-
-    window.addEventListener('resize', adjustJoysticksLayout);
-    adjustJoysticksLayout();
-    adjustLayoutForTablet(); // Llama al ajuste de tabletas
-
+    // Depuración de divisiones
     initDebugForDivisions();
+
+    console.log("Modo móvil activo.");
 });
