@@ -5,8 +5,10 @@ body {
     background-color: #eef2f3;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    align-items: center;
+    justify-content: flex-start;
     overscroll-behavior-y: none;
+    height: 100vh;
 }
 
 /* Header styles */
@@ -16,7 +18,7 @@ header {
     left: 0;
     background: linear-gradient(135deg, #343a40, #495057);
     color: white;
-    padding: 10px 20px; /* Añadido padding horizontal para separación */
+    padding: 10px;
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -29,12 +31,13 @@ header h1 {
     margin: 0;
     font-size: 1.5rem;
     font-weight: bold;
-    color: #32ff32;
+    color: #32ff32; /* Verde fosforescente */
 }
 
 header .buttons {
+    margin-right: 20px; /* Margen derecho para los botones */
     display: flex;
-    gap: 10px;
+    gap: 10px; /* Espacio entre los botones */
 }
 
 /* Botones del header */
@@ -46,7 +49,6 @@ header .buttons input {
     cursor: pointer;
     border-radius: 5px;
     font-size: 1rem;
-    transition: background 0.3s ease;
 }
 
 header .buttons input:hover {
@@ -83,7 +85,7 @@ header .buttons input:hover {
     justify-content: center;
 }
 
-/* Nuevo contenedor central */
+/* Contenedor central */
 #center-container {
     flex: 0 0 20%;
     display: flex;
@@ -146,7 +148,8 @@ header .buttons input:hover {
     transform: translate(-50%, -50%) scale(1.1);
 }
 
-/* Debug styles (opcional) */
+/* Descomenta si quieres ver la depuración
 .debug-container {
     outline: 1px solid red;
 }
+*/

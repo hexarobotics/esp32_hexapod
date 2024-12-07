@@ -72,7 +72,7 @@ class Joystick {
 
     setupMobileEvents() {
         this.container.addEventListener('touchstart', event => {
-            event.preventDefault(); // Evita desplazamiento en el touchstart
+            event.preventDefault();
             if (this.activeTouchId === null) {
                 this.recalculateDimensions();
                 const touch = event.changedTouches[0];
@@ -82,13 +82,13 @@ class Joystick {
         }, { passive: false });
 
         this.container.addEventListener('touchmove', event => {
-            event.preventDefault(); // Evita desplazamiento en el touchmove
+            event.preventDefault();
             const touch = Array.from(event.touches).find(t => t.identifier === this.activeTouchId);
             if (touch) this.updatePosition(touch);
         }, { passive: false });
 
         this.container.addEventListener('touchend', event => {
-            event.preventDefault(); // Evita desplazamiento en el touchend
+            event.preventDefault();
             const touch = Array.from(event.changedTouches).find(t => t.identifier === this.activeTouchId);
             if (touch) this.resetPosition();
         }, { passive: false });
@@ -144,6 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Puedes comentar o remover esta función si no quieres ver el contorno debug.
-    initDebugForDivisions(); 
+    // Si quieres activar el modo debug, descomenta la siguiente línea:
+    // initDebugForDivisions();
 });
