@@ -71,12 +71,15 @@ class Joystick {
     }
 
     setupMobileEvents() {
+        const innerCircle = this.joystick;
+        
         this.container.addEventListener('touchstart', event => {
             event.preventDefault();
             if (this.activeTouchId === null) {
                 this.recalculateDimensions();
                 const touch = event.changedTouches[0];
                 this.activeTouchId = touch.identifier;
+                innerCircle.classList.add('joystick-touch'); // Añadimos la clase al tocar
                 this.updatePosition(touch);
             }
         }, { passive: false });
@@ -90,7 +93,10 @@ class Joystick {
         this.container.addEventListener('touchend', event => {
             event.preventDefault();
             const touch = Array.from(event.changedTouches).find(t => t.identifier === this.activeTouchId);
-            if (touch) this.resetPosition();
+            if (touch) {
+                this.resetPosition();
+                innerCircle.classList.remove('joystick-touch'); // Quitamos la clase al soltar
+            }
         }, { passive: false });
     }
 
@@ -131,18 +137,32 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(sendJoystickData, CONFIG.sendInterval);
     lockOrientationLandscape();
 
-    document.getElementById("button-1").addEventListener("click", () => {});
-    document.getElementById("button-2").addEventListener("click", () => {});
-    document.getElementById("button-3").addEventListener("click", () => {});
+    // Manejo de los botones del centro para mantener el estado seleccionado
+    const modeButtons = [
+        document.getElementById("button-1"),
+        document.getElementById("button-2"),
+        document.getElementById("button-3")
+    ].filter(Boolean); // Por si alguno no existe
+
+    modeButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            // Remover la clase selected-mode de todos los botones
+            modeButtons.forEach(b => b.classList.remove("selected-mode"));
+            // Agregarla solo al botón pulsado
+            btn.classList.add("selected-mode");
+        });
+    });
 
     const fullscreenBtn = document.getElementById('fullscreen-btn');
-    fullscreenBtn.addEventListener('click', () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            document.exitFullscreen().catch(() => {});
-        }
-    });
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        });
+    }
 
     // Si quieres activar el modo debug, descomenta la siguiente línea:
     // initDebugForDivisions();
