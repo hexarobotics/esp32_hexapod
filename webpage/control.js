@@ -33,6 +33,23 @@ function sendJoystickData() {
     }
 }
 
+/**
+ * Envía el modo seleccionado al ESP32.
+ * modeValue: número que representa el modo (1=Tripod, 2=Ripple, 3=Wave)
+ */
+function sendModeData(modeValue) {
+    fetch('/mode-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: modeValue }),
+    })
+    .then(response => response.json().catch(() => null))
+    .then(data => {
+        console.log('Modo seleccionado enviado:', modeValue, 'Respuesta:', data);
+    })
+    .catch(error => console.error('Error enviando modo:', error));
+}
+
 class Joystick {
     constructor(containerId, axis) {
         this.container = document.getElementById(containerId).parentNode;
@@ -79,7 +96,7 @@ class Joystick {
                 this.recalculateDimensions();
                 const touch = event.changedTouches[0];
                 this.activeTouchId = touch.identifier;
-                innerCircle.classList.add('joystick-touch'); // Añadimos la clase al tocar
+                innerCircle.classList.add('joystick-touch');
                 this.updatePosition(touch);
             }
         }, { passive: false });
@@ -95,7 +112,7 @@ class Joystick {
             const touch = Array.from(event.changedTouches).find(t => t.identifier === this.activeTouchId);
             if (touch) {
                 this.resetPosition();
-                innerCircle.classList.remove('joystick-touch'); // Quitamos la clase al soltar
+                innerCircle.classList.remove('joystick-touch');
             }
         }, { passive: false });
     }
@@ -139,17 +156,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Manejo de los botones del centro para mantener el estado seleccionado
     const modeButtons = [
-        document.getElementById("button-1"),
-        document.getElementById("button-2"),
-        document.getElementById("button-3")
-    ].filter(Boolean); // Por si alguno no existe
+        { element: document.getElementById("button-Tripod"), modeValue: 1 },
+        { element: document.getElementById("button-Ripple"), modeValue: 2 },
+        { element: document.getElementById("button-Wave"),   modeValue: 3 }
+    ].filter(b => b.element);
 
-    modeButtons.forEach(btn => {
-        btn.addEventListener("click", () => {
+    modeButtons.forEach(b => {
+        b.element.addEventListener("click", () => {
             // Remover la clase selected-mode de todos los botones
-            modeButtons.forEach(b => b.classList.remove("selected-mode"));
+            modeButtons.forEach(bx => bx.element.classList.remove("selected-mode"));
             // Agregarla solo al botón pulsado
-            btn.classList.add("selected-mode");
+            b.element.classList.add("selected-mode");
+
+            // Enviar el modo seleccionado al ESP32
+            sendModeData(b.modeValue);
         });
     });
 
