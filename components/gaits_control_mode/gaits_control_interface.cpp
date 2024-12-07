@@ -29,5 +29,10 @@ void gaits_control_interface_set_speeds(int16_t x_speed, int16_t y_speed, int16_
     gaits_controller->set_rspeed(r_speed);
 }
 
+void gaits_control_interface_set_gait_mode( int new_gait_mode )
+{
+    gaits_controller->gait_select(static_cast<GaitType>(new_gait_mode));
+}
+
 
 }

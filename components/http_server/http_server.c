@@ -19,6 +19,7 @@
 #include "tasks_manager.h"
 #include "wifi_app.h"
 #include "gaits_control_interface.h"
+//#include "body_control_interface.h"
 
 
 // Tag used for ESP serial console messages
@@ -193,6 +194,54 @@ static esp_err_t http_server_joystick_data_handler(httpd_req_t *req)
     // Mostrar los valores en los logs
     ESP_LOGI(TAG_JOY, "Joystick Data -> X: %d, Y: %d, Z: %d", x_speed, y_speed, r_speed);
 	gaits_control_interface_set_speeds(x_speed, y_speed, r_speed);
+
+    // Responder al cliente con una confirmación
+    const char resp[] = "{\"status\":\"success\"}";
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, resp, strlen(resp));
+
+    return ESP_OK;
+}
+
+// Tag para log en consola
+static const char TAG_MODE[] = "http_server_mode_data";
+
+// Handler para recibir los datos del modo
+static esp_err_t http_server_mode_data_handler(httpd_req_t *req)
+{
+    // Buffer para recibir el contenido del cuerpo de la solicitud
+    char content[100];
+    int ret, remaining = req->content_len;
+
+    // Leer el contenido de la solicitud (POST)
+    while (remaining > 0) {
+        if ((ret = httpd_req_recv(req, content, MIN(remaining, sizeof(content)-1))) <= 0) {
+            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+                // Si hay timeout, continuar intentándolo
+                continue;
+            }
+            // Si hay otro tipo de error, fallar
+            return ESP_FAIL;
+        }
+        remaining -= ret;
+    }
+
+    // Asegurar el fin de la cadena
+    content[req->content_len] = '\0';
+
+    // Log opcional del contenido recibido
+    //ESP_LOGI(TAG_MODE, "Datos modo recibidos: %s", content);
+
+    // Analizar el JSON para extraer el valor "mode"
+    int gait_mode = 0;
+    sscanf(content, "{\"mode\":%d}", &gait_mode);
+
+    // Loggear el modo recibido
+    ESP_LOGI(TAG_MODE, "Modo recibido: %d", gait_mode);
+
+    // Aquí puedes llamar a la función que configure el modo de tu robot, p.ej:
+    // set_robot_mode(gait_mode);
+	gaits_control_interface_set_gait_mode( gait_mode );
 
     // Responder al cliente con una confirmación
     const char resp[] = "{\"status\":\"success\"}";
@@ -826,6 +875,14 @@ static httpd_handle_t http_server_configure(void)
             .user_ctx = NULL
         };
         httpd_register_uri_handler(http_server_handle, &joystick_data_uri);
+
+		httpd_uri_t mode_data_uri = {
+			.uri = "/mode-data",
+			.method = HTTP_POST,
+			.handler = http_server_mode_data_handler,
+			.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &mode_data_uri);
 
 		return http_server_handle;
 	}

@@ -156,9 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Manejo de los botones del centro para mantener el estado seleccionado
     const modeButtons = [
-        { element: document.getElementById("button-Tripod"), modeValue: 1 },
-        { element: document.getElementById("button-Ripple"), modeValue: 2 },
-        { element: document.getElementById("button-Wave"),   modeValue: 3 }
+        { element: document.getElementById("button-Tripod"), modeValue: 3 },
+        { element: document.getElementById("button-Ripple"), modeValue: 0 },
+        { element: document.getElementById("button-Wave"),   modeValue: 6 }
     ].filter(b => b.element);
 
     modeButtons.forEach(b => {
