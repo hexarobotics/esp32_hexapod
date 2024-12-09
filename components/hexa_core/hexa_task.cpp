@@ -27,8 +27,8 @@ namespace hexapod
 
         hexapod::Gaits gait(TRIPOD_6,HEXAPOD);
         // Inicializa la interfaz de control con el objeto Gaits
-        gaits_control_interface_init(static_cast<void*>(&gait));
-
+        gaits_control_interface_init(&gait);
+        
         hexapod::KinematicsConfig config(L_COXA, L_FEMUR, L_TIBIA);
         hexapod::HexaIK ik_solver(config);
 

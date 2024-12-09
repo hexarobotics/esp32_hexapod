@@ -4,11 +4,15 @@
 #include <stdint.h> // Para los tipos int16_t
 
 #ifdef __cplusplus
+#include "gaits.h" // Incluir solo en C++
+
+// Función de inicialización solo disponible en C++
+void gaits_control_interface_init(hexapod::Gaits* gaits_obj);
+
 extern "C" {
 #endif
 
-// Inicializa la interfaz con un objeto Gaits
-void gaits_control_interface_init(void* gaits_obj);
+//C compatible
 
 // Actualiza las velocidades X, Y, Z
 void gaits_control_interface_set_speeds(int16_t x, int16_t y, int16_t z);
