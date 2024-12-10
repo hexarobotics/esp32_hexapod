@@ -10,6 +10,8 @@ void body_control_interface_init(transformations3D::Tmatrix* tbody_obj)
     tbody = tbody_obj;
 }
 
+extern "C" {
+
 void update_traslation_parameters( float x, float y, float z )
 {
     if (!tbody)
@@ -34,4 +36,6 @@ void update_rotation_parameters( float rot_x, float rot_y, float rot_z )
     tbody->rot_x = rot_x;
     tbody->rot_y = rot_y;
     tbody->rot_z = rot_z;
+}
+
 }

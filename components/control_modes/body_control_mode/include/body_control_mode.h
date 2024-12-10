@@ -7,6 +7,8 @@
 namespace hexapod
 {
     void hexa_body_step( hexapod::HexaIK ik_solver, Servo::ServoController& servo_ctr );
+    void body_control_init( void );
+
 }
 
 #endif // BODY_CONTROL_MODE_H
