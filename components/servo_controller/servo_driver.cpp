@@ -121,7 +121,6 @@ namespace Servo
         if ( servo_cal_ == nullptr ) // default -> no calibration
         {
             pwm_val = (Angle - MIN_ANGLE) * ((float)SERVO_MAX - (float)SERVO_MIN) / (MAX_ANGLE - MIN_ANGLE) + (float)SERVO_MIN;
-            ESP_LOGE(TAG, "NO ESTARAS ENTRANDO CABRON?");
         }
         else if ( ( ch < pose_size_ ) && ch < NUM_MAX_CHANNELS )
         {

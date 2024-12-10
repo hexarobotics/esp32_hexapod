@@ -6,6 +6,7 @@
  */
 
 #include "esp_http_server.h"
+#include <string.h>
 #include "esp_log.h"
 #include "esp_ota_ops.h"
 #include "esp_timer.h"
@@ -17,6 +18,9 @@
 #include "sntp_time_sync.h"
 #include "tasks_manager.h"
 #include "wifi_app.h"
+#include "gaits_control_interface.h"
+//#include "body_control_interface.h"
+
 
 // Tag used for ESP serial console messages
 static const char TAG[] = "http_server";
@@ -50,17 +54,25 @@ const esp_timer_create_args_t fw_update_reset_args = {
 };
 esp_timer_handle_t fw_update_reset;
 
-// Embedded files: JQuery, index.html, app.css, app.js and favicon.ico files
-extern const uint8_t jquery_3_3_1_min_js_start[]	asm("_binary_jquery_3_3_1_min_js_start");
-extern const uint8_t jquery_3_3_1_min_js_end[]		asm("_binary_jquery_3_3_1_min_js_end");
-extern const uint8_t index_html_start[]				asm("_binary_index_html_start");
-extern const uint8_t index_html_end[]				asm("_binary_index_html_end");
-extern const uint8_t app_css_start[]				asm("_binary_app_css_start");
-extern const uint8_t app_css_end[]					asm("_binary_app_css_end");
-extern const uint8_t app_js_start[]					asm("_binary_app_js_start");
-extern const uint8_t app_js_end[]					asm("_binary_app_js_end");
-extern const uint8_t favicon_ico_start[]			asm("_binary_favicon_ico_start");
-extern const uint8_t favicon_ico_end[]				asm("_binary_favicon_ico_end");
+// Embedded files: JQuery, index.html, app.css, app.js, favicon.ico, control.html, control.css, control.js
+extern const uint8_t jquery_3_3_1_min_js_start[]   asm("_binary_jquery_3_3_1_min_js_start");
+extern const uint8_t jquery_3_3_1_min_js_end[]     asm("_binary_jquery_3_3_1_min_js_end");
+//extern const uint8_t interact_min_js_start[]       asm("_binary_interact_min_js_start");
+//extern const uint8_t interact_min_js_end[]         asm("_binary_interact_min_js_end");
+extern const uint8_t index_html_start[]            asm("_binary_index_html_start");
+extern const uint8_t index_html_end[]              asm("_binary_index_html_end");
+extern const uint8_t app_css_start[]               asm("_binary_app_css_start");
+extern const uint8_t app_css_end[]                 asm("_binary_app_css_end");
+extern const uint8_t app_js_start[]                asm("_binary_app_js_start");
+extern const uint8_t app_js_end[]                  asm("_binary_app_js_end");
+extern const uint8_t favicon_ico_start[]           asm("_binary_favicon_ico_start");
+extern const uint8_t favicon_ico_end[]             asm("_binary_favicon_ico_end");
+extern const uint8_t control_html_start[]          asm("_binary_control_html_start");
+extern const uint8_t control_html_end[]            asm("_binary_control_html_end");
+extern const uint8_t control_css_start[]           asm("_binary_control_css_start");
+extern const uint8_t control_css_end[]             asm("_binary_control_css_end");
+extern const uint8_t control_js_start[]            asm("_binary_control_js_start");
+extern const uint8_t control_js_end[]              asm("_binary_control_js_end");
 
 /**
  * Checks the g_fw_update_status and creates the fw_update_reset timer if g_fw_update_status is true.
@@ -148,6 +160,97 @@ static void http_server_monitor_task(void *parameter)
 	}
 }
 
+// Tag used for ESP serial console messages
+static const char TAG_JOY[] = "http_server_joystick_data";
+
+// Handler para recibir los datos del joystick
+static esp_err_t http_server_joystick_data_handler(httpd_req_t *req)
+{
+    // Buffer para recibir el contenido del cuerpo de la solicitud
+    char content[100];
+    int ret, remaining = req->content_len;
+
+    // Leer el contenido de la solicitud (POST)
+    while (remaining > 0) {
+        if ((ret = httpd_req_recv(req, content, MIN(remaining, sizeof(content)))) <= 0) {
+            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+                continue;
+            }
+            return ESP_FAIL;
+        }
+        remaining -= ret;
+    }
+
+    // Asegurarse de que el contenido esté terminado en nulo
+    content[req->content_len] = '\0';
+
+    // Logear el contenido recibido
+    //ESP_LOGI(TAG_JOY, "Datos recibidos: %s", content);
+
+    // Analizar el JSON para extraer los valores de x, y, z
+    int16_t x_speed = 0, y_speed = 0, r_speed = 0;
+    sscanf(content, "{\"x\":%hd,\"y\":%hd,\"z\":%hd}", &x_speed, &y_speed, &r_speed);
+
+    // Mostrar los valores en los logs
+    ESP_LOGI(TAG_JOY, "Joystick Data -> X: %d, Y: %d, Z: %d", x_speed, y_speed, r_speed);
+	gaits_control_interface_set_speeds(x_speed, y_speed, r_speed);
+
+    // Responder al cliente con una confirmación
+    const char resp[] = "{\"status\":\"success\"}";
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, resp, strlen(resp));
+
+    return ESP_OK;
+}
+
+// Tag para log en consola
+static const char TAG_MODE[] = "http_server_mode_data";
+
+// Handler para recibir los datos del modo
+static esp_err_t http_server_mode_data_handler(httpd_req_t *req)
+{
+    // Buffer para recibir el contenido del cuerpo de la solicitud
+    char content[100];
+    int ret, remaining = req->content_len;
+
+    // Leer el contenido de la solicitud (POST)
+    while (remaining > 0) {
+        if ((ret = httpd_req_recv(req, content, MIN(remaining, sizeof(content)-1))) <= 0) {
+            if (ret == HTTPD_SOCK_ERR_TIMEOUT) {
+                // Si hay timeout, continuar intentándolo
+                continue;
+            }
+            // Si hay otro tipo de error, fallar
+            return ESP_FAIL;
+        }
+        remaining -= ret;
+    }
+
+    // Asegurar el fin de la cadena
+    content[req->content_len] = '\0';
+
+    // Log opcional del contenido recibido
+    //ESP_LOGI(TAG_MODE, "Datos modo recibidos: %s", content);
+
+    // Analizar el JSON para extraer el valor "mode"
+    int gait_mode = 0;
+    sscanf(content, "{\"mode\":%d}", &gait_mode);
+
+    // Loggear el modo recibido
+    ESP_LOGI(TAG_MODE, "Modo recibido: %d", gait_mode);
+
+    // Aquí puedes llamar a la función que configure el modo de tu robot, p.ej:
+    // set_robot_mode(gait_mode);
+	gaits_control_interface_set_gait_mode( gait_mode );
+
+    // Responder al cliente con una confirmación
+    const char resp[] = "{\"status\":\"success\"}";
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, resp, strlen(resp));
+
+    return ESP_OK;
+}
+
 /**
  * Jquery get handler is requested when accessing the web page.
  * @param req HTTP request for which the uri needs to be handled.
@@ -222,6 +325,66 @@ static esp_err_t http_server_favicon_ico_handler(httpd_req_t *req)
 
 	return ESP_OK;
 }
+
+/**
+ * control.html get handler is requested when accessing the control page.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_control_html_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "control.html requested");
+
+    httpd_resp_set_type(req, "text/html");
+    httpd_resp_send(req, (const char *)control_html_start, control_html_end - control_html_start);
+
+    return ESP_OK;
+}
+
+/**
+ * control.css get handler is requested when accessing the control page styles.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_control_css_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "control.css requested");
+
+    httpd_resp_set_type(req, "text/css");
+    httpd_resp_send(req, (const char *)control_css_start, control_css_end - control_css_start);
+
+    return ESP_OK;
+}
+
+/**
+ * control.js get handler is requested when accessing the control page script.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+static esp_err_t http_server_control_js_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "control.js requested");
+
+    httpd_resp_set_type(req, "application/javascript");
+    httpd_resp_send(req, (const char *)control_js_start, control_js_end - control_js_start);
+
+    return ESP_OK;
+}
+
+/**
+ * interact.min.js get handler is requested when accessing the nipple.js library.
+ * @param req HTTP request for which the uri needs to be handled.
+ * @return ESP_OK
+ */
+//static esp_err_t http_server_interact_min_js_handler(httpd_req_t *req)
+//{
+//    ESP_LOGI(TAG, "interact.min.js requested");
+//
+//    httpd_resp_set_type(req, "application/javascript");
+//    httpd_resp_send(req, (const char *)interact_min_js_start, interact_min_js_end - interact_min_js_start);
+//
+//    return ESP_OK;
+//}
 
 /**
  * Receives the .bin file fia the web page and handles the firmware update
@@ -560,6 +723,15 @@ static httpd_handle_t http_server_configure(void)
 		};
 		httpd_register_uri_handler(http_server_handle, &index_html);
 
+		// register /index.html handler
+		httpd_uri_t index_html_page = {
+			.uri = "/index.html",
+			.method = HTTP_GET,
+			.handler = http_server_index_html_handler,
+			.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &index_html_page);
+
 		// register app.css handler
 		httpd_uri_t app_css = {
 				.uri = "/app.css",
@@ -658,6 +830,59 @@ static httpd_handle_t http_server_configure(void)
 				.user_ctx = NULL
 		};
 		httpd_register_uri_handler(http_server_handle, &ap_ssid_json);
+
+		// register control.html handler
+		httpd_uri_t control_html = {
+				.uri = "/control.html",
+				.method = HTTP_GET,
+				.handler = http_server_control_html_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &control_html);
+
+		// register control.css handler
+		httpd_uri_t control_css = {
+				.uri = "/control.css",
+				.method = HTTP_GET,
+				.handler = http_server_control_css_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &control_css);
+
+		// register control.js handler
+		httpd_uri_t control_js = {
+				.uri = "/control.js",
+				.method = HTTP_GET,
+				.handler = http_server_control_js_handler,
+				.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &control_js);
+
+		// register interact.min.js handler
+		//httpd_uri_t interact_min_js = {
+		//		.uri = "/interact.min.js",
+		//		.method = HTTP_GET,
+		//		.handler = http_server_interact_min_js_handler,
+		//		.user_ctx = NULL
+		//};
+		//httpd_register_uri_handler(http_server_handle, &interact_min_js);
+
+		// Handler para los datos del joystick
+        httpd_uri_t joystick_data_uri = {
+            .uri = "/joystick-data",
+            .method = HTTP_POST,
+            .handler = http_server_joystick_data_handler,
+            .user_ctx = NULL
+        };
+        httpd_register_uri_handler(http_server_handle, &joystick_data_uri);
+
+		httpd_uri_t mode_data_uri = {
+			.uri = "/mode-data",
+			.method = HTTP_POST,
+			.handler = http_server_mode_data_handler,
+			.user_ctx = NULL
+		};
+		httpd_register_uri_handler(http_server_handle, &mode_data_uri);
 
 		return http_server_handle;
 	}

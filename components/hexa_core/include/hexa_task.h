@@ -1,5 +1,5 @@
-#ifndef HEXA_CORE_H
-    #define HEXA_CORE_H
+#ifndef HEXA_TASK_H
+    #define HEXA_TASK_H
 
 namespace hexapod
 {
@@ -13,4 +13,4 @@ namespace hexapod
 
 }
 
-#endif // HEXA_CORE_H
+#endif // HEXA_TASK_H
